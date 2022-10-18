@@ -26,6 +26,9 @@
 plugins {
     id 'application'
 }
+application {
+    mainClass = 'de.unijena.cheminf.fragment.fingerprint.main.Main'
+}
 
 group 'de.unijena.cheminf.fragment.fingerprint'
 version '0.0.0.1'
