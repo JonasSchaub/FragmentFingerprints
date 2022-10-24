@@ -1,3 +1,26 @@
+/*
+ * MIT License
+ *
+ * Copyright (c) 2022 Betuel Sevindik, Felix Baensch, Jonas Schaub, Christoph Steinbeck, and Achim Zielesny
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
 package de.unijena.cheminf.fragment.fingerprint.main;
 
 import de.unijena.cheminf.fragment.fingerprint.BitFragmentFingerprint;
@@ -5,56 +28,51 @@ import de.unijena.cheminf.fragment.fingerprint.CountFragmentFingerprint;
 
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
+
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.function.Function;
-import java.util.stream.Collectors;
 
+/**
+ * Main class to start the application
+ *
+ * @author Betuel Sevindik
+ */
 public class Main {
 
     public static void main(String[] args) throws IOException {
 
+        BitFragmentFingerprint tmpBitFragmentFingerprint = new BitFragmentFingerprint();
+        CountFragmentFingerprint tmpCountFragmentFingerprint = new CountFragmentFingerprint();
 
-        BitFragmentFingerprint bitFragmentFingerprint = new BitFragmentFingerprint();
-        CountFragmentFingerprint countFragmentFingerprint = new CountFragmentFingerprint();
-
-        BufferedReader br2 = new BufferedReader(new FileReader("C:\\Users\\betue\\Desktop\\Items_Ertl_algorithm_test.csv"));
-        String line2 = "";
-        String DELIMITER2 = ";";
-        List<String> records2 = new ArrayList<>();
-        List<List<String>> records3 = new ArrayList<>();
-        HashMap<String, String> maps = new HashMap<>();
-        String line3;
-        while ((line3 = br2.readLine()) != null) {
-            String[] values = line3.split(DELIMITER2);
-            records3.add(Arrays.asList(values));
-
-          //  System.out.println(records3.get(0) + "indexNull");
+        // read in a csv file created in MORTAR to get molecule fragments
+        //Attention: the separator must be a semicolon
+        BufferedReader tmpBufferedReader = new BufferedReader(new FileReader("C:\\Users\\betue\\Desktop\\Items_Ertl_algorithm_test.csv"));
+        String tmpSeparator = ";";
+        List<List<String>> tmpMoleculeFragments = new ArrayList<>();
+        String tmpCsvLine;
+        while ((tmpCsvLine = tmpBufferedReader.readLine()) != null) {
+            String[] values = tmpCsvLine.split(tmpSeparator);
+            tmpMoleculeFragments.add(Arrays.asList(values));
         }
-        List<String> str = null;
-        for(int z = 1; z< records3.size(); z++) {
-            str = records3.get(z);
+        List<String> tmpMoleculeList = null;
+        for(int tmpLine = 1; tmpLine< tmpMoleculeFragments.size(); tmpLine++) {
+            tmpMoleculeList = tmpMoleculeFragments.get(tmpLine);
             //System.out.println(str + "---einezlene Listen");
-            HashMap<String, String> allMaps = new HashMap<>();
-            for(int i = 0; i<str.size(); i++) {
-                if (i % 2 == 0) {
-                    allMaps.put(str.get(i), str.get(i + 1));
+            HashMap<String, String> tmpMoleculeMap = new HashMap<>();
+            for(int tmpMoleculeListIndex = 0; tmpMoleculeListIndex < tmpMoleculeList.size(); tmpMoleculeListIndex++) {
+                if (tmpMoleculeListIndex % 2 == 0) {
+                    tmpMoleculeMap.put(tmpMoleculeList.get(tmpMoleculeListIndex), tmpMoleculeList.get(tmpMoleculeListIndex + 1));
                 }
             }
            // System.out.println(allMaps +"------map");
-            ArrayList g = bitFragmentFingerprint.generateFragmentFingerprint((ArrayList<String>)getFragmentList(new File("C:\\Users\\betue\\Desktop\\Fragments_Ertl_algorithm.csv")), allMaps);
-          //  System.out.println( g.get(g.keySet().toArray()[0]));
-            System.out.println(bitFragmentFingerprint.getNumberPositiveBits(g) + "neue Methode");
-            int[] arr = (int[]) g.get(0);
-            System.out.println(java.util.Arrays.toString(arr) +"--"+str.get(0));
+            ArrayList tmpBitVector = tmpCountFragmentFingerprint.generateFragmentFingerprint((ArrayList<String>)getFragmentList(new File("C:\\Users\\betue\\Desktop\\Fragments_Ertl_algorithm.csv")), tmpMoleculeMap);
+            System.out.println(tmpCountFragmentFingerprint.getIndicesPositiveBits(tmpBitVector)+ "----Positive indices");
+            int[] arr = (int[]) tmpBitVector.get(0);
+            System.out.println(java.util.Arrays.toString(arr) +"--"+ tmpMoleculeList.get(0));
             //System.out.println(java.util.Arrays.toString(g) +"--"+str.get(0));
            // int[] q = countFragmentFingerprint.generateFragmentFingerprint((ArrayList<String>) records, allMaps);
            // System.out.println(java.util.Arrays.toString(q)+ "---"+str.get(0));
@@ -62,17 +80,23 @@ public class Main {
 
     }
 
+    /**
+     * Csv reader to get a list with fragments
+     *
+     * @param aFile
+     * @return
+     * @throws IOException
+     */
     private static ArrayList<String> getFragmentList(File aFile) throws IOException {
-        BufferedReader br = new BufferedReader(new FileReader(aFile));
-        String line = "";
+        BufferedReader tmpBufferedReader = new BufferedReader(new FileReader(aFile));
+        String tmpCsvLine = "";
         String DELIMITER = ",";
-        ArrayList<String> records = new ArrayList<>();
-        while ((line = br.readLine()) != null) {
-            String[] values = line.split(DELIMITER);
-            records.add(values[0]);
+        ArrayList<String> tmpFragmentList = new ArrayList<>();
+        while ((tmpCsvLine = tmpBufferedReader.readLine()) != null) {
+            String[] values = tmpCsvLine.split(DELIMITER);
+            tmpFragmentList.add(values[0]);
         }
-        records.remove(0);
-        return  records;
-        // System.out.println(records+ "----fragment list");
+        tmpFragmentList.remove(0);
+        return tmpFragmentList;
     }
 }

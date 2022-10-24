@@ -31,17 +31,26 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 /**
- *
+ *  Class to test the correct working of BitFragmentFingerprint and CountFragmentFingerprint
  */
 public class FragmentFingerprintTest extends BitFragmentFingerprint {
 
+    //<editor-fold desc="Constructor">
+    /**
+     * Empty Constructor
+     */
+    public FragmentFingerprintTest() {
+    }
+    //</editor-fold>
 
-
-
+    /**
+     * Tests the instantiation and the call of the method "generateFingerprint"
+     *
+     * @throws Exception  if anything goes wrong
+     */
     @Test
     public void basicTest() throws Exception {
-        //ArrayList<String> tmpTestList = new ArrayList<>();
-        /**
+        ArrayList<String> tmpTestList = new ArrayList<>();
         tmpTestList.add("*OS(=O)(=O)O[H]");
         tmpTestList.add("CC1(C)CCCC2(C)C1CCC3(C)C2CCC4C5CCCC5(C)CCC43C");
         tmpTestList.add("*N(*)S(*)(=O)=O");
@@ -73,51 +82,31 @@ public class FragmentFingerprintTest extends BitFragmentFingerprint {
         tmpTestList.add("cC");
         tmpTestList.add("BrC=C");
         tmpTestList.add("*OP(=O)(O*)O[H]");
-         */
-        ArrayList<String> list = new ArrayList<>();
-        list.add("C");
-        list.add("c1ccc(cc1)C");
-        list.add("c1cc(cc2ccc(cc12)CC(C)C)C");
-        list.add("CCCC");
-        list.add("c1ccc(cc1)CCCc2cccc(c2)C(c3ccccc3)CCc4ccccc4");
 
 
+        BitFragmentFingerprint tmpBitFingerprintTest = new BitFragmentFingerprint();
+        CountFragmentFingerprint tmpCountFingerprintTest = new CountFragmentFingerprint();
+        HashMap<String,String> tmpMoleculeFragments = new HashMap<>();
+
+        tmpMoleculeFragments.put("BrC=C", "25");
+        tmpMoleculeFragments.put("ccc(cCC(CC)C1CCC(CC)CC1)CC(C)CC2CC3(CCCC3C)CCC(C)(CC4CCCC(C4)C(C)C5CCCCC5)C2C(C)C6CCCC(Cc7ccccc7)C6", "25");
+        tmpMoleculeFragments.put("*s*", "10");
+        tmpMoleculeFragments.put("*OC(C(*)=O)N(*)C(*)=O", "5");
+        tmpMoleculeFragments.put("c1cc(cc(c1)C)c2cccc(c2)C3C4C(C)CCC4C3(C)C", "7");
+        tmpMoleculeFragments.put("c1cc(ccc1C)C", "3");
+        tmpMoleculeFragments.put("*OC(=O)C=CN(*)C(*)=O", "66");
+        tmpMoleculeFragments.put("CCCC(C)C", "74");
 
 
-        BitFragmentFingerprint tmpFingerprint = new BitFragmentFingerprint();
-        HashMap<String,Integer> tmpMoleculeFragments = new HashMap<>();
-        /**
-        tmpMoleculeFragments.put("BrC=C", 25);
-        tmpMoleculeFragments.put("ccc(cCC(CC)C1CCC(CC)CC1)CC(C)CC2CC3(CCCC3C)CCC(C)(CC4CCCC(C4)C(C)C5CCCCC5)C2C(C)C6CCCC(Cc7ccccc7)C6", 25);
-        tmpMoleculeFragments.put("*s*", 10);
-        tmpMoleculeFragments.put("*OC(C(*)=O)N(*)C(*)=O", 5);
-        tmpMoleculeFragments.put("c1cc(cc(c1)C)c2cccc(c2)C3C4C(C)CCC4C3(C)C", 7);
-        tmpMoleculeFragments.put("c1cc(ccc1C)C", 3);
-        tmpMoleculeFragments.put("*OC(=O)C=CN(*)C(*)=O", 66);
-        tmpMoleculeFragments.put("CCCC(C)C", 74);
-        tmpMoleculeFragments.put("*OCO*", 1);
-        tmpMoleculeFragments.put("O=CC=C",4);
-        tmpMoleculeFragments.put("C=C", 8);
-        tmpMoleculeFragments.put("c1ccc(cc1)ccC", 10);
-        tmpMoleculeFragments.put("*OP(=O)(O*)O[H]", 5);
-        tmpMoleculeFragments.put("cC", 3);
-        tmpMoleculeFragments.put("*o*", 89);
-        tmpMoleculeFragments.put("c1ccc(cc1)C(c2ccccc2)C", 1);
-         */
-        HashMap<String, Integer> molecule = new HashMap<>();
-        molecule.put("c1ccc(cc1)C", 20);
-        molecule.put("c1ccc(cc1)CCCc2cccc(c2)C(c3ccccc3)CCc4ccccc4",100);
-        molecule.put("cccc",2);
+        ArrayList tmpBitTest1 =  tmpBitFingerprintTest.generateFragmentFingerprint(tmpTestList, tmpMoleculeFragments);
+        int[] tmpBiTVector1 = (int[]) tmpBitTest1.get(0);
+        int[] tmpExceptedBitVector = {0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,1,0,0,0,0,0,0,0,0,0,0,1,0,0,0};
+        Assert.assertArrayEquals(tmpExceptedBitVector,tmpBiTVector1);
 
-
-        /**
-       int[] test1 =  tmpFingerprint.generateFragmentFingerprint(list, molecule);
-       int[] test2 = {0,0,1,1,0};
-        Assert.assertArrayEquals(test2,test1);
-         */
-
-
-
+        ArrayList tmpCountTest1 = tmpCountFingerprintTest.generateFragmentFingerprint(tmpTestList, tmpMoleculeFragments);
+        int[] tmpCountVector1 = (int[]) tmpCountTest1.get(0);
+        int[] tmpExceptedCountVector = {0,0,0,0,0,0,0,0,0,0,0,0,0,10,0,0,25,0,0,0,0,0,0,0,0,0,0,25,0,0,0};
+        Assert.assertArrayEquals(tmpExceptedCountVector,tmpCountVector1);
     }
 
 }
