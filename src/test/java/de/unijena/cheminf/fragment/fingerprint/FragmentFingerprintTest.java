@@ -25,9 +25,99 @@
 
 package de.unijena.cheminf.fragment.fingerprint;
 
+import org.junit.Assert;
+import org.junit.Test;
+import java.util.ArrayList;
+import java.util.HashMap;
+
 /**
  *
  */
-public class FragmentFingerprintTest extends FragmentFingerprint{
+public class FragmentFingerprintTest extends BitFragmentFingerprint {
+
+
+
+
+    @Test
+    public void basicTest() throws Exception {
+        //ArrayList<String> tmpTestList = new ArrayList<>();
+        /**
+        tmpTestList.add("*OS(=O)(=O)O[H]");
+        tmpTestList.add("CC1(C)CCCC2(C)C1CCC3(C)C2CCC4C5CCCC5(C)CCC43C");
+        tmpTestList.add("*N(*)S(*)(=O)=O");
+        tmpTestList.add("*C(=O)C=C");
+        tmpTestList.add("*OCO[H]");
+        tmpTestList.add("CC(C)C1CCC2(C)C1CCC3(C)C2CCC4C5(C)CCCC(C)(C)C5CCC43C");
+        tmpTestList.add("ccc(cCC(CC)C1CCC(CC)CC1)CC(C)CC2CC3(CCCC3C)CCC(C)(CC4CCCC(C4)C(C)C5CCCCC5)C2C(C)C6CCCC(Cc7ccccc7)C6");
+        tmpTestList.add("c1cc(c(cc1CCC(C)CCCC(C)CCCC(C)CCCC(C)C)C)C");
+        tmpTestList.add("*C(=O)N(*)C=CC(=O)N(*)*");
+        tmpTestList.add("c1ccc(cc1)CCc2ccccc2CC");
+        tmpTestList.add("O=C");
+        tmpTestList.add("[H]OC1OC(=O)C=C1");
+        tmpTestList.add("c1cc(cc(c1)CC(C)C(C)C(C)C)CCCCC2CC(CC)C2c3cccc(c3)CCC");
+        tmpTestList.add("*OC=C(O[H])C(*)=O");
+        tmpTestList.add("c1cc(cc(c1)CC)C");
+        tmpTestList.add("CCCCCCCCCCCCCCCCCCCCCCC");
+        tmpTestList.add("*C(=O)OC=CO[H]");
+        tmpTestList.add("[H]OC=NC=C");
+        tmpTestList.add("*OC=CC(=O)O*");
+        tmpTestList.add("*N(*)*");
+        tmpTestList.add("*OC(=CBr)C(Br)=C");
+        tmpTestList.add("cc(c)C");
+        tmpTestList.add("*s*");
+        tmpTestList.add("cc");
+        tmpTestList.add("CCCC1(C)C(C)CC(C)C(C)C1CC(CC)C(C)CC");
+        tmpTestList.add("*OC=C(O*)C(*)=O");
+        tmpTestList.add("c1ccc(cc1)CCC");
+        tmpTestList.add("*OCN(*)C(=O)N=CN(*)*");
+        tmpTestList.add("cC");
+        tmpTestList.add("BrC=C");
+        tmpTestList.add("*OP(=O)(O*)O[H]");
+         */
+        ArrayList<String> list = new ArrayList<>();
+        list.add("C");
+        list.add("c1ccc(cc1)C");
+        list.add("c1cc(cc2ccc(cc12)CC(C)C)C");
+        list.add("CCCC");
+        list.add("c1ccc(cc1)CCCc2cccc(c2)C(c3ccccc3)CCc4ccccc4");
+
+
+
+
+        BitFragmentFingerprint tmpFingerprint = new BitFragmentFingerprint();
+        HashMap<String,Integer> tmpMoleculeFragments = new HashMap<>();
+        /**
+        tmpMoleculeFragments.put("BrC=C", 25);
+        tmpMoleculeFragments.put("ccc(cCC(CC)C1CCC(CC)CC1)CC(C)CC2CC3(CCCC3C)CCC(C)(CC4CCCC(C4)C(C)C5CCCCC5)C2C(C)C6CCCC(Cc7ccccc7)C6", 25);
+        tmpMoleculeFragments.put("*s*", 10);
+        tmpMoleculeFragments.put("*OC(C(*)=O)N(*)C(*)=O", 5);
+        tmpMoleculeFragments.put("c1cc(cc(c1)C)c2cccc(c2)C3C4C(C)CCC4C3(C)C", 7);
+        tmpMoleculeFragments.put("c1cc(ccc1C)C", 3);
+        tmpMoleculeFragments.put("*OC(=O)C=CN(*)C(*)=O", 66);
+        tmpMoleculeFragments.put("CCCC(C)C", 74);
+        tmpMoleculeFragments.put("*OCO*", 1);
+        tmpMoleculeFragments.put("O=CC=C",4);
+        tmpMoleculeFragments.put("C=C", 8);
+        tmpMoleculeFragments.put("c1ccc(cc1)ccC", 10);
+        tmpMoleculeFragments.put("*OP(=O)(O*)O[H]", 5);
+        tmpMoleculeFragments.put("cC", 3);
+        tmpMoleculeFragments.put("*o*", 89);
+        tmpMoleculeFragments.put("c1ccc(cc1)C(c2ccccc2)C", 1);
+         */
+        HashMap<String, Integer> molecule = new HashMap<>();
+        molecule.put("c1ccc(cc1)C", 20);
+        molecule.put("c1ccc(cc1)CCCc2cccc(c2)C(c3ccccc3)CCc4ccccc4",100);
+        molecule.put("cccc",2);
+
+
+        /**
+       int[] test1 =  tmpFingerprint.generateFragmentFingerprint(list, molecule);
+       int[] test2 = {0,0,1,1,0};
+        Assert.assertArrayEquals(test2,test1);
+         */
+
+
+
+    }
 
 }
