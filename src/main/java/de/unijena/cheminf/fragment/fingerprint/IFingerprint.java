@@ -49,21 +49,21 @@ public interface IFingerprint {
      *
      * @return int number
      */
-    int getFragmentFingerprintSize();
+    int getFragmentFingerprintSize(int[] aVector);
     //
     /**
      * Returns the value of the similarity between two fingerprints
      *
      * @return
      */
-    double calculateTanimotoSimilarity();
+    double calculateTanimotoSimilarity(ArrayList<Object> aFirstMoleculeFingerprint, ArrayList<Object> aSecondMoleculeFingerprint);
     //
     /**
      * Returns the number of positive bits in the fingerprint
      *
      * @return
      */
-    int getNumberPositiveBits();
+    int getNumberPositiveBits(ArrayList<Object> aList);
     //
     /**
      * Returns the positive indices
@@ -71,9 +71,10 @@ public interface IFingerprint {
      * @param aList
      * @return
      */
-    Object getIndicesPositiveBits(ArrayList<Object> aList);
+    ArrayList getIndicesPositiveBits(ArrayList<Object> aList);
     // </editor-fold>
     //
+
 
     //TODO sparse vector
 

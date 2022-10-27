@@ -56,7 +56,6 @@ public class BitFragmentFingerprint implements IFingerprint {
     public ArrayList generateFragmentFingerprint(ArrayList<String> aFragmentList, HashMap<String, String> aMoleculeFragments) {
         int tmpVectorSize = aFragmentList.size();
         int[] tmpBitVector = new int[tmpVectorSize];
-       // HashMap<int[], ArrayList<Integer>> overAllMap = new HashMap<>();
         ArrayList<Integer> tmpPositiveIndices = new ArrayList<>();
         ArrayList<Object> tmpFingerprintResult = new ArrayList<>();
         for (int tmpDefaultBit = 0; tmpDefaultBit < tmpVectorSize; tmpDefaultBit++) {
@@ -69,18 +68,14 @@ public class BitFragmentFingerprint implements IFingerprint {
         for (String tmpKey : aFragmentList) {
             tmpFragmentHashMap.put(tmpKey, tmpValuePosition);
             tmpValuePosition++;
-
         }
         for (String tmpUniqueSmiles : aMoleculeFragments.keySet()) {
             if (tmpFragmentHashMap.containsKey(tmpUniqueSmiles) == true) {
                 int tmpPosition = tmpFragmentHashMap.get(tmpUniqueSmiles);
                 tmpPositiveIndices.add(tmpPosition);
                 tmpBitVector[tmpPosition] = 1;
-
             }
         }
-      //  return tmpBitVector;
-      //  overAllMap.put(tmpBitVector,fgh);
         tmpFingerprintResult.add(tmpBitVector);
         tmpFingerprintResult.add(tmpPositiveIndices);
         return tmpFingerprintResult;
@@ -91,16 +86,18 @@ public class BitFragmentFingerprint implements IFingerprint {
      * @return
      */
     @Override
-    public int getFragmentFingerprintSize() {
-        return 0;
+    public int getFragmentFingerprintSize(int[] aVector) {
+        return aVector.length;
     }
     //
     /**
-     * TODO implementation
+     * 
      * @return
      */
-    public int getNumberPositiveBits() {
-      return 0;
+    public int getNumberPositiveBits(ArrayList<Object> aList) {
+        Object tmpPositiveBits = aList.get(1);
+        ArrayList tmpNumber  = (ArrayList) tmpPositiveBits;
+        return tmpNumber.size();
     }
     //
     /**
@@ -110,8 +107,10 @@ public class BitFragmentFingerprint implements IFingerprint {
      * @return
      */
     @Override
-    public Object getIndicesPositiveBits(ArrayList<Object> aList) {
-        return aList.get(1);
+    public ArrayList getIndicesPositiveBits(ArrayList<Object> aList) {
+        Object tmpPositiveBits = aList.get(1);
+        ArrayList<Integer> tmpBitsList = (ArrayList) tmpPositiveBits;
+        return tmpBitsList;
     }
     //
     /**
@@ -120,7 +119,33 @@ public class BitFragmentFingerprint implements IFingerprint {
      * @return
      */
     @Override
-    public double calculateTanimotoSimilarity() {
-        return 0;
+    public double calculateTanimotoSimilarity(ArrayList<Object> aFirstMoleculeFingerprint, ArrayList<Object> aSecondMoleculeFingerprint) {
+        ArrayList<Integer> tmpFirstFingerprint = (ArrayList) aFirstMoleculeFingerprint;
+        ArrayList<Integer> tmpSecondFingerprint = (ArrayList) aSecondMoleculeFingerprint;
+        System.out.println(tmpFirstFingerprint +"---liste1");
+        System.out.println(tmpSecondFingerprint +"---liste2");
+        HashMap<Integer, Integer> tmpMapForFirstFingerprint = new HashMap<>();
+        HashMap<Integer, Integer> tmpMapForSecondFingerprint = new HashMap<>();
+        int tmpFirstMapValues = 0;
+        int tmpSecondMapValues = 0;
+        for (int tmpFirstMapKey : tmpFirstFingerprint) {
+            tmpMapForFirstFingerprint.put(tmpFirstMapKey, tmpFirstMapValues);
+            tmpFirstMapValues++;
+        }
+        System.out.println(tmpMapForFirstFingerprint + "-----map1");
+        for (int tmpSecondMapKey : tmpSecondFingerprint) {
+            tmpMapForSecondFingerprint.put(tmpSecondMapKey, tmpSecondMapValues);
+            tmpSecondMapValues++;
+        }
+        System.out.println(tmpMapForSecondFingerprint +"----map2");
+        int tmpIntersection = 0;
+            for (int tmpEqualsKey : tmpMapForSecondFingerprint.keySet()) {
+                if (tmpMapForFirstFingerprint.containsKey(tmpEqualsKey)) {
+                    tmpIntersection++;
+                }
+            }
+        double tmpUnificationQuantity = (tmpFirstFingerprint.size()+ tmpSecondFingerprint.size()) - tmpIntersection;
+        double tmpTanimotoSimilarity = tmpIntersection / tmpUnificationQuantity;
+        return tmpTanimotoSimilarity;
     }
 }

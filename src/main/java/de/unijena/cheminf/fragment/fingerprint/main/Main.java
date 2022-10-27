@@ -50,7 +50,7 @@ public class Main {
 
         // read in a csv file created in MORTAR to get molecule fragments
         //Attention: the separator must be a semicolon
-        BufferedReader tmpBufferedReader = new BufferedReader(new FileReader("C:\\Users\\betue\\Desktop\\Items_Ertl_algorithm_test.csv"));
+        BufferedReader tmpBufferedReader = new BufferedReader(new FileReader("C:\\Users\\betue\\Desktop\\Items_Ertl_algorithm_coco.csv"));
         String tmpSeparator = ";";
         List<List<String>> tmpMoleculeFragments = new ArrayList<>();
         String tmpCsvLine;
@@ -59,6 +59,7 @@ public class Main {
             tmpMoleculeFragments.add(Arrays.asList(values));
         }
         List<String> tmpMoleculeList = null;
+        ArrayList<ArrayList<Object>> tmpListsForCalculateTanimotoSimilarity = new ArrayList<>();
         for(int tmpLine = 1; tmpLine< tmpMoleculeFragments.size(); tmpLine++) {
             tmpMoleculeList = tmpMoleculeFragments.get(tmpLine);
             //System.out.println(str + "---einezlene Listen");
@@ -68,18 +69,30 @@ public class Main {
                     tmpMoleculeMap.put(tmpMoleculeList.get(tmpMoleculeListIndex), tmpMoleculeList.get(tmpMoleculeListIndex + 1));
                 }
             }
-           // System.out.println(allMaps +"------map");
-            ArrayList tmpBitVector = tmpCountFragmentFingerprint.generateFragmentFingerprint((ArrayList<String>)getFragmentList(new File("C:\\Users\\betue\\Desktop\\Fragments_Ertl_algorithm.csv")), tmpMoleculeMap);
-            System.out.println(tmpCountFragmentFingerprint.getIndicesPositiveBits(tmpBitVector)+ "----Positive indices");
-            int[] arr = (int[]) tmpBitVector.get(0);
-            System.out.println(java.util.Arrays.toString(arr) +"--"+ tmpMoleculeList.get(0));
-            //System.out.println(java.util.Arrays.toString(g) +"--"+str.get(0));
-           // int[] q = countFragmentFingerprint.generateFragmentFingerprint((ArrayList<String>) records, allMaps);
-           // System.out.println(java.util.Arrays.toString(q)+ "---"+str.get(0));
+            ArrayList tmpFingerprint = tmpCountFragmentFingerprint.generateFragmentFingerprint(getFragmentList(new File("C:\\Users\\betue\\Desktop\\Fragments_Ertl_algorithm.csv")), tmpMoleculeMap);
+            System.out.println(tmpCountFragmentFingerprint.getIndicesPositiveBits(tmpFingerprint)+ "----Positive indices");
+            int[] tmpFingerprintArray = (int[]) tmpFingerprint.get(0);
+            System.out.println(tmpCountFragmentFingerprint.getFragmentFingerprintSize(tmpFingerprintArray)+ "-----Size");
+            System.out.println(tmpCountFragmentFingerprint.getNumberPositiveBits(tmpFingerprint)+ "------Number");
+            System.out.println(java.util.Arrays.toString(tmpFingerprintArray) +"--"+ tmpMoleculeList.get(0));
+            tmpListsForCalculateTanimotoSimilarity.add(tmpBitFragmentFingerprint.getIndicesPositiveBits(tmpFingerprint));
+            System.out.println(tmpListsForCalculateTanimotoSimilarity + "----ar");
+            /**
+            ArrayList tmpFingerprint = tmpBitFragmentFingerprint.generateFragmentFingerprint(getFragmentList(new File("C:\\Users\\betue\\Desktop\\Fragments_Ertl_algorithm.csv")), tmpMoleculeMap);
+            System.out.println(tmpBitFragmentFingerprint.getIndicesPositiveBits(tmpFingerprint)+ "----Positive indices");
+             ar.add(tmpBitFragmentFingerprint.getIndicesPositiveBits(tmpFingerprint));
+            System.out.println(ar + "----ar");
+
+            int[] tmpFingerprintArray = (int[]) tmpFingerprint.get(0);
+            System.out.println(tmpBitFragmentFingerprint.getFragmentFingerprintSize(tmpFingerprintArray)+ "-----Size");
+            System.out.println(tmpBitFragmentFingerprint.getNumberPositiveBits(tmpFingerprint)+ "------Number");
+            System.out.println(java.util.Arrays.toString(tmpFingerprintArray) +"--"+ tmpMoleculeList.get(0));
+             */
         }
-
+        double tmpSimilarity = tmpBitFragmentFingerprint.calculateTanimotoSimilarity(tmpListsForCalculateTanimotoSimilarity.get(6), tmpListsForCalculateTanimotoSimilarity.get(4));
+        System.out.println(tmpSimilarity);
     }
-
+    //
     /**
      * Csv reader to get a list with fragments
      *
