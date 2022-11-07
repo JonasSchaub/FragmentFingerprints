@@ -24,7 +24,12 @@
 
 package de.unijena.cheminf.fragment.fingerprint;
 
+import org.openscience.cdk.fingerprint.IBitFingerprint;
+import org.openscience.cdk.fingerprint.ICountFingerprint;
+import org.openscience.cdk.fingerprint.IFingerprinter;
+
 import java.util.ArrayList;
+import java.util.BitSet;
 import java.util.HashMap;
 
 /**
@@ -32,51 +37,21 @@ import java.util.HashMap;
  *
  * @author Betuel Sevindik
  */
-public interface IFingerprint {
+public interface IFragmentFingerprinter extends IFingerprinter {
 
-    // <editor-fold defaultstate="collapsed" desc="Methods">
-    /**
-     * Returns a List with the fingerprint and the positive indices in the fingerprint array
-     *
-     * @param aList  a fragment list
-     * @param aMap  a molecule HashMap
-     * @return list
-     */
-    ArrayList generateFragmentFingerprint(ArrayList<String> aList, HashMap<String,String> aMap);
-    //
-    /**
-     * Returns the fingerprint size
-     *
-     * @return int number
-     */
-    int getFragmentFingerprintSize(int[] aVector);
-    //
-    /**
-     * Returns the value of the similarity between two fingerprints
-     *
-     * @return
-     */
-    double calculateTanimotoSimilarity(ArrayList<Object> aFirstMoleculeFingerprint, ArrayList<Object> aSecondMoleculeFingerprint);
-    //
-    /**
-     * Returns the number of positive bits in the fingerprint
-     *
-     * @return
-     */
-    int getNumberPositiveBits(ArrayList<Object> aList);
-    //
-    /**
-     * Returns the positive indices
-     *
-     * @param aList
-     * @return
-     */
-    ArrayList getIndicesPositiveBits(ArrayList<Object> aList);
-    // </editor-fold>
-    //
+    IBitFingerprint getBitFingerprint(ArrayList<String> aListWithUniqueSmiles);
+
+    ICountFingerprint getCountFingerprint(HashMap<String, Integer> aMoleculeFragmentsMap);
 
 
-    //TODO sparse vector
+
+
+
+
+
+
+
+
 
 
 
