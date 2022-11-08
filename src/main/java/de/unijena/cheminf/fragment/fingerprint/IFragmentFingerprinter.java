@@ -29,7 +29,6 @@ import org.openscience.cdk.fingerprint.ICountFingerprint;
 import org.openscience.cdk.fingerprint.IFingerprinter;
 
 import java.util.ArrayList;
-import java.util.BitSet;
 import java.util.HashMap;
 
 /**
@@ -39,8 +38,21 @@ import java.util.HashMap;
  */
 public interface IFragmentFingerprinter extends IFingerprinter {
 
+    /**
+     * Method to generate bit fingerprint all by itself by comparing the unique SMILES
+     *
+     * @param aListWithUniqueSmiles  a list containing all the fragments produced by the fragmentation of a given molecule
+     * @return IBitFingerprint
+     */
     IBitFingerprint getBitFingerprint(ArrayList<String> aListWithUniqueSmiles);
 
+    /**
+     *  Method to generate count fingerprint all by itself by comparing the unique SMILES
+     *
+     * @param aMoleculeFragmentsMap a HashMap containing all fragments of the molecule and the corresponding frequencies of the generated fragments.
+     *                              Key = unique SMILES, Value = frequency
+     * @return ICountFingerprint
+     */
     ICountFingerprint getCountFingerprint(HashMap<String, Integer> aMoleculeFragmentsMap);
 
 
