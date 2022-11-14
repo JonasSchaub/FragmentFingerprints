@@ -30,6 +30,8 @@ import org.openscience.cdk.fingerprint.IFingerprinter;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Interface for implementing fragment fingerprints
@@ -41,19 +43,30 @@ public interface IFragmentFingerprinter extends IFingerprinter {
     /**
      * Method to generate bit fingerprint all by itself by comparing the unique SMILES
      *
-     * @param aListWithUniqueSmiles  a list containing all the fragments produced by the fragmentation of a given molecule
+     * @param aListOfUniqueSmiles  a list containing all the fragments produced by the fragmentation of a given molecule
      * @return IBitFingerprint
      */
-    IBitFingerprint getBitFingerprint(ArrayList<String> aListWithUniqueSmiles);
+   IBitFingerprint getBitFingerprint(List<String> aListOfUniqueSmiles);
 
     /**
-     *  Method to generate count fingerprint all by itself by comparing the unique SMILES
+     * Method to generate count fingerprint all by itself by comparing the unique SMILES
      *
-     * @param aMoleculeFragmentsMap a HashMap containing all fragments of the molecule and the corresponding frequencies of the generated fragments.
-     *                              Key = unique SMILES, Value = frequency
+     * @param aMapToCountMoleculeFragmentSmiles a Map containing all fragments of the molecule as unique SMILES and the
+     *    corresponding frequencies of the generated fragments.
+     *    Key = unique SMILES, Value = frequency
      * @return ICountFingerprint
      */
-    ICountFingerprint getCountFingerprint(HashMap<String, Integer> aMoleculeFragmentsMap);
+    ICountFingerprint getCountFingerprint(Map<String, Integer> aMapToCountMoleculeFragmentSmiles);
+
+    /**
+     * Method to generate count fingerprint all by itself by comparing the unique SMILES.
+     *
+     * @param aListToCountMoleculeFragmentSmiles a list containing all fragments of the molecule as unique SMILES.
+     *    If a fragment is present more than once in the molecule, then the SMILES
+     *    corresponding to the fragment is also present more than once in the list.
+     * @return
+     */
+    ICountFingerprint getCountFingerprint(List<String> aListToCountMoleculeFragmentSmiles);
 
 
 

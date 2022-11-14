@@ -26,7 +26,7 @@
 package de.unijena.cheminf.fragment.fingerprint;
 
 import org.junit.Assert;
-import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 import org.openscience.cdk.fingerprint.IBitFingerprint;
 import org.openscience.cdk.fingerprint.ICountFingerprint;
@@ -45,36 +45,37 @@ import java.util.List;
  *  Class to test the correct working of  FragmentFingerprinter
  */
 public class FragmentFingerprintTest  {
-
+    //<editor-fold desc="private static class variables" defaultstate="collapsed">
     /**
-     * List
+     * Is a list in which all molecule fragments are stored that are read in from the CSV file.
      */
-    ArrayList<HashMap<String, Integer>> moleculeSetList = new ArrayList<>();
+    static ArrayList<HashMap<String, Integer>> moleculeFragmentList = new ArrayList<>(); // TODO local variable if only test the last molecule
     /**
-     * Fragment list
+     * Is a list that contains all fragments, the fingerprint is then generated based on these fragments.
      */
-    ArrayList<String> fragmentList = new ArrayList<>();
+    static ArrayList<String> fragmentList = new ArrayList<>();
 
     /**
      *  fragmentFingerprinter
      */
-    FragmentFingerprinter fragmentFingerprinter;
+    static FragmentFingerprinter fragmentFingerprinter;
 
     /**
      *  Bit fingerprint
      */
-    IBitFingerprint bitFingerprintTest;
+    static IBitFingerprint bitFingerprintTest;
 
     /**
      *  Count fingerprint
      */
-    ICountFingerprint countFingerprintTest;
+    static ICountFingerprint countFingerprintTest;
 
     /**
      *  List only with unique SMILES and without frequencies
      */
-    ArrayList<String> dataForGenerateBitFingerprint;
-
+   static ArrayList<String> dataForGenerateBitFingerprint;
+    //</editor-fold>
+    //
     /**
      * Empty Constructor
      */
@@ -82,26 +83,27 @@ public class FragmentFingerprintTest  {
     }
 
     /**
-     * Start generating fingerprinting data (MORTAR)
+     * Start generating fingerprinting data (MORTAR); @BeforeClass ensures that the setUp method is only executed once.
      *
      * @throws IOException
      */
-    @Before
-    public void setUp() throws IOException {
-        // Read CSV file ( fragmentation tab)
+    @BeforeClass
+    public static void setUp() throws IOException {
+        // Read CSV file ( fragmentation tab) to  obtain fragments used to create the fingerprint.
         BufferedReader tmpFragmentSetReader = new BufferedReader(new FileReader("src/main/resources/de/unijena/cheminf/fragment/fingerprint/FragmentsList.txt"));
         String tmpLine;
         String tmpSeparatorComma = ",";
         while ((tmpLine = tmpFragmentSetReader.readLine()) != null) {
             String[] tmpSmilesOfFragments = tmpLine.split(tmpSeparatorComma);
-            fragmentList.add(tmpSmilesOfFragments[0]);
+            FragmentFingerprintTest.fragmentList.add(tmpSmilesOfFragments[0]);
         }
-        fragmentList.remove(0);
+        FragmentFingerprintTest.fragmentList.remove(0);
         // Read CSV file (itemization tab)
         BufferedReader tmpMoleculeFragmentsReader = new BufferedReader(new FileReader("src/main/resources/de/unijena/cheminf/fragment/fingerprint/MoleculeFragments.txt"));
         String tmpSeparatorSemicolon = ";";
         List<List<String>> tmpList = new ArrayList<>();
         String tmpMoleculeLine;
+        System.out.println("\n\tBit and count arrays of the given molecules:");
         while ((tmpMoleculeLine = tmpMoleculeFragmentsReader.readLine()) != null) {
             String[] tmpMoleculeFragmentsAndFrequencies = tmpMoleculeLine.split(tmpSeparatorSemicolon);
             tmpList.add(Arrays.asList(tmpMoleculeFragmentsAndFrequencies));
@@ -111,125 +113,223 @@ public class FragmentFingerprintTest  {
             tmpSeparateList = tmpList.get(tmpCurrentLine);
             List<String> ListWithoutNameAndMoleculeSmiles = tmpSeparateList.subList(2, tmpSeparateList.size());
             HashMap<String, Integer> tmpMoleculeFragmentsMap = new HashMap<>();
-            this.dataForGenerateBitFingerprint = new ArrayList<>();
+            FragmentFingerprintTest.dataForGenerateBitFingerprint = new ArrayList<>();
             for (int i = 0; i < ListWithoutNameAndMoleculeSmiles.size(); i++) {
                 if (i % 2 == 0) {
                     tmpMoleculeFragmentsMap.put(ListWithoutNameAndMoleculeSmiles.get(i), Integer.valueOf(ListWithoutNameAndMoleculeSmiles.get(i + 1)));
-                    this.dataForGenerateBitFingerprint.add(ListWithoutNameAndMoleculeSmiles.get(i));
+                    FragmentFingerprintTest.dataForGenerateBitFingerprint.add(ListWithoutNameAndMoleculeSmiles.get(i));
                 }
-                /**
-                 FragmentFingerprinter bitTest = new FragmentFingerprinter(records);
-                 IBitFingerprint bitFingerprint = bitTest.getBitFingerprint(allMaps);
-                 System.out.println(bitFingerprint.size()+ "----Size");
-                 System.out.println(java.util.Arrays.toString(bitTest.getBitVector()) + "BitVector");
-                 System.out.println(bitFingerprint.asBitSet().toString());
-                 */
             }
-            this.moleculeSetList.add(tmpMoleculeFragmentsMap);
+            // Illustration the results of the bit arrays for the specified molecules
+            FragmentFingerprinter tmpFingerprintRepresentation = new FragmentFingerprinter(FragmentFingerprintTest.fragmentList);
+            IBitFingerprint tmpBitFingerprint = tmpFingerprintRepresentation.getBitFingerprint(FragmentFingerprintTest.dataForGenerateBitFingerprint);
+            ICountFingerprint tmpCountFingerprint = tmpFingerprintRepresentation.getCountFingerprint(tmpMoleculeFragmentsMap);
+            System.out.println("\t\tBit array: "+ tmpSeparateList.get(0)+ ": "+ java.util.Arrays.toString(tmpFingerprintRepresentation.getBitArray(FragmentFingerprintTest.dataForGenerateBitFingerprint)));
+            System.out.println("\t\tCount array: "+ tmpSeparateList.get(0)+ ": "+ java.util.Arrays.toString(tmpFingerprintRepresentation.getCountArray(tmpMoleculeFragmentsMap)));
+            System.out.println("\t\t     ");
+
+            // add all molecule maps
+            FragmentFingerprintTest.moleculeFragmentList.add(tmpMoleculeFragmentsMap);
         }
-        // Objects necessary for the test are created
-        this.fragmentFingerprinter = new FragmentFingerprinter(this.fragmentList);
-        this.countFingerprintTest = this.fragmentFingerprinter.getCountFingerprint(this.moleculeSetList.get(this.moleculeSetList.size()-1));
-        this.bitFingerprintTest = this.fragmentFingerprinter.getBitFingerprint(this.dataForGenerateBitFingerprint);
+        // Objects necessary for the test are created (used only in @Test)
+        FragmentFingerprintTest.fragmentFingerprinter = new FragmentFingerprinter(FragmentFingerprintTest.fragmentList);
+        FragmentFingerprintTest.countFingerprintTest = FragmentFingerprintTest.fragmentFingerprinter.getCountFingerprint(FragmentFingerprintTest.moleculeFragmentList.get(FragmentFingerprintTest.moleculeFragmentList.size()-1));
+        FragmentFingerprintTest.bitFingerprintTest = FragmentFingerprintTest.fragmentFingerprinter.getBitFingerprint(FragmentFingerprintTest.dataForGenerateBitFingerprint);
     }
 
     /**
-     * Test the getBitVectorTest() method
+     * Tests the getBitVectorTest() method
+     * Test molecule: Variamycin
      *
      * @throws Exception if anything goes wrong
      */
     @Test
     public void getBitVectorTest() throws Exception{
-        /**
-            int it = 0;
-            for (HashMap<String, Integer> tmpMap : moleculeSetList) {
-                FragmentFingerprinter bitTest = new FragmentFingerprinter(this.fragmentsList);
-                IBitFingerprint bitFingerprint = bitTest.getBitFingerprint(tmpMap);
-                System.out.println(bitFingerprint.size()+ "----Size");
-                System.out.println(java.util.Arrays.toString(bitTest.getBitVector()) + "BitVector");
-                System.out.println(bitFingerprint.asBitSet().toString());
-                it++;
-            }
-         */
         // Test complete bit vector
-            int[] test = {0, 1, 0, 0, 0, 0, 1, 0, 0, 1, 1, 1, 0, 1, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0};
-            Assert.assertArrayEquals(test, fragmentFingerprinter.getBitVector());
-        }
+        int[] tmpBitArrayTest = {0, 1, 0, 0, 0, 0, 1, 0, 0, 1, 1, 1, 0, 1, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0};
+        Assert.assertArrayEquals(tmpBitArrayTest, FragmentFingerprintTest.fragmentFingerprinter.getBitArray(FragmentFingerprintTest.dataForGenerateBitFingerprint));
+    }
 
     /**
-     * Test the getCountVectorTest() method
+     * Tests the getCountVectorTest() method, with a Map as input
+     * Test molecule: Variamycin
      *
      * @throws Exception if anything goes wrong
      */
     @Test
-        public void getCountVectorTest() throws Exception{
-        // Test complete count vector
-            int[] test = {0, 2, 0, 0, 0, 0, 2, 0, 0, 5, 8, 2, 0, 2, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 5, 0};
-            Assert.assertArrayEquals(test, fragmentFingerprinter.getCountVector());
-        }
-
+    public void getCountVectorTest() throws Exception{
+        // Test complete count vector; Input is a map
+        int[] tmpCountArrayTest = {0, 2, 0, 0, 0, 0, 2, 0, 0, 5, 8, 2, 0, 2, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 5, 0};
+        Assert.assertArrayEquals(tmpCountArrayTest, FragmentFingerprintTest.fragmentFingerprinter.getCountArray(FragmentFingerprintTest.moleculeFragmentList.get(FragmentFingerprintTest.moleculeFragmentList.size()-1)));
+    }
     /**
      * Tests the other methods used in the creation of the bit fingerprint
+     * Test molecule: Variamycin
      *
      * @throws Exception if anything goes wrong
      */
     @Test
-        public void bitFingerprintTest() throws  Exception {
-            //Test number of positive indices
-            int tmpNumberPositiveBitsTest = 9;
-            Assert.assertEquals(tmpNumberPositiveBitsTest, this.bitFingerprintTest.cardinality());
-            // Test size
-            long tmpSizeTest = 64;
-            Assert.assertEquals(64,this.bitFingerprintTest.size());
-            //Test asBitSet
-            BitSet tmpBitSetTest = new BitSet();
-            tmpBitSetTest.set(1);
-            tmpBitSetTest.set(6);
-            tmpBitSetTest.set(9);
-            tmpBitSetTest.set(10);
-            tmpBitSetTest.set(11);
-            tmpBitSetTest.set(13);
-            tmpBitSetTest.set(14);
-            tmpBitSetTest.set(21);
-            tmpBitSetTest.set(26);
-            Assert.assertEquals(tmpBitSetTest,this.bitFingerprintTest.asBitSet());
-            // Test getSetbits
-            int[] tmpArrayBitSetTest = {1,6,9,10,11,13,14,21,26};
-            Assert.assertArrayEquals(tmpArrayBitSetTest, this.bitFingerprintTest.getSetbits());
-        }
+    public void bitFingerprintTest() throws  Exception {
+        //Test number of positive indices
+        int tmpNumberPositiveBitsTest = 9;
+        Assert.assertEquals(tmpNumberPositiveBitsTest, FragmentFingerprintTest.bitFingerprintTest.cardinality());
+        // Test size
+        long tmpSizeTest = 64;
+        Assert.assertEquals(64,FragmentFingerprintTest.bitFingerprintTest.size());
+        //Test asBitSet
+        BitSet tmpBitSetTest = new BitSet();
+        tmpBitSetTest.set(1);
+        tmpBitSetTest.set(6);
+        tmpBitSetTest.set(9);
+        tmpBitSetTest.set(10);
+        tmpBitSetTest.set(11);
+        tmpBitSetTest.set(13);
+        tmpBitSetTest.set(14);
+        tmpBitSetTest.set(21);
+        tmpBitSetTest.set(26);
+        Assert.assertEquals(tmpBitSetTest,FragmentFingerprintTest.bitFingerprintTest.asBitSet());
+        // Test getSetbits
+        int[] tmpArrayBitSetTest = {1,6,9,10,11,13,14,21,26};
+        Assert.assertArrayEquals(tmpArrayBitSetTest, FragmentFingerprintTest.bitFingerprintTest.getSetbits());
+    }
 
     /**
-     * Tests the other methods used in the creation of the count fingerprint
+     * Tests the other methods used in the creation of the count fingerprint, if the input is a map
+     * Test molecule: Variamycin
      *
      * @throws Exception if anything goes wrong
      */
     @Test
-        public void countFingerprintTest() throws  Exception {
+    public void countFingerprintTest() throws  Exception {
         // Test size
-        long tmpSizeTest = this.fragmentList.size();
-        Assert.assertEquals(tmpSizeTest, this.countFingerprintTest.size());
+        long tmpSizeTest = FragmentFingerprintTest.fragmentList.size();
+        Assert.assertEquals(tmpSizeTest, FragmentFingerprintTest.countFingerprintTest.size());
         // Test the number of bins that are populated.
         int tmpBinsTest = 28;
-        Assert.assertEquals(tmpBinsTest, this.countFingerprintTest.numOfPopulatedbins());
+        Assert.assertEquals(tmpBinsTest, FragmentFingerprintTest.countFingerprintTest.numOfPopulatedbins());
         // Test value at position 10
-        Assert.assertEquals(8, this.countFingerprintTest.getCount(10));
+        Assert.assertEquals(5, FragmentFingerprintTest.countFingerprintTest.getCount(26));
         // Test the hash in index 10
-        Assert.assertEquals(10,this.countFingerprintTest.getHash(10));
+        Assert.assertEquals(10,FragmentFingerprintTest.countFingerprintTest.getHash(10));
         // Test whether the fingerprint contains the given hash. index 0-27 true; index>27 false
-        Assert.assertEquals(true, this.countFingerprintTest.hasHash(27));
+        Assert.assertEquals(false, FragmentFingerprintTest.countFingerprintTest.hasHash(30));
         // Test the count value for the bin with index 10.
-        Assert.assertEquals(8, this.countFingerprintTest.getCount(10));
-        }
+        Assert.assertEquals(0, FragmentFingerprintTest.countFingerprintTest.getCountForHash(0));
+    }
 
     /**
-     * Test the size of the fingerprint
+     * Tests the size of the fingerprint
+     * Test molecule: Variamycin
      *
      * @throws Exception if anything goes wrong
      */
     @Test
-        public void fragmentFingerprintSizeTest() throws Exception {
+    public void fragmentFingerprintSizeTest() throws Exception {
         // Test size of the fingerprint
-        Assert.assertEquals(this.fragmentList.size(), this.fragmentFingerprinter.getSize());
-        }
+        Assert.assertEquals(FragmentFingerprintTest.fragmentList.size(),FragmentFingerprintTest.fragmentFingerprinter.getSize());
     }
+
+    /**
+     * Tests the method getCountFingerprint, the input must be a list
+     *
+     * Test molecule: Variamycin
+     *
+     * @throws Exception if anything goes wrong
+     */
+    @Test
+    public void countFingerprintTestInputList() throws Exception {
+        // list to generate input for the  "getCountFingerprint(List<String> aListToCountMoleculeFragmentSmiles)" method
+        ArrayList<String> tmpCountListOfUniqueSmiles = new ArrayList<>();
+        tmpCountListOfUniqueSmiles.add("*C(*)=O");
+        tmpCountListOfUniqueSmiles.add("*C(*)=O");
+        tmpCountListOfUniqueSmiles.add("[H]Oc");
+        tmpCountListOfUniqueSmiles.add("[H]Oc");
+        tmpCountListOfUniqueSmiles.add("*OCO*");
+        tmpCountListOfUniqueSmiles.add("*OCO*");
+        tmpCountListOfUniqueSmiles.add("*OCO*");
+        tmpCountListOfUniqueSmiles.add("*OCO*");
+        tmpCountListOfUniqueSmiles.add("*OCO*");
+        tmpCountListOfUniqueSmiles.add("[H]OC");
+        tmpCountListOfUniqueSmiles.add("[H]OC");
+        tmpCountListOfUniqueSmiles.add("[H]OC");
+        tmpCountListOfUniqueSmiles.add("[H]OC");
+        tmpCountListOfUniqueSmiles.add("[H]OC");
+        tmpCountListOfUniqueSmiles.add("[H]OC");
+        tmpCountListOfUniqueSmiles.add("[H]OC");
+        tmpCountListOfUniqueSmiles.add("[H]OC");
+        tmpCountListOfUniqueSmiles.add("*O*");
+        tmpCountListOfUniqueSmiles.add("*O*");
+        tmpCountListOfUniqueSmiles.add("c1cc(cc2ccc(cc12)CC(C)C)C");
+        tmpCountListOfUniqueSmiles.add("CCCCC");
+        tmpCountListOfUniqueSmiles.add("CCCCC");
+        tmpCountListOfUniqueSmiles.add("CCCCC");
+        tmpCountListOfUniqueSmiles.add("CCCCC");
+        tmpCountListOfUniqueSmiles.add("CCCCC");
+        tmpCountListOfUniqueSmiles.add("C");
+        tmpCountListOfUniqueSmiles.add("C");
+        tmpCountListOfUniqueSmiles.add("CCC");
+
+        //Object
+        ICountFingerprint tmpCountFingerprintInputList = FragmentFingerprintTest.fragmentFingerprinter.getCountFingerprint(tmpCountListOfUniqueSmiles);
+
+        // Test size
+        long tmpSizeTest = FragmentFingerprintTest.fragmentList.size();
+        Assert.assertEquals(tmpSizeTest, tmpCountFingerprintInputList.size());
+        // Test the number of bins that are populated.
+        int tmpBinsTest = 28;
+        Assert.assertEquals(tmpBinsTest, tmpCountFingerprintInputList.numOfPopulatedbins());
+        // Test value at position 10
+        Assert.assertEquals(5, tmpCountFingerprintInputList.getCount(26));
+        // Test the hash in index 10
+        Assert.assertEquals(10,tmpCountFingerprintInputList.getHash(10));
+        // Test whether the fingerprint contains the given hash. index 0-27 true; index>27 false
+        Assert.assertEquals(false, tmpCountFingerprintInputList.hasHash(30));
+        // Test the count value for the bin with index 10.
+        Assert.assertEquals(0, tmpCountFingerprintInputList.getCountForHash(0));
+    }
+
+    /**
+     * Tests the method getCountArray, the input must be a list
+     *
+     * @throws Exception if anything goes wrong
+     */
+    @Test
+    public void countArrayTestInputList() throws Exception {
+        // list to generate input for the  "getCountFingerprint(List<String> aListToCountMoleculeFragmentSmiles)" method
+        ArrayList<String> tmpCountListOfUniqueSmiles = new ArrayList<>();
+        tmpCountListOfUniqueSmiles.add("*C(*)=O");
+        tmpCountListOfUniqueSmiles.add("*C(*)=O");
+        tmpCountListOfUniqueSmiles.add("[H]Oc");
+        tmpCountListOfUniqueSmiles.add("[H]Oc");
+        tmpCountListOfUniqueSmiles.add("*OCO*");
+        tmpCountListOfUniqueSmiles.add("*OCO*");
+        tmpCountListOfUniqueSmiles.add("*OCO*");
+        tmpCountListOfUniqueSmiles.add("*OCO*");
+        tmpCountListOfUniqueSmiles.add("*OCO*");
+        tmpCountListOfUniqueSmiles.add("[H]OC");
+        tmpCountListOfUniqueSmiles.add("[H]OC");
+        tmpCountListOfUniqueSmiles.add("[H]OC");
+        tmpCountListOfUniqueSmiles.add("[H]OC");
+        tmpCountListOfUniqueSmiles.add("[H]OC");
+        tmpCountListOfUniqueSmiles.add("[H]OC");
+        tmpCountListOfUniqueSmiles.add("[H]OC");
+        tmpCountListOfUniqueSmiles.add("[H]OC");
+        tmpCountListOfUniqueSmiles.add("*O*");
+        tmpCountListOfUniqueSmiles.add("*O*");
+        tmpCountListOfUniqueSmiles.add("c1cc(cc2ccc(cc12)CC(C)C)C");
+        tmpCountListOfUniqueSmiles.add("CCCCC");
+        tmpCountListOfUniqueSmiles.add("CCCCC");
+        tmpCountListOfUniqueSmiles.add("CCCCC");
+        tmpCountListOfUniqueSmiles.add("CCCCC");
+        tmpCountListOfUniqueSmiles.add("CCCCC");
+        tmpCountListOfUniqueSmiles.add("C");
+        tmpCountListOfUniqueSmiles.add("C");
+        tmpCountListOfUniqueSmiles.add("CCC");
+
+        int[] tmpCountArrayTestIfInputIsList = {0, 2, 0, 0, 0, 0, 2, 0, 0, 5, 8, 2, 0, 2, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 5, 0};
+        Assert.assertArrayEquals(tmpCountArrayTestIfInputIsList, FragmentFingerprintTest.fragmentFingerprinter.getCountArray(tmpCountListOfUniqueSmiles));
+    }
+
+
+}
 

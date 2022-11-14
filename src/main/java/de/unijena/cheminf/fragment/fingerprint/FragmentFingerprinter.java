@@ -24,14 +24,15 @@
 package de.unijena.cheminf.fragment.fingerprint;
 
 import org.openscience.cdk.exception.CDKException;
+import org.openscience.cdk.fingerprint.BitSetFingerprint;
 import org.openscience.cdk.fingerprint.IBitFingerprint;
 import org.openscience.cdk.fingerprint.ICountFingerprint;
 import org.openscience.cdk.interfaces.IAtomContainer;
 
-import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.BitSet;
-import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -46,31 +47,57 @@ public class FragmentFingerprinter implements IFragmentFingerprinter {
      */
     BitSet bitSet;
     /**
-     * Bit vector to  display the complete fingerprint
+     * Bit array to  display the complete fingerprint
      */
-    int[] bitVector;
+    int[] bitArray;
     /**
-     * Count vector to display the complete fingerprint
+     * Count array to display the complete fingerprint
      */
-    int[] countVector;
+    int[] countArray;
     /**
-     * Is the list that contains all the "unique SMILES" for the fragments, on the basis of which the fingerprints are then created.
+     * Is the array that contains all the unique SMILES for the fragments, on the basis of
+     * which the fingerprints are then created.
      */
-    ArrayList<String> fragmentSetList;
+    String[] fragmentArray;
+    /**
+     * The fragmentArray is converted into a HashMap to speed up the matching of the unique SMILES. The keys in the
+     * map correspond to the unique SMILES and the values to the hash values.
+     */
+    HashMap<String, Integer> fragmentHashMap; // TODO rename
+    /**
+     * Copy of bitArray
+     */
+    int[] copyBitArray;
+    /**
+     * Copy of countArray
+     */
+    int[] copyCountArray;
     //</editor-fold>
     //
     /**
      * Constructor
+     * Initialisation of the fingerprint
      */
-    public FragmentFingerprinter(ArrayList<String> aFragmentList) {
-        this.fragmentSetList = aFragmentList;
-    }
-
-    /**
-     * Empty Constructor
-     */
-    public FragmentFingerprinter() {
-
+    public FragmentFingerprinter(List<String> aFragmentList) {
+        this.fragmentArray = aFragmentList.toArray(new String[0]);
+        int tmpVectorSize = this.fragmentArray.length;
+        this.bitArray = new int[tmpVectorSize];
+        this.copyBitArray = this.bitArray;
+        this.countArray = new int[tmpVectorSize];
+        this.copyCountArray = this.countArray;
+        for (int tmpDefaultBit = 0; tmpDefaultBit < tmpVectorSize; tmpDefaultBit++) {
+            this.bitArray[tmpDefaultBit] = 0;
+            this.countArray[tmpDefaultBit] = 0;
+        }
+        this.fragmentHashMap = new HashMap<>();
+        // sort aFragmentList alphabetically
+       // Collections.sort(this.fragmentSetList, String.CASE_INSENSITIVE_ORDER);
+        Arrays.sort(this.fragmentArray, String.CASE_INSENSITIVE_ORDER);
+        int tmpValuePosition = 0;
+        for (String tmpKey : this.fragmentArray) {
+            fragmentHashMap.put(tmpKey, tmpValuePosition);
+            tmpValuePosition++;
+        }
     }
     //
     //<editor-fold desc="public methods" defaultstate="collapsed">
@@ -78,270 +105,69 @@ public class FragmentFingerprinter implements IFragmentFingerprinter {
      * Method to generate the bit fingerprint.
      * The fingerprint is only created by matching the unique SMILES (String matching).
      *
-     * @param aListWithUniqueSmiles a list containing all the fragments produced by the fragmentation of a given molecule
+     * @param aListOfUniqueSmiles a list containing all the fragments produced by the fragmentation of a given molecule
      * @return IBitFingerprint (cdk)
      */
     @Override
-    public IBitFingerprint getBitFingerprint(ArrayList<String> aListWithUniqueSmiles) {
-        int tmpVectorSize = this.fragmentSetList.size();
-        this.bitVector = new int[tmpVectorSize];
-        this.bitSet = new BitSet(this.fragmentSetList.size()); // TODO
-        for (int tmpDefaultBit = 0; tmpDefaultBit < tmpVectorSize; tmpDefaultBit++) {
-            this.bitVector[tmpDefaultBit] = 0;
-        }
-        /**
-        String[] keys = new String[aMoleculeFragmentsMap.size()];
-        int iter = 0;
-        for(String tmpKey : aMoleculeFragmentsMap.keySet()) {
-            keys[iter]  = tmpKey;
-            iter++;
-        }
-         */
-        HashMap<String, Integer> tmpFragmentHashMap = new HashMap<>();
-        // sort aFragmentList alphabetically
-        Collections.sort(this.fragmentSetList, String.CASE_INSENSITIVE_ORDER);
-        int tmpValuePosition = 0;
-        for (String tmpKey : this.fragmentSetList) {
-            tmpFragmentHashMap.put(tmpKey, tmpValuePosition);
-            tmpValuePosition++;
-        }
-        for (String tmpUniqueSmiles : aListWithUniqueSmiles) {
-            if (tmpFragmentHashMap.containsKey(tmpUniqueSmiles)) {
-                int tmpPosition = tmpFragmentHashMap.get(tmpUniqueSmiles);
-                this.bitVector[tmpPosition] = 1;
+    public IBitFingerprint getBitFingerprint(List<String> aListOfUniqueSmiles) {
+        this.bitSet = new BitSet(this.fragmentArray.length);
+        for (String tmpUniqueSmiles : aListOfUniqueSmiles) {
+            if (this.fragmentHashMap.containsKey(tmpUniqueSmiles)) {
+                int tmpPosition = fragmentHashMap.get(tmpUniqueSmiles);
+                this.bitArray[tmpPosition] = 1;
                 this.bitSet.set(tmpPosition,true);
             }
         }
-        return new IBitFingerprint() {
-            /**
-             * Returns the number of positive bits in the fingerprint
-             *
-             * @return int
-             */
-            @Override
-            public int cardinality() {
-                return bitSet.cardinality();
-            }
-
-            /**
-             * Returns the size of fingerprint, i.e., the number of hash bins
-             *
-             * @return long
-             */
-            @Override
-            public long size() {
-                return bitSet.size();
-            }
-
-            /**
-             *
-             * @param fingerprint the fingerprint with which to perform the AND operation
-             */
-            @Override
-            public void and(IBitFingerprint fingerprint) {
-                throw new UnsupportedOperationException();
-            }
-
-            /**
-             *
-             * @param fingerprint the fingerprint with which to perform the OR operation
-             */
-            @Override
-            public void or(IBitFingerprint fingerprint) {
-                throw new UnsupportedOperationException();
-            }
-
-            /**
-             * Returns the value of the bit with the specified index
-             *
-             * @param index the index of the bit to return the value for
-             * @return boolean (true or false)
-             */
-            @Override
-            public boolean get(int index) {
-                return bitSet.get(index);
-            }
-
-            /**
-             *
-             * @param index the index of the bit to change
-             * @param value the new value for the bit at position <code>index</code>
-             */
-            @Override
-            public void set(int index, boolean value) {
-                throw new UnsupportedOperationException();
-            }
-
-            /**
-             * Returns the positive indices as BitSet
-             *
-             * @return BitSet
-             */
-            @Override
-            public BitSet asBitSet() {
-                return (BitSet) bitSet.clone();
-            }
-
-            /**
-             *
-             * @param i index
-             */
-            @Override
-            public void set(int i) {
-                throw new UnsupportedOperationException();
-            }
-
-            /**
-             * Returns the positive indices as array
-             *
-             * @return int[]
-             */
-            @Override
-            public int[] getSetbits() {
-                int[] tmpPositiveBits = new int[bitSet.cardinality()];
-                int tmpIndex = 0;
-                for (int i = 0; i < bitSet.length(); i++) {
-                    if (bitSet.get(i)) {
-                        tmpPositiveBits[tmpIndex++] = i;
-                    }
-                }
-                return tmpPositiveBits;
-            }
-        };
+        return new BitSetFingerprint(this.bitSet);
     }
 
     /**
-     * Method to generate count fingerprint.
+     * Method to generate count fingerprint with a Map as input.
      * The fingerprint is only created by matching the unique SMILES (String matching).
      *
-     * @param aMoleculeFragmentsMap a HashMap containing all fragments of the molecule and the corresponding frequencies of the generated fragments.
-     *                              Key = unique SMILES, Value = frequency
-     * @return ICountFingerprint (cdk)
+     * @param aMoleculeFragmentMap a HashMap containing all fragments of the molecule and the corresponding frequencies of the generated fragments.
+     *   Key = unique SMILES, Value = frequency
+     * @return CountFingerprint; new class to organise methods related to the count Fingerprint.
      */
     @Override
-    public ICountFingerprint getCountFingerprint(HashMap<String, Integer> aMoleculeFragmentsMap) {
-        int tmpVectorSize = this.fragmentSetList.size();
-        this.countVector = new int[tmpVectorSize];
-        // Create null vector
-        for (int tmpDefaultBit = 0; tmpDefaultBit < tmpVectorSize; tmpDefaultBit++) {
-            this.countVector[tmpDefaultBit] = 0;
-        }
-        HashMap<String, Integer> tmpFragmentHashMap = new HashMap<>();
-        // Sort aFragmentList alphabetically
-        Collections.sort(this.fragmentSetList, String.CASE_INSENSITIVE_ORDER);
-        int tmpValuePosition = 0;
-        // Convert the fragment list in a HashMap
-        for (String tmpKey : this.fragmentSetList) {
-            tmpFragmentHashMap.put(tmpKey, tmpValuePosition);
-            tmpValuePosition++;
-        }
-        /*
-         *  Comparison of two hashmaps on identical keys
-         *  TODO: Possibly make it more efficient
-         */
-        Map<Integer, Integer> tmpCountMap = new HashMap<>(this.fragmentSetList.size());
-        for (String tmpUniqueSmiles : tmpFragmentHashMap.keySet()) {
-            if (aMoleculeFragmentsMap.containsKey(tmpUniqueSmiles)) {
-                int tmpPosition = tmpFragmentHashMap.get(tmpUniqueSmiles);
-                this.countVector[tmpPosition] = aMoleculeFragmentsMap.get(tmpUniqueSmiles);
-                //set.set(Integer.parseInt(aMoleculeFragments.get(tmpUniqueSmiles)));
-                tmpCountMap.put(tmpFragmentHashMap.get(tmpUniqueSmiles),aMoleculeFragmentsMap.get(tmpUniqueSmiles));
-            }
-            else{
-                tmpCountMap.put(tmpFragmentHashMap.get(tmpUniqueSmiles), 0);
+    public ICountFingerprint getCountFingerprint(Map<String, Integer> aMoleculeFragmentMap) {
+        for (String tmpUniqueSmiles : aMoleculeFragmentMap.keySet()) {
+            if (this.fragmentHashMap.containsKey(tmpUniqueSmiles)) {
+                int tmpPosition = this.fragmentHashMap.get(tmpUniqueSmiles);
+                this.countArray[tmpPosition] = aMoleculeFragmentMap.get(tmpUniqueSmiles);
             }
         }
-        // Split the count HashMap in two arrays
-        int[] tmpHash = new int[tmpCountMap.size()];
-        int[] tmpCount = new int[tmpCountMap.size()];
-        int i = 0;
-        for(int h: tmpCountMap.keySet()) {
-            tmpHash[i] = h;
-            tmpCount[i++] = tmpCountMap.get(h);
+      return new CountFingerprint(this.fragmentArray, this.countArray, this.fragmentHashMap);
+    }
+
+    /**
+     * Method to generate count fingerprint with a List as input.
+     * If a unique SMILES appears more than once in the list, its frequency is summarised.
+     *
+     * @param aListToCountMoleculeFragmentSmiles
+     * @return ICountFingerprint (cdk)
+     * @author TODO add author
+     *
+     */
+    @Override
+    public ICountFingerprint getCountFingerprint(List<String> aListToCountMoleculeFragmentSmiles) {
+        HashMap<String, Integer> tmpCountMap = new HashMap<>();
+        int tmpUniqueSmilesFrequencyInList = 0;
+        String tmpUniqueSmilesInList = null;
+        for (String tmpSmiles : aListToCountMoleculeFragmentSmiles) {
+            if (tmpUniqueSmilesInList == null || !tmpSmiles.equals(tmpUniqueSmilesInList)) {
+                if (tmpUniqueSmilesFrequencyInList > 0)
+                    tmpCountMap.put(tmpUniqueSmilesInList, tmpUniqueSmilesFrequencyInList);
+                tmpUniqueSmilesFrequencyInList = 1;
+                tmpUniqueSmilesInList = tmpSmiles;
+            } else {
+                ++tmpUniqueSmilesFrequencyInList;
+            }
         }
-        return new ICountFingerprint() {
-            /**
-             * Returns the number of bits of this fingerprint
-             *
-             * @return long
-             */
-            @Override
-            public long size() {
-                return fragmentSetList.size();
-            }
-
-            /**
-             * Returns the number of bins that are populated
-             *
-             * @return int
-             */
-            @Override
-            public int numOfPopulatedbins() {
-                return tmpCountMap.size();
-            }
-
-            /**
-             * Returns the count value for the bin with the given index
-             *
-             * @param index the index of the bin to return the number of hits for.
-             * @return int
-             */
-            @Override
-            public int getCount(int index) {
-                return tmpCount[index];
-            }
-
-            /**
-             * Returns the hash corresponding to the given index in the fingerprint
-             *
-             * @param index the index of the bin to return the hash for.
-             * @return
-             */
-            @Override
-            public int getHash(int index) {
-                return tmpHash[index];
-            }
-
-            /**
-             *
-             * @param fp to be merged
-             */
-            @Override
-            public void merge(ICountFingerprint fp) {
-                throw new UnsupportedOperationException();
-            }
-
-            /**
-             *
-             * @param behaveAsBitFingerprint
-             */
-            @Override
-            public void setBehaveAsBitFingerprint(boolean behaveAsBitFingerprint) {
-                throw new UnsupportedOperationException();
-            }
-
-            /**
-             * Whether the fingerprint contains the given hash
-             *
-             * @param hash
-             * @return  boolean (true or false)
-             */
-            @Override
-            public boolean hasHash(int hash) {
-                return tmpCountMap.containsKey(hash);
-            }
-
-            /**
-             * Returns the number of times a certain hash exists in the fingerprint
-             *
-             * @param hash
-             * @return
-             */
-            @Override
-            public int getCountForHash(int hash) {
-                return tmpCountMap.get(hash);
-            }
-        };
+        if (tmpUniqueSmilesFrequencyInList > 0)
+            tmpCountMap.put(tmpUniqueSmilesInList, tmpUniqueSmilesFrequencyInList);
+         return this.getCountFingerprint(tmpCountMap);
+       // return new CountFingerprint(this.fragmentArray, this.countArray, this.fragmentHashMap);
     }
 
     /**
@@ -404,24 +230,42 @@ public class FragmentFingerprinter implements IFragmentFingerprinter {
      */
     @Override
     public int getSize() {
-     return this.fragmentSetList.size();
+     return this.fragmentArray.length;
     }
 
     /**
      * Returns the complete count fingerprint
+     * Input must be a map
      *
      * @return
      */
-    public int[] getCountVector() {
-        return this.countVector;
+    public int[] getCountArray(Map<String, Integer> aMoleculeFragmentMap) {
+        if(this.countArray == this.copyCountArray)
+            this.getCountFingerprint(aMoleculeFragmentMap);
+       return this.countArray;
+    }
+
+    /**
+     * Returns the complete count fingerprint, but the input must be a list
+     *
+     * @param aListToCountMoleculeFragmentSmiles
+     * @return
+     */
+    public int[] getCountArray(List<String> aListToCountMoleculeFragmentSmiles) {
+        if(this.countArray == this.copyCountArray) {
+            this.getCountFingerprint(aListToCountMoleculeFragmentSmiles);
+        }
+        return this.countArray;
     }
 
     /**
      * Returns the complete bit fingerprint
      *
      * @return
-     */
-    public int[] getBitVector() {
-        return this.bitVector;
+     * */
+    public int[] getBitArray(List<String> aListOfUniqueSmiles) {
+        if(this.bitArray == this.copyBitArray)
+            this.getBitFingerprint(aListOfUniqueSmiles);
+        return this.bitArray;
     }
 }
