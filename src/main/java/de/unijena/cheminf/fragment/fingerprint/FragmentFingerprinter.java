@@ -29,145 +29,169 @@ import org.openscience.cdk.fingerprint.IBitFingerprint;
 import org.openscience.cdk.fingerprint.ICountFingerprint;
 import org.openscience.cdk.interfaces.IAtomContainer;
 
-import java.util.Arrays;
 import java.util.BitSet;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 /**
- * Class to generate a bit fragment fingerprint
+ * Class to generate fingerprints. The fingerprints that can be generated are the bit fingerprint and the count fingerprint
+ * FragmentFingerprinter is a key-based fingerprint. Thus, the class requires to be predefined structures/fragments in
+ * the form of unique SMILES to create the fingerprint. These structures must be passed when the
+ * class is called (in the constructor). The class implements the interface IFragmentFingerprinter,
+ * which inherits the IFingerprinter (CDK), which allows the class to compute fingerprints in 2 ways.
+ * The first way to calculate a bit or count fingerprint is to perform a substructure comparison with all
+ * predefined fragments for a given IAtomContainer. The second way to calculate fingerprints is by comparing
+ * given fragments, which are in the form of "unique SMILES", with the predefined fragments.
+ * The second possibility is thus based on a pure comparison of strings.
  *
  * @author Betuel Sevindik
  */
 public class FragmentFingerprinter implements IFragmentFingerprinter {
     //<editor-fold desc="private  class variables" defaultstate="collapsed">
     /**
-     * bitSet
-     */
-    BitSet bitSet;
-    /**
-     * Bit array to  display the complete fingerprint
-     */
-    int[] bitArray;
-    /**
-     * Count array to display the complete fingerprint
-     */
-    int[] countArray;
-    /**
-     * Is the array that contains all the unique SMILES for the fragments, on the basis of
-     * which the fingerprints are then created.
+     * Is the array containing all the unique predefined SMILES fragments based
+     * on which the fingerprints are then created.
+     *
      */
     String[] fragmentArray;
     /**
-     * The fragmentArray is converted into a HashMap to speed up the matching of the unique SMILES. The keys in the
-     * map correspond to the unique SMILES and the values to the hash values.
+     * The fragmentArray is converted into a HashMap to speed up the matching of the unique SMILES.
+     * The Map maps the unique SMILES of the predefined fragments to the position they have in the input list.
+     *
      */
-    HashMap<String, Integer> fragmentHashMap; // TODO rename
-    /**
-     * Copy of bitArray
-     */
-    int[] copyBitArray;
-    /**
-     * Copy of countArray
-     */
-    int[] copyCountArray;
+    HashMap<String, Integer> uniqueSmilesToPositionMap;
     //</editor-fold>
     //
+
     /**
-     * Constructor
-     * Initialisation of the fingerprint
+     * Constructor.
+     * Initialization of the fingerprinter by using a user-defined set of fragments in the form of unique SMILES.
+     * This list of predefined fragments is converted into a HashMap that maps the predefined fragments
+     * to the position the fragments have in the list aFragmentList.
+     *
+     * @param aFragmentList is the ist in which the predefined fragments are stored.
+     * @throws NullPointerException is thrown if the list aFragmentList is null or contains blank strings.
      */
-    public FragmentFingerprinter(List<String> aFragmentList) {
-        this.fragmentArray = aFragmentList.toArray(new String[0]);
-        int tmpVectorSize = this.fragmentArray.length;
-        this.bitArray = new int[tmpVectorSize];
-        this.copyBitArray = this.bitArray;
-        this.countArray = new int[tmpVectorSize];
-        this.copyCountArray = this.countArray;
-        for (int tmpDefaultBit = 0; tmpDefaultBit < tmpVectorSize; tmpDefaultBit++) {
-            this.bitArray[tmpDefaultBit] = 0;
-            this.countArray[tmpDefaultBit] = 0;
+    public FragmentFingerprinter(List<String> aFragmentList) throws NullPointerException {
+        // Check whether aFragmentList is null or whether there are elements (strings) in the list that are empty.
+        Objects.requireNonNull(aFragmentList, "aFragmentList (list of string instances) is null."); // TODO message
+        for(String str: aFragmentList) {
+            Objects.requireNonNull(str, "aFragmentList (einzelne Listenelemente sind null)"); // TODO message
+            if(str.isBlank()) {
+                throw new NullPointerException("aFragmentList element is blank"); // TODO message
+            }
         }
-        this.fragmentHashMap = new HashMap<>();
-        // sort aFragmentList alphabetically
-       // Collections.sort(this.fragmentSetList, String.CASE_INSENSITIVE_ORDER);
-        Arrays.sort(this.fragmentArray, String.CASE_INSENSITIVE_ORDER);
+        this.fragmentArray = aFragmentList.toArray(new String[0]);
+        System.out.println(java.util.Arrays.toString(this.fragmentArray) + "fragmentArray");
+        this.uniqueSmilesToPositionMap = new HashMap<>(this.fragmentArray.length);
         int tmpValuePosition = 0;
         for (String tmpKey : this.fragmentArray) {
-            fragmentHashMap.put(tmpKey, tmpValuePosition);
+            uniqueSmilesToPositionMap.put(tmpKey, tmpValuePosition);
             tmpValuePosition++;
         }
+        System.out.println(uniqueSmilesToPositionMap + "meine FragmentHashMap");
     }
     //
     //<editor-fold desc="public methods" defaultstate="collapsed">
+
     /**
      * Method to generate the bit fingerprint.
-     * The fingerprint is only created by matching the unique SMILES (String matching).
+     * An entered list of unique SMILES is compared with the predefined fragments.
+     * If there is a match, the position of the unique SMILES is determined from the map and set to true in the
+     * initialized BitSet.
      *
-     * @param aListOfUniqueSmiles a list containing all the fragments produced by the fragmentation of a given molecule
-     * @return IBitFingerprint (cdk)
+     * @param aListOfUniqueSmiles is a list that stores fragments in the form of unique SMILES.
+     * To be able to calculate the fingerprint for a molecule, the fragments should belong to one molecule.
+     * @return BitSet. BitSet is a CDK class that implements the IBitFingerprint interface of CDK.
+     * This allows methods to be used that return useful information from the calculated bit fingerprint, such as the number of positive bits in the fingerprint, etc.
+     * @throws NullPointerException is thrown if the list aListOfuniqueSmiles is null or contains blank strings.
      */
     @Override
-    public IBitFingerprint getBitFingerprint(List<String> aListOfUniqueSmiles) {
-        this.bitSet = new BitSet(this.fragmentArray.length);
+    public IBitFingerprint getBitFingerprint(List<String> aListOfUniqueSmiles) throws NullPointerException {
+        Objects.requireNonNull(aListOfUniqueSmiles, "aFragmentList (list of string instances) is null."); // TODO message
+        for(String str: aListOfUniqueSmiles) {
+            Objects.requireNonNull(str, "aFragmentList (einzelne Listenelemente sind null)"); // TODO message
+            if(str.isBlank()) {
+                throw new NullPointerException("aFragmentList element is blank"); // TODO message
+            }
+        }
+        BitSet tmpBitSet = new BitSet(this.fragmentArray.length);
         for (String tmpUniqueSmiles : aListOfUniqueSmiles) {
-            if (this.fragmentHashMap.containsKey(tmpUniqueSmiles)) {
-                int tmpPosition = fragmentHashMap.get(tmpUniqueSmiles);
-                this.bitArray[tmpPosition] = 1;
-                this.bitSet.set(tmpPosition,true);
+            if (this.uniqueSmilesToPositionMap.containsKey(tmpUniqueSmiles)) {
+                int tmpPosition = uniqueSmilesToPositionMap.get(tmpUniqueSmiles);
+                tmpBitSet.set(tmpPosition,true);
             }
         }
-        return new BitSetFingerprint(this.bitSet);
+        return new BitSetFingerprint(tmpBitSet);
     }
 
     /**
-     * Method to generate count fingerprint with a Map as input.
-     * The fingerprint is only created by matching the unique SMILES (String matching).
+     * Method to generate count fingerprint.
+     * An input map that assigns unique SMILES to, the frequency of these unique SMILES is compared with the predefined
+     * fragments. In case of a match, the corresponding position of the predefined fragment or the unique SMILES
+     * is determined and additionally the frequency of these unique SMILES is also determined from the input map
+     * and stored in a locally initialized map. I.e. this HashMap maps the position of the unique SMILES to the
+     * frequency of this unique SMILES, which is specified with the input map.
      *
-     * @param aMoleculeFragmentMap a HashMap containing all fragments of the molecule and the corresponding frequencies of the generated fragments.
-     *   Key = unique SMILES, Value = frequency
-     * @return CountFingerprint; new class to organise methods related to the count Fingerprint.
+     * @param aUniqueSmilesToFrequencyMap  is a map that maps fragments in the form of unique SMILES to the frequency of unique SMILES.
+     * To be able to calculate the fingerprint for a molecule, the fragments must belong to a molecule.
+     * @return count fingerprint
+     * @throws NullPointerException  is thrown if the map aUniqueSmilesToFrequencyMap is null or contains keys or values that are null or blank, respectively.
      */
     @Override
-    public ICountFingerprint getCountFingerprint(Map<String, Integer> aMoleculeFragmentMap) {
-        for (String tmpUniqueSmiles : aMoleculeFragmentMap.keySet()) {
-            if (this.fragmentHashMap.containsKey(tmpUniqueSmiles)) {
-                int tmpPosition = this.fragmentHashMap.get(tmpUniqueSmiles);
-                this.countArray[tmpPosition] = aMoleculeFragmentMap.get(tmpUniqueSmiles);
+    public ICountFingerprint getCountFingerprint(Map<String, Integer> aUniqueSmilesToFrequencyMap) throws NullPointerException {
+        HashMap<Integer, Integer> tmpRawMap = new HashMap<>(this.fragmentArray.length);
+        Objects.requireNonNull(aUniqueSmilesToFrequencyMap, "TODO message");
+        for(String str :aUniqueSmilesToFrequencyMap.keySet()) {
+            if(str == null || aUniqueSmilesToFrequencyMap.get(str) == null) {
+                throw new NullPointerException("TODO message"); // TODO message
             }
         }
-      return new CountFingerprint(this.fragmentArray, this.countArray, this.fragmentHashMap);
+        for (String tmpUniqueSmiles : aUniqueSmilesToFrequencyMap.keySet()) {
+            if (this.uniqueSmilesToPositionMap.containsKey(tmpUniqueSmiles)) {
+                int tmpPosition = this.uniqueSmilesToPositionMap.get(tmpUniqueSmiles);
+                tmpRawMap.put(tmpPosition,aUniqueSmilesToFrequencyMap.get(tmpUniqueSmiles));
+               // this.countArray[tmpPosition] = aMoleculeFragmentMap.get(tmpUniqueSmiles);
+            }
+        }
+        System.out.println(tmpRawMap + "RawMap");
+      return new CountFingerprint(this.fragmentArray, this.uniqueSmilesToPositionMap, tmpRawMap);
     }
 
     /**
-     * Method to generate count fingerprint with a List as input.
-     * If a unique SMILES appears more than once in the list, its frequency is summarised.
+     * Method to generate count fingerprint.
+     * The method works the same as the getCountFingerprint() above.
+     * The only difference is that a list is entered as input.
+     * A unique SMILES can occur more than once in the list. This list is converted into a HashMap.
+     * The HashMap maps the unique SMILES to the number of occurrences of these unique SMILES in the list.
      *
-     * @param aListToCountMoleculeFragmentSmiles
-     * @return ICountFingerprint (cdk)
-     * @author TODO add author
-     *
+     * @param aListToCountMoleculeFragmentSmiles is a list that stores fragments in the form of unique SMILES.
+     * If a fragment occurs more than once in the molecule, it is also present more than
+     * once in the list. To be able to calculate the fingerprint for a molecule,
+     * the fragments should belong to one molecule.
+     * @return count fingerprint
+     * @throws NullPointerException
      */
     @Override
-    public ICountFingerprint getCountFingerprint(List<String> aListToCountMoleculeFragmentSmiles) {
-        HashMap<String, Integer> tmpCountMap = new HashMap<>();
-        int tmpUniqueSmilesFrequencyInList = 0;
-        String tmpUniqueSmilesInList = null;
-        for (String tmpSmiles : aListToCountMoleculeFragmentSmiles) {
-            if (tmpUniqueSmilesInList == null || !tmpSmiles.equals(tmpUniqueSmilesInList)) {
-                if (tmpUniqueSmilesFrequencyInList > 0)
-                    tmpCountMap.put(tmpUniqueSmilesInList, tmpUniqueSmilesFrequencyInList);
-                tmpUniqueSmilesFrequencyInList = 1;
-                tmpUniqueSmilesInList = tmpSmiles;
+    public ICountFingerprint getCountFingerprint(List<String> aListToCountMoleculeFragmentSmiles) throws NullPointerException {
+        HashMap<String, Integer> tmpUniqueSmilesToFrequencyCountMap = new HashMap<>();
+        int i = 1;
+        Objects.requireNonNull(aListToCountMoleculeFragmentSmiles, "TODO message");
+        for (String str : aListToCountMoleculeFragmentSmiles) {
+            Objects.requireNonNull(str, "aFragmentList (einzelne Listenelemente sind null)"); // TODO message
+            if(str.isBlank()) {
+                throw new NullPointerException("aFragmentList element is blank"); // TODO message
+            }
+            if (tmpUniqueSmilesToFrequencyCountMap.containsKey(str) == false) {
+                tmpUniqueSmilesToFrequencyCountMap.put(str, i);
             } else {
-                ++tmpUniqueSmilesFrequencyInList;
+                tmpUniqueSmilesToFrequencyCountMap.put(str, tmpUniqueSmilesToFrequencyCountMap.get(str) + 1);
+
             }
         }
-        if (tmpUniqueSmilesFrequencyInList > 0)
-            tmpCountMap.put(tmpUniqueSmilesInList, tmpUniqueSmilesFrequencyInList);
-         return this.getCountFingerprint(tmpCountMap);
-       // return new CountFingerprint(this.fragmentArray, this.countArray, this.fragmentHashMap);
+        return this.getCountFingerprint(tmpUniqueSmilesToFrequencyCountMap);
     }
 
     /**
@@ -224,7 +248,8 @@ public class FragmentFingerprinter implements IFragmentFingerprinter {
     }
 
     /**
-     * Returns the size of the fingerprint
+     * Since the FragmentFingerprinter is a key-based fingerprint, the size of the fingerprint
+     * corresponds to the number of predefined fragments(unique SMILES)
      *
      * @return int
      */
@@ -232,40 +257,7 @@ public class FragmentFingerprinter implements IFragmentFingerprinter {
     public int getSize() {
      return this.fragmentArray.length;
     }
-
-    /**
-     * Returns the complete count fingerprint
-     * Input must be a map
-     *
-     * @return
-     */
-    public int[] getCountArray(Map<String, Integer> aMoleculeFragmentMap) {
-        if(this.countArray == this.copyCountArray)
-            this.getCountFingerprint(aMoleculeFragmentMap);
-       return this.countArray;
-    }
-
-    /**
-     * Returns the complete count fingerprint, but the input must be a list
-     *
-     * @param aListToCountMoleculeFragmentSmiles
-     * @return
-     */
-    public int[] getCountArray(List<String> aListToCountMoleculeFragmentSmiles) {
-        if(this.countArray == this.copyCountArray) {
-            this.getCountFingerprint(aListToCountMoleculeFragmentSmiles);
-        }
-        return this.countArray;
-    }
-
-    /**
-     * Returns the complete bit fingerprint
-     *
-     * @return
-     * */
-    public int[] getBitArray(List<String> aListOfUniqueSmiles) {
-        if(this.bitArray == this.copyBitArray)
-            this.getBitFingerprint(aListOfUniqueSmiles);
-        return this.bitArray;
+    public String getBitDefinition(int aHash) {
+        throw new UnsupportedOperationException();
     }
 }

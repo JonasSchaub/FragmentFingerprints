@@ -1,39 +1,45 @@
 package de.unijena.cheminf.fragment.fingerprint;
 
 import org.openscience.cdk.fingerprint.ICountFingerprint;
-import java.util.HashMap;
 
+import java.util.HashMap;
+import java.util.Map;
+
+/**
+ * The CountFingerprint class implements the CDK interface ICountFingerprint.
+ * ICountFingerprint provides useful methods to obtain information about the calculated count fingerprint.
+ */
 public class CountFingerprint implements ICountFingerprint {
     //<editor-fold desc="private  class variables" defaultstate="collapsed">
     /**
-     * Is an array containing all the fragments that are to be used to generate the fingerprint.
+     * Is an array containing all predefined unique SMILES.
      */
     String[] fragmentArrayOfUniqueSmiles;
     /**
-     * count array
+     * The HashMap maps the unique SMILES to the position they have in the array.
      */
-    int[] countArray;
+    HashMap<String,Integer> uniqueSmilesToPositionMap;
     /**
-     * Map that contains all the fragments that have been removed from a molecule with their frequencies.
+     * Map
      */
-    HashMap<String,Integer> fragmentHashMap; // TODO rename
+    HashMap<Integer, Integer> rawMap;
     //</editor-fold>
     //
     /**
-     * Constructor
+     * Constructor.
+     *
      *
      * @param aFragments
-     * @param aCountArray
      * @param aMapOfFragmentSmiles
      */
-    public CountFingerprint(String[] aFragments, int[] aCountArray, HashMap<String, Integer> aMapOfFragmentSmiles) {
+    public CountFingerprint(String[] aFragments, HashMap<String, Integer> aMapOfFragmentSmiles, HashMap<Integer, Integer> aRawMap) {
         this.fragmentArrayOfUniqueSmiles = aFragments;
-        this.countArray = aCountArray;
-        this.fragmentHashMap = aMapOfFragmentSmiles;
+        this.uniqueSmilesToPositionMap = aMapOfFragmentSmiles;
+        this.rawMap = aRawMap;
     }
 
     /**
-     * Returns the size of the fingerprint, i.e., the number of hash bins.
+     * Returns the number of bits of this fingerprint.
      *
      * @return
      */
@@ -50,7 +56,7 @@ public class CountFingerprint implements ICountFingerprint {
     @Override
     public int numOfPopulatedbins() {
         return this.fragmentArrayOfUniqueSmiles.length;
-    }
+    } // TODO
 
     /**
      * Returns the count value for the bin with the given index
@@ -59,9 +65,15 @@ public class CountFingerprint implements ICountFingerprint {
      * @return int
      */
     @Override
-    public int getCount(int index) {
-        return  this.countArray[index];
-    }
+    public int getCount(int index)  {
+            if (index < this.fragmentArrayOfUniqueSmiles.length && this.rawMap.containsKey(index)) { // TODO größer null
+                return this.rawMap.get(index);
+            } else if (index >= this.fragmentArrayOfUniqueSmiles.length) {
+                return this.rawMap.get(index);
+            } else {
+                return 0;
+            }
+    } //this.countArray[index]
 
     /**
      * Returns the hash corresponding to the given index in the fingerprint
@@ -71,7 +83,7 @@ public class CountFingerprint implements ICountFingerprint {
      */
     @Override
     public int getHash(int index) {
-        return this.fragmentHashMap.get(fragmentArrayOfUniqueSmiles[index]);
+        return this.uniqueSmilesToPositionMap.get(this.fragmentArrayOfUniqueSmiles[index]);
     }
 
     /**
@@ -103,7 +115,7 @@ public class CountFingerprint implements ICountFingerprint {
         if(hash >= this.fragmentArrayOfUniqueSmiles.length){
             return false;
         } else {
-            return this.fragmentHashMap.containsKey(this.fragmentArrayOfUniqueSmiles[hash]);
+            return this.uniqueSmilesToPositionMap.containsKey(this.fragmentArrayOfUniqueSmiles[hash]);
         }
     }
 
@@ -114,7 +126,7 @@ public class CountFingerprint implements ICountFingerprint {
      * @return
      */
     @Override
-    public int getCountForHash(int hash) {
-        return this.countArray[hash];
+    public int getCountForHash(int hash) {  //return this.countArray[hash];
+      throw new UnsupportedOperationException();
     }
 }
