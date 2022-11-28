@@ -37,7 +37,7 @@ import java.util.Objects;
 
 /**
  * Class to generate fingerprints. The fingerprints that can be generated are the bit fingerprint and the count fingerprint
- * FragmentFingerprinter is a key-based fingerprint. Thus, the class requires to be predefined structures/fragments in
+ * Fragment fingerprints are  key-based fingerprints. Thus, the class requires to be predefined structures/fragments in
  * the form of unique SMILES to create the fingerprint. These structures must be passed when the
  * class is called (in the constructor). The class implements the interface IFragmentFingerprinter,
  * which inherits the IFingerprinter (CDK), which allows the class to compute fingerprints in 2 ways.
@@ -76,22 +76,20 @@ public class FragmentFingerprinter implements IFragmentFingerprinter {
      */
     public FragmentFingerprinter(List<String> aFragmentList) throws NullPointerException {
         // Check whether aFragmentList is null or whether there are elements (strings) in the list that are empty.
-        Objects.requireNonNull(aFragmentList, "aFragmentList (list of string instances) is null."); // TODO message
-        for(String str: aFragmentList) {
-            Objects.requireNonNull(str, "aFragmentList (einzelne Listenelemente sind null)"); // TODO message
-            if(str.isBlank()) {
-                throw new NullPointerException("aFragmentList element is blank"); // TODO message
+        Objects.requireNonNull(aFragmentList, "aFragmentList (list of string instances) is null.");
+        for(String tmpDefinedUniqueSMILES : aFragmentList) {
+            Objects.requireNonNull(tmpDefinedUniqueSMILES, "aFragmentList (at least one list element) is null.");
+            if(tmpDefinedUniqueSMILES.isBlank()) {
+                throw new NullPointerException("aFragmentList (at least one list element) is blank.");
             }
         }
         this.fragmentArray = aFragmentList.toArray(new String[0]);
-        System.out.println(java.util.Arrays.toString(this.fragmentArray) + "fragmentArray");
         this.uniqueSmilesToPositionMap = new HashMap<>(this.fragmentArray.length);
         int tmpValuePosition = 0;
         for (String tmpKey : this.fragmentArray) {
-            uniqueSmilesToPositionMap.put(tmpKey, tmpValuePosition);
+            this.uniqueSmilesToPositionMap.put(tmpKey, tmpValuePosition);
             tmpValuePosition++;
         }
-        System.out.println(uniqueSmilesToPositionMap + "meine FragmentHashMap");
     }
     //
     //<editor-fold desc="public methods" defaultstate="collapsed">
@@ -110,11 +108,11 @@ public class FragmentFingerprinter implements IFragmentFingerprinter {
      */
     @Override
     public IBitFingerprint getBitFingerprint(List<String> aListOfUniqueSmiles) throws NullPointerException {
-        Objects.requireNonNull(aListOfUniqueSmiles, "aFragmentList (list of string instances) is null."); // TODO message
-        for(String str: aListOfUniqueSmiles) {
-            Objects.requireNonNull(str, "aFragmentList (einzelne Listenelemente sind null)"); // TODO message
-            if(str.isBlank()) {
-                throw new NullPointerException("aFragmentList element is blank"); // TODO message
+        Objects.requireNonNull(aListOfUniqueSmiles, "aFragmentList (list of string instances) is null.");
+        for(String tmpSmiles : aListOfUniqueSmiles) {
+            Objects.requireNonNull(tmpSmiles, "aFragmentList (at least one list element) is null.");
+            if(tmpSmiles.isBlank()) {
+                throw new NullPointerException("aFragmentList (at least one list element) is blank.");
             }
         }
         BitSet tmpBitSet = new BitSet(this.fragmentArray.length);
@@ -143,10 +141,11 @@ public class FragmentFingerprinter implements IFragmentFingerprinter {
     @Override
     public ICountFingerprint getCountFingerprint(Map<String, Integer> aUniqueSmilesToFrequencyMap) throws NullPointerException {
         HashMap<Integer, Integer> tmpRawMap = new HashMap<>(this.fragmentArray.length);
-        Objects.requireNonNull(aUniqueSmilesToFrequencyMap, "TODO message");
-        for(String str :aUniqueSmilesToFrequencyMap.keySet()) {
-            if(str == null || aUniqueSmilesToFrequencyMap.get(str) == null) {
-                throw new NullPointerException("TODO message"); // TODO message
+        Objects.requireNonNull(aUniqueSmilesToFrequencyMap, "aUniqueSmilesToFrequencyMap (Map of string and integer instances) is null.");
+        for(String tmpKeys :aUniqueSmilesToFrequencyMap.keySet()) {
+            if(tmpKeys == null || aUniqueSmilesToFrequencyMap.get(tmpKeys) == null || tmpKeys.isBlank()) {
+                throw new NullPointerException("aUniqueSmilesToFrequencyMap (Map of string and integer instances) contains " +
+                        "instances that are null or strings that are blank.");
             }
         }
         for (String tmpUniqueSmiles : aUniqueSmilesToFrequencyMap.keySet()) {
@@ -156,7 +155,6 @@ public class FragmentFingerprinter implements IFragmentFingerprinter {
                // this.countArray[tmpPosition] = aMoleculeFragmentMap.get(tmpUniqueSmiles);
             }
         }
-        System.out.println(tmpRawMap + "RawMap");
       return new CountFingerprint(this.fragmentArray, this.uniqueSmilesToPositionMap, tmpRawMap);
     }
 
@@ -167,7 +165,7 @@ public class FragmentFingerprinter implements IFragmentFingerprinter {
      * A unique SMILES can occur more than once in the list. This list is converted into a HashMap.
      * The HashMap maps the unique SMILES to the number of occurrences of these unique SMILES in the list.
      *
-     * @param aListToCountMoleculeFragmentSmiles is a list that stores fragments in the form of unique SMILES.
+     * @param aUniqueSmilesToFrequencyList is a list that stores fragments in the form of unique SMILES.
      * If a fragment occurs more than once in the molecule, it is also present more than
      * once in the list. To be able to calculate the fingerprint for a molecule,
      * the fragments should belong to one molecule.
@@ -175,19 +173,19 @@ public class FragmentFingerprinter implements IFragmentFingerprinter {
      * @throws NullPointerException
      */
     @Override
-    public ICountFingerprint getCountFingerprint(List<String> aListToCountMoleculeFragmentSmiles) throws NullPointerException {
+    public ICountFingerprint getCountFingerprint(List<String>  aUniqueSmilesToFrequencyList) throws NullPointerException {
         HashMap<String, Integer> tmpUniqueSmilesToFrequencyCountMap = new HashMap<>();
         int i = 1;
-        Objects.requireNonNull(aListToCountMoleculeFragmentSmiles, "TODO message");
-        for (String str : aListToCountMoleculeFragmentSmiles) {
-            Objects.requireNonNull(str, "aFragmentList (einzelne Listenelemente sind null)"); // TODO message
-            if(str.isBlank()) {
-                throw new NullPointerException("aFragmentList element is blank"); // TODO message
+        Objects.requireNonNull(aUniqueSmilesToFrequencyList, "aUniqueSmilesToFrequencyList (list of string instances) is null.");
+        for (String tmpSmiles :  aUniqueSmilesToFrequencyList) {
+            Objects.requireNonNull(tmpSmiles, "aUniqueSmilesToFrequencyList (at least one list element) is null.");
+            if(tmpSmiles.isBlank()) {
+                throw new NullPointerException("aUniqueSmilesToFrequencyList (at least one list element) is blank.");
             }
-            if (tmpUniqueSmilesToFrequencyCountMap.containsKey(str) == false) {
-                tmpUniqueSmilesToFrequencyCountMap.put(str, i);
+            if (tmpUniqueSmilesToFrequencyCountMap.containsKey(tmpSmiles) == false) {
+                tmpUniqueSmilesToFrequencyCountMap.put(tmpSmiles, i);
             } else {
-                tmpUniqueSmilesToFrequencyCountMap.put(str, tmpUniqueSmilesToFrequencyCountMap.get(str) + 1);
+                tmpUniqueSmilesToFrequencyCountMap.put(tmpSmiles, tmpUniqueSmilesToFrequencyCountMap.get(tmpSmiles) + 1);
 
             }
         }
@@ -257,7 +255,14 @@ public class FragmentFingerprinter implements IFragmentFingerprinter {
     public int getSize() {
      return this.fragmentArray.length;
     }
-    public String getBitDefinition(int aHash) {
-        throw new UnsupportedOperationException();
+
+    /**
+     *  returns the bit definitions i.e. which  bit stands for which fragment SMILES
+     *
+     * @param aBit
+     * @return unique SMILES
+     */
+    public String getBitDefinition(int aBit) {
+      return this.fragmentArray[aBit];
     }
 }
