@@ -48,6 +48,21 @@ repositories {
 def cdkVersion = '2.8'
 dependencies {
     implementation group: 'org.jetbrains', name : 'annotations', version: '23.0.0'
-    testImplementation group: 'junit', name: 'junit', version: '4.13'
+   // testImplementation group: 'junit', name: 'junit', version: '4.13'
+    testImplementation(platform('org.junit:junit-bom:5.9.1'))
+    testImplementation('org.junit.jupiter:junit-jupiter')
+    // https://mvnrepository.com/artifact/org.junit.jupiter/junit-jupiter-api
+   // testImplementation group: 'org.junit.jupiter', name: 'junit-jupiter-api', version: '5.9.1'
     implementation group: 'org.openscience.cdk', name: 'cdk-bundle', version: cdkVersion
 }
+tasks.withType(Test).configureEach {
+    useJUnitPlatform()
+
+    forkEvery = 1
+
+    testLogging {
+        showStandardStreams = true
+    }
+}
+
+

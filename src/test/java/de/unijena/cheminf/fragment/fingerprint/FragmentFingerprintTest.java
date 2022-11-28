@@ -25,9 +25,10 @@
 
 package de.unijena.cheminf.fragment.fingerprint;
 
-import org.junit.Assert;
-import org.junit.BeforeClass;
-import org.junit.Test;
+
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
 import org.openscience.cdk.fingerprint.IBitFingerprint;
 import org.openscience.cdk.fingerprint.ICountFingerprint;
 
@@ -86,7 +87,7 @@ public class FragmentFingerprintTest  {
      *
      * @throws IOException
      */
-    @BeforeClass
+    @BeforeAll
     public static void setUp() throws IOException {
         // Read CSV file ( fragmentation tab) to  obtain fragments used to create the fingerprint.
         BufferedReader tmpFragmentSetReader = new BufferedReader(new FileReader("src/test/resources/de/unijena/cheminf/fragment/fingerprint/FragmentList.txt"));
@@ -142,11 +143,12 @@ public class FragmentFingerprintTest  {
      */
     @Test
    public void bitFingerprintTest() {
+        FragmentFingerprintTest.bitFingerprintTest = FragmentFingerprintTest.fragmentFingerprinter.getBitFingerprint(FragmentFingerprintTest.dataForGenerateBitFingerprint);
         //Test number of positive indices
         int tmpNumberPositiveBitsTest = 9;
-        Assert.assertEquals(tmpNumberPositiveBitsTest, FragmentFingerprintTest.bitFingerprintTest.cardinality());
+        Assertions.assertEquals(tmpNumberPositiveBitsTest, FragmentFingerprintTest.bitFingerprintTest.cardinality());
         // Test size
-        Assert.assertEquals(64,FragmentFingerprintTest.bitFingerprintTest.size());
+        Assertions.assertEquals(64,FragmentFingerprintTest.bitFingerprintTest.size());
         //Test asBitSet
         BitSet tmpBitSetTest = new BitSet();
         tmpBitSetTest.set(3);
@@ -158,10 +160,10 @@ public class FragmentFingerprintTest  {
         tmpBitSetTest.set(18);
         tmpBitSetTest.set(26);
         tmpBitSetTest.set(27);
-        Assert.assertEquals(tmpBitSetTest,FragmentFingerprintTest.bitFingerprintTest.asBitSet());
+        Assertions.assertEquals(tmpBitSetTest,FragmentFingerprintTest.bitFingerprintTest.asBitSet());
         // Test getSetbits
         int[] tmpArrayBitSetTest = {3,5,9,14,16,17,18,26,27};
-        Assert.assertArrayEquals(tmpArrayBitSetTest, FragmentFingerprintTest.bitFingerprintTest.getSetbits());
+        Assertions.assertArrayEquals(tmpArrayBitSetTest, FragmentFingerprintTest.bitFingerprintTest.getSetbits());
     }
     /**
      * Tests the other methods used in the creation of the count fingerprint, if the input is a map
@@ -173,18 +175,18 @@ public class FragmentFingerprintTest  {
     public void countFingerprintTest() throws  Exception {
         // Test size
         long tmpSizeTest = FragmentFingerprintTest.fragmentList.size();
-        Assert.assertEquals(tmpSizeTest, FragmentFingerprintTest.countFingerprintTest.size());
+        Assertions.assertEquals(tmpSizeTest, FragmentFingerprintTest.countFingerprintTest.size());
         // Test the number of bins that are populated.
         int tmpBinsTest = 28;
-        Assert.assertEquals(tmpBinsTest, FragmentFingerprintTest.countFingerprintTest.numOfPopulatedbins());
+        Assertions.assertEquals(tmpBinsTest, FragmentFingerprintTest.countFingerprintTest.numOfPopulatedbins());
         // Test value in bin 17
-        Assert.assertEquals(8, FragmentFingerprintTest.countFingerprintTest.getCount(17));
+        Assertions.assertEquals(8, FragmentFingerprintTest.countFingerprintTest.getCount(17));
         // Test the hash in index 17
-        Assert.assertEquals(17,FragmentFingerprintTest.countFingerprintTest.getHash(17));
+        Assertions.assertEquals(17,FragmentFingerprintTest.countFingerprintTest.getHash(17));
         // Test whether the fingerprint contains the given hash. index 0-27 true; index>27 false
-        Assert.assertEquals(false, FragmentFingerprintTest.countFingerprintTest.hasHash(30));
+        Assertions.assertEquals(false, FragmentFingerprintTest.countFingerprintTest.hasHash(30));
         // Test the count value for the bin with index 10.
-        Assert.assertEquals(0, FragmentFingerprintTest.countFingerprintTest.getCountForHash(10));
+        Assertions.assertEquals(0, FragmentFingerprintTest.countFingerprintTest.getCountForHash(10));
     }
     /**
      * Tests the size of the fingerprint
@@ -195,7 +197,7 @@ public class FragmentFingerprintTest  {
     @Test
     public void fragmentFingerprintSizeTest() throws Exception {
         // Test size of the fingerprint
-        Assert.assertEquals(28,FragmentFingerprintTest.fragmentFingerprinter.getSize());
+        Assertions.assertEquals(28,FragmentFingerprintTest.fragmentFingerprinter.getSize());
     }
     /**
      * Tests the method getCountFingerprint, the input must be a list
@@ -242,18 +244,18 @@ public class FragmentFingerprintTest  {
 
         // Test size
         long tmpSizeTest = FragmentFingerprintTest.fragmentList.size();
-        Assert.assertEquals(tmpSizeTest, tmpCountFingerprintInputList.size());
+        Assertions.assertEquals(tmpSizeTest, tmpCountFingerprintInputList.size());
         // Test the number of bins that are populated.
         int tmpBinsTest = 28;
-        Assert.assertEquals(tmpBinsTest, tmpCountFingerprintInputList.numOfPopulatedbins());
+        Assertions.assertEquals(tmpBinsTest, tmpCountFingerprintInputList.numOfPopulatedbins());
         // Test value at position 26
-        Assert.assertEquals(5, tmpCountFingerprintInputList.getCount(26));
+        Assertions.assertEquals(5, tmpCountFingerprintInputList.getCount(26));
         // Test the hash in index 10
-        Assert.assertEquals(10,tmpCountFingerprintInputList.getHash(10));
+        Assertions.assertEquals(10,tmpCountFingerprintInputList.getHash(10));
         // Test whether the fingerprint contains the given hash. index 0-27 true; index>27 false
-        Assert.assertEquals(false, tmpCountFingerprintInputList.hasHash(30));
+        Assertions.assertEquals(false, tmpCountFingerprintInputList.hasHash(30));
         // Test the count value for the bin with index 10.
-        Assert.assertEquals(0, tmpCountFingerprintInputList.getCountForHash(0));
+        Assertions.assertEquals(0, tmpCountFingerprintInputList.getCountForHash(0));
     }
 
 

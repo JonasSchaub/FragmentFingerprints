@@ -87,8 +87,8 @@ public class CountFingerprint implements ICountFingerprint {
 
     /**
      * For each defined structure in the fingerprint, returns the frequency.
-     * For an index >= 0 and < fragmentArrayOfUniqueSmiles, the frequency of this unique SMILES is output.
-     * If the given index is > than the size of the fingerprint, a NullPinterException is thrown.
+     * For an index greater than or equal to 0 and less than fragmentArrayOfUniqueSmiles, the frequency of this unique SMILES is output.
+     * If the given index is greater than the size of the fingerprint, a NullPinterException is thrown.
      *
      * @param index the index of the bin to return the number of hits for.
      * @return the count for the bin with given index.
@@ -139,7 +139,7 @@ public class CountFingerprint implements ICountFingerprint {
      * Whether the fingerprint contains the given hash.
      *The parameter hash is not a calculated hash value, but also corresponds to the position of the bin in the fingerprint.
      * @see    #getHash(int)
-     * For hash >= fingerprint size the method returns false and for all hash < fingerprint size a true is returned.
+     * For hash greater than or equals fingerprint size the method returns false and for all hash less than fingerprint size a true is returned.
      *
      * @param hash
      * @return true if the fingerprint contains the given hash, otherwise false.
