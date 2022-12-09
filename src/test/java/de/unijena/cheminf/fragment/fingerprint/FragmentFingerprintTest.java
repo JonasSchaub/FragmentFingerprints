@@ -29,8 +29,13 @@ package de.unijena.cheminf.fragment.fingerprint;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import org.openscience.cdk.exception.CDKException;
+import org.openscience.cdk.exception.InvalidSmilesException;
 import org.openscience.cdk.fingerprint.IBitFingerprint;
 import org.openscience.cdk.fingerprint.ICountFingerprint;
+import org.openscience.cdk.interfaces.IAtomContainer;
+import org.openscience.cdk.silent.SilentChemObjectBuilder;
+import org.openscience.cdk.smiles.SmilesParser;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
@@ -83,7 +88,8 @@ public class FragmentFingerprintTest  {
     }
 
     /**
-     * Start generating fingerprinting data (MORTAR); @BeforeClass ensures that the setUp method is only executed once.
+     * Start generating fingerprinting data (MORTAR)
+     * @BeforeAll ensures that the setUp method is only executed once.
      *
      * @throws IOException
      */
@@ -256,6 +262,16 @@ public class FragmentFingerprintTest  {
         Assertions.assertEquals(false, tmpCountFingerprintInputList.hasHash(30));
         // Test the count value for the bin with index 10.
         Assertions.assertEquals(0, tmpCountFingerprintInputList.getCountForHash(0));
+    }
+    @Test
+    public void substrctureSearch() throws CDKException {
+        /*
+        FragmentFingerprinter tester = new FragmentFingerprinter();
+        SmilesParser sp  = new SmilesParser(SilentChemObjectBuilder.getInstance());
+        IAtomContainer m   = sp.parseSmiles("C1CC(=O)NC1(=O)");
+        IBitFingerprint subBit = tester.getBitFingerprint(m);
+
+         */
     }
 
 

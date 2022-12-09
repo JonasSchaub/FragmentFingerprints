@@ -27,7 +27,8 @@ plugins {
     id 'application'
 }
 application {
-    mainClass = 'de.unijena.cheminf.fragment.fingerprint.main.Main'
+    mainClassName = 'de.unijena.cheminf.fragment.fingerprint.performanceTest.Main'  //de.unijena.cheminf.fragment.fingerprint.main.Main
+   // de/unijena/cheminf/fragment/fingerprint/performanceTest/Main.java
 }
 
 group 'de.unijena.cheminf.fragment.fingerprint'
@@ -63,6 +64,31 @@ tasks.withType(Test).configureEach {
     testLogging {
         showStandardStreams = true
     }
+}
+//Needed to make the created jar archives executable
+jar {
+    manifest {
+        attributes 'Main-Class': mainClassName
+    }
+}
+
+//Creates a jar archive that includes all dependencies of the project, i.e. that  MORTAR can be started by executing this jar
+task fatJar(type: Jar) {
+    manifest {
+        attributes 'Implementation-Title': 'Fragment fingerprints Jar File',
+                'Implementation-Version': archiveVersion,
+                'Main-Class': mainClassName
+    }
+    archiveBaseName = project.name + '-fat'
+    from {
+        configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }
+    }
+    with jar
+}
+
+//Archives artifacts executed with build
+artifacts {
+    archives fatJar
 }
 
 
