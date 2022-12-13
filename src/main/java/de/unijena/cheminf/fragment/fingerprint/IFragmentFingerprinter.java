@@ -33,7 +33,7 @@ import java.util.Map;
 
 /**
  * Interface for implementing fragment fingerprints.
- * The interface IFragmentFingerprinter inherits from the CDk interface IFingerprinter and extends it with further methods.
+ * The interface IFragmentFingerprinter inherits from the CDK interface IFingerprinter and extends it with further methods.
  * IFingerprinter is an interface for the calculation of fingerprints.
  * I.e. classes that implement IFingerprinter can calculate fingerprints for a given IAtomContainer,
  * including a bit and count fingerprint. The extension of the IFingerprinter by further methods now allows the

@@ -24,11 +24,17 @@
 package de.unijena.cheminf.fragment.fingerprint;
 
 import org.openscience.cdk.exception.CDKException;
+import org.openscience.cdk.exception.UnsupportedChemObjectException;
 import org.openscience.cdk.fingerprint.BitSetFingerprint;
 import org.openscience.cdk.fingerprint.IBitFingerprint;
 import org.openscience.cdk.fingerprint.ICountFingerprint;
 import org.openscience.cdk.interfaces.IAtomContainer;
+import org.openscience.cdk.isomorphism.Pattern;
+import org.openscience.cdk.isomorphism.VentoFoggia;
+import org.openscience.cdk.silent.SilentChemObjectBuilder;
+import org.openscience.cdk.smiles.SmilesParser;
 
+import java.util.ArrayList;
 import java.util.BitSet;
 import java.util.HashMap;
 import java.util.List;
@@ -90,6 +96,9 @@ public class FragmentFingerprinter implements IFragmentFingerprinter {
             this.uniqueSmilesToPositionMap.put(tmpKey, tmpValuePosition);
             tmpValuePosition++;
         }
+    }
+    public FragmentFingerprinter() {
+
     }
     //
     //<editor-fold desc="public methods" defaultstate="collapsed">
@@ -209,7 +218,7 @@ public class FragmentFingerprinter implements IFragmentFingerprinter {
      */
     @Override
     public BitSet getFingerprint(IAtomContainer mol) throws CDKException {
-       throw new UnsupportedOperationException();
+        throw new UnsupportedOperationException();
     }
 
     /**
@@ -264,5 +273,11 @@ public class FragmentFingerprinter implements IFragmentFingerprinter {
      */
     public String getBitDefinition(int aBit) {
       return this.fragmentArray[aBit];
+    }
+    public int[] getBitArray(){
+        throw new UnsupportedOperationException();
+    }
+    public int[] getCountArray(){
+        throw new UnsupportedOperationException();
     }
 }

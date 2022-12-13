@@ -12,6 +12,7 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -53,17 +54,18 @@ public class PerformanceTest {
      * The working directory (the jar-file's directory)
      */
     private String workingPath;
-    private ArrayList<ArrayList<String>> deneme = new ArrayList<>();
+    private ArrayList<ArrayList<String>> moleculeListforBitFingerprint = new ArrayList<>();
     private ArrayList<String> fragmentList = new ArrayList<>();
-    File dataFile1;
-    File dataFile2;
+    File moleculeFile;
+    File fragmentFile;
     PrintWriter resultsPrintWriter;
     PrintWriter bitPrintWriter;
     PrintWriter countPrintWriter;
+    PrintWriter exceptionsPrintWriter;
 
     private ArrayList<HashMap<String, Integer>> moleculeFragmentList = new ArrayList<>();
 
-    public PerformanceTest(String anArgs, String anArgs2) throws IOException {
+    public PerformanceTest(String anArgs, String anArgs2, int anArgs3) throws IOException {
         /*Set up exception log file*/
         this.workingPath = (new File("").getAbsoluteFile().getAbsolutePath()) + File.separator;
         LocalDateTime tmpDateTime = LocalDateTime.now();
@@ -72,67 +74,64 @@ public class PerformanceTest {
         File tmpExceptionsLogFile = new File(this.workingPath + "/Results/"
                 + PerformanceTest.EXCEPTIONS_LOG_FILE_NAME);
         FileWriter tmpExceptionsLogFileWriter = new FileWriter(tmpExceptionsLogFile, true);
-        PrintWriter tmpExceptionsPrintWriter = new PrintWriter(tmpExceptionsLogFileWriter);
-        tmpExceptionsPrintWriter.println("#########################################################################");
-        tmpExceptionsPrintWriter.println("Processing Time: " + tmpProcessingTime);
-        tmpExceptionsPrintWriter.println();
-        tmpExceptionsPrintWriter.flush();
+        this.exceptionsPrintWriter = new PrintWriter(tmpExceptionsLogFileWriter);
+        this.exceptionsPrintWriter.println("#########################################################################");
+        this.exceptionsPrintWriter.println("Processing Time: " + tmpProcessingTime);
+        this.exceptionsPrintWriter.println();
+        this.exceptionsPrintWriter.flush();
         try {
-            /*Load SD file*/
-             dataFile1 = new File(this.workingPath + anArgs);
-             dataFile2 = new File(this.workingPath + anArgs2);
-            FileInputStream tmpFile2;
-            FileInputStream tmpDBFileInputStream;
+            // Load fragment files
+             this.moleculeFile = new File(this.workingPath + anArgs);
+             this.fragmentFile = new File(this.workingPath + anArgs2);
+            FileInputStream tmpFragmentFileInputStream;
+            FileInputStream tmpMoleculeFileInputStream;
             try {
-                tmpDBFileInputStream = new FileInputStream(dataFile1);
-                tmpFile2 = new FileInputStream(dataFile2);
+                tmpMoleculeFileInputStream = new FileInputStream(moleculeFile);
+                tmpFragmentFileInputStream = new FileInputStream(fragmentFile);
             } catch (FileNotFoundException | SecurityException anException) {
-                throw new IllegalArgumentException("One or more files (name) are invalid: " + anException.getMessage()); // TODO  message
+                throw new IllegalArgumentException("One or more files (name) are invalid: " + anException.getMessage());
             }
             // results files
             File tmpResultsLogFile = new File(this.workingPath + "/Results/" + PerformanceTest.RESULTS_FILE_NAME + tmpProcessingTime + ".txt");
             FileWriter tmpResultsLogFileWriter = new FileWriter(tmpResultsLogFile, true);
-            resultsPrintWriter = new PrintWriter(tmpResultsLogFileWriter); // printer
-            resultsPrintWriter.println("#########################################################################");
-            resultsPrintWriter.println("Processing Time: " + tmpProcessingTime);
-            resultsPrintWriter.println("Application initialized. Loading  files named " + anArgs + " and "+ anArgs2+ ".");
-           // tmpResultsPrintWriter.flush();
-            /*ProcessingTime file*/ // file mit 3 palten
+            this.resultsPrintWriter = new PrintWriter(tmpResultsLogFileWriter);
+            this.resultsPrintWriter.println("#########################################################################");
+            this.resultsPrintWriter.println("Processing Time: " + tmpProcessingTime);
+            this.resultsPrintWriter.println("Application initialized. Loading  files named " + anArgs + " and "+ anArgs2+ ".");
+            // bit fingerprints process file
             File tmpCSVTimeFile = new File(this.workingPath + "/Results/" + PerformanceTest.CSV_TIME_FILE_NAME + tmpProcessingTime + ".csv");
             FileWriter tmpCSVTimeFileWriter = new FileWriter(tmpCSVTimeFile, false);
-            bitPrintWriter = new PrintWriter(tmpCSVTimeFileWriter);
-            //
+            this.bitPrintWriter = new PrintWriter(tmpCSVTimeFileWriter);
+            // count fingerprints process file
             File tmpOriginNetworkOriginFile = new File(this.workingPath + "/Results/" + PerformanceTest.CSV_ORIGIN_NETWORK_FILE_NAME + tmpProcessingTime + ".csv");
             FileWriter tmpOriginNetworkOriginFileWriter = new FileWriter(tmpOriginNetworkOriginFile, false);
-            countPrintWriter = new PrintWriter(tmpOriginNetworkOriginFileWriter);
-           // tmpCSVTimePrintWriter.flush();
-            //tmpResultsPrintWriter.println("Hallo");
-            // TODO read
-            this.generateFingerprints(1,2);
-            resultsPrintWriter.flush();
-            bitPrintWriter.println();
-            bitPrintWriter.flush();
-            countPrintWriter.flush();
+            this.countPrintWriter = new PrintWriter(tmpOriginNetworkOriginFileWriter);
+            // read in CSV files that contains fragments
+            this.generateFingerprints(anArgs3);
+            this.resultsPrintWriter.flush();
+            this.bitPrintWriter.println();
+            this.bitPrintWriter.flush();
+            this.countPrintWriter.flush();
+            this.exceptionsPrintWriter.flush();
         } catch (Exception anException) {
-            //TODO append log file
+            this.appendToLogfile(anException);
             anException.printStackTrace(System.err);
             System.exit(1);
         }
     }
 
     public void read() throws IOException { // TODO exception
-        BufferedReader tmpFragmentSetReader = new BufferedReader(new FileReader(dataFile1));
+        BufferedReader tmpFragmentSetReader = new BufferedReader(new FileReader(this.moleculeFile));
         String tmpLine;
         String tmpSeparatorComma = ";";  // TODO separator as argument?
-         fragmentList = new ArrayList<>();
+        this.fragmentList = new ArrayList<>();
         while ((tmpLine = tmpFragmentSetReader.readLine()) != null) {
             String[] tmpSmilesOfFragments = tmpLine.split(tmpSeparatorComma);
-            fragmentList.add(tmpSmilesOfFragments[0]);
+            this.fragmentList.add(tmpSmilesOfFragments[0]);
         }
-        // tmpFragmentSetReader.close();
-        fragmentList.remove(0);
+        this.fragmentList.remove(0);
         // Read CSV file (itemization tab)
-        BufferedReader tmpMoleculeFragmentsReader = new BufferedReader(new FileReader(dataFile2));
+        BufferedReader tmpMoleculeFragmentsReader = new BufferedReader(new FileReader(this.fragmentFile));
         String tmpSeparatorSemicolon = ";";
         List<List<String>> tmpList = new ArrayList<>();
         String tmpMoleculeLine;
@@ -142,79 +141,104 @@ public class PerformanceTest {
         }
         tmpMoleculeFragmentsReader.close();
         List<String> tmpSeparateList;
-       // ArrayList<ArrayList<String>> deneme = new ArrayList<>();
         for (int tmpCurrentLine = 1; tmpCurrentLine < tmpList.size(); tmpCurrentLine++) {
             tmpSeparateList = tmpList.get(tmpCurrentLine);
             List<String> ListWithoutNameAndMoleculeSmiles = tmpSeparateList.subList(2, tmpSeparateList.size());
             HashMap<String, Integer> tmpMoleculeFragmentsMap = new HashMap<>();
-           ArrayList<String> dataForGenerateBitFingerprint = new ArrayList<>();
+            ArrayList<String> dataForGenerateBitFingerprint = new ArrayList<>();
             for (int i = 0; i < ListWithoutNameAndMoleculeSmiles.size(); i++) {
                 if (i % 2 == 0) {
                     tmpMoleculeFragmentsMap.put(ListWithoutNameAndMoleculeSmiles.get(i), Integer.valueOf(ListWithoutNameAndMoleculeSmiles.get(i + 1)));
                     dataForGenerateBitFingerprint.add(ListWithoutNameAndMoleculeSmiles.get(i));
                 }
             }
-            // Illustration the results of the bit arrays for the specified molecules
-            // add all molecule maps
-            moleculeFragmentList.add(tmpMoleculeFragmentsMap);
-            deneme.add(dataForGenerateBitFingerprint);
+            this.moleculeFragmentList.add(tmpMoleculeFragmentsMap);
+            this.moleculeListforBitFingerprint.add(dataForGenerateBitFingerprint);
         }
-        /*
-        FragmentFingerprinter printer = new FragmentFingerprinter(fragmentList);
-        long tmpStartTime = System.currentTimeMillis();
-        int i = 0;
-        // System.out.println(deneme + "----deneme");
-        for (List<String> liste : deneme ) { // deneme sublist für roundNumber
-            IBitFingerprint bitFingerprint = printer.getBitFingerprint(liste);
-            //  System.out.println(bitFingerprint.cardinality());
-            //  i++;
-        }
-         */
     }
-    public void generateFingerprints(long startTime, long endTime) throws IOException {
-        this.read();
-        FragmentFingerprinter printer = new FragmentFingerprinter(fragmentList);
-        resultsPrintWriter.println("Number of molecules: " + deneme.size());
-        resultsPrintWriter.println("\n\tGenerate bit fingerprints");
-        resultsPrintWriter.println();
-        bitPrintWriter.println("Number of fragments: " + fragmentList.size() + " and number of molecules: " + deneme.size());
-        bitPrintWriter.println("Number of molecules in process, Bit fingerprint process time in ms");
-       // System.out.println(fragmentList + "---fragmentlist");
-        for (int i =200000; i <= deneme.size(); i++) { //int i =200; i <= deneme.size(); i+=200
-            List<ArrayList<String>> sublist = deneme.subList(0, i);
-            startTime = System.currentTimeMillis();
-            for (ArrayList<String> a : sublist) {
-                IBitFingerprint bit = printer.getBitFingerprint(a);
-            }
-            endTime = System.currentTimeMillis();
-           // System.out.println(endTime-startTime);
-            resultsPrintWriter.println("Processing " + sublist.size() + " valid molecules." );
-            resultsPrintWriter.println("Bit fingerprint generation took: " + (endTime-startTime) + " ms.");
-            bitPrintWriter.println(sublist.size() + "," + (endTime-startTime));
+    public void generateFingerprints(int numberOfMoleculesInProcess) throws Exception {
+        try {
+            this.read();
+        } catch (Exception anException) {
+            this.exceptionsPrintWriter.println("Fragment load ERROR. Unsuitable (structure) CSV files were tried to be read in.");
+            this.exceptionsPrintWriter.flush();
+            this.appendToLogfile(anException);
+            throw new Exception("Fragment load ERROR. Unsuitable (structure) CSV files were tried to be read in. ");
         }
-        resultsPrintWriter.println();
-        resultsPrintWriter.println("#########################################################################");
-        resultsPrintWriter.println("\n\tGenerate count fingerprints");
-        resultsPrintWriter.println();
-        countPrintWriter.println("Number of molecules in process, Count fingerprint process time in ms.");
-        for(int i = 200000; i<= moleculeFragmentList.size(); i++) {  //i+=2000)
-            List<HashMap<String,Integer>> sub = moleculeFragmentList.subList(0,i);
-            long start = System.currentTimeMillis();
-            for(HashMap<String,Integer> map : sub) {
-                ICountFingerprint count = printer.getCountFingerprint(map);
-            }
-            long end = System.currentTimeMillis();
-            resultsPrintWriter.println("Processing " + sub.size() + " valid molecules." );
-            resultsPrintWriter.println("Count fingerprint generation took: " + (end-start) + " ms.");
-            resultsPrintWriter.println();
-            countPrintWriter.println(sub.size() + "," + (end-start));
-          //  System.out.println(end-start);
+        FragmentFingerprinter printer = new FragmentFingerprinter(this.fragmentList);
+        this.resultsPrintWriter.println("Number of molecules: " + this.moleculeListforBitFingerprint.size());
+        this.resultsPrintWriter.println("Number of fragment: " + this.moleculeListforBitFingerprint.size());
+        this.resultsPrintWriter.println("\n\tGenerate bit fingerprints");
+        this.resultsPrintWriter.println();
+        this.bitPrintWriter.println("Number of fragments: " + this.fragmentList.size() + " and number of molecules: " + this.moleculeListforBitFingerprint.size());
+        this.bitPrintWriter.println("Number of molecules in process, Bit fingerprint process time in ms");
+        for (int i = numberOfMoleculesInProcess; i <= this.moleculeListforBitFingerprint.size(); i+=numberOfMoleculesInProcess) {
+                List<ArrayList<String>> tmpNumberOfMoleculesInProcess = this.moleculeListforBitFingerprint.subList(0, i);
+                try {
+                long startTime = System.currentTimeMillis();
+                    for (ArrayList<String> tmpMolecule : tmpNumberOfMoleculesInProcess) {
+                        IBitFingerprint bit = printer.getBitFingerprint(tmpMolecule);
+                    }
+                  long endTime = System.currentTimeMillis();
+                    this.resultsPrintWriter.println("Processing " + tmpNumberOfMoleculesInProcess.size() + " valid molecules.");
+                    this.resultsPrintWriter.println("Bit fingerprint generation took: " + (endTime - startTime) + " ms.");
+                    this.bitPrintWriter.println(tmpNumberOfMoleculesInProcess.size() + "," + (endTime - startTime));
+                } catch (Exception anException) {
+                    this.exceptionsPrintWriter.println("Bit fingerprint generation ERROR. There may be incorrect/invalid elements in the fragment list or molecule list.");
+                    this.appendToLogfile(anException);
+                    throw new Exception("Bit fingerprint generation ERROR. There may be incorrect/invalid elements in the fragment list or molecule list.");
+                }
+                /*
+                resultsPrintWriter.println("Processing " + sublist.size() + " valid molecules.");
+                resultsPrintWriter.println("Bit fingerprint generation took: " + (endTime - startTime) + " ms.");
+                bitPrintWriter.println(sublist.size() + "," + (endTime - startTime));
+                 */
         }
-       // System.out.println(endTime-startTime + "bit time");
-
-
-
+        this.resultsPrintWriter.println();
+        this.resultsPrintWriter.println("#########################################################################");
+        this.resultsPrintWriter.println("\n\tGenerate count fingerprints");
+        this.resultsPrintWriter.println();
+        this.countPrintWriter.println("Number of molecules in process, Count fingerprint process time in ms.");
+        for(int i = numberOfMoleculesInProcess; i<= this.moleculeFragmentList.size(); i+=numberOfMoleculesInProcess) {  //i+=2000)
+                List<HashMap<String, Integer>> sub = this.moleculeFragmentList.subList(0, i);
+                try {
+                    long start = System.currentTimeMillis();
+                    for (HashMap<String, Integer> map : sub) {
+                        ICountFingerprint count = printer.getCountFingerprint(map);
+                    }
+                    long end = System.currentTimeMillis();
+                    this.resultsPrintWriter.println("Processing " + sub.size() + " valid molecules.");
+                    this.resultsPrintWriter.println("Count fingerprint generation took: " + (end - start) + " ms.");
+                    this.resultsPrintWriter.println();
+                    this.countPrintWriter.println(sub.size() + "," + (end - start));
+                } catch (Exception anException) {
+                    this.exceptionsPrintWriter.println("Count fingerprint generation ERROR. There may be incorrect/invalid elements in the fragment list oder molecule list");
+                    this.appendToLogfile(anException);
+                    throw new Exception("Count fingerprint generation ERROR. There may be incorrect/invalid elements in the fragment list oder molecule list");
+                }
+            }
+        }
+    private void appendToLogfile(Exception anException) {
+        if (anException == null) {
+            return;
+        }
+        PrintWriter tmpPrintWriter = null;
+        try {
+            FileWriter tmpFileWriter = new FileWriter(this.workingPath
+                    + "/Results/" + PerformanceTest.EXCEPTIONS_LOG_FILE_NAME, true);
+            tmpPrintWriter = new PrintWriter(tmpFileWriter);
+            StringWriter tmpStringWriter = new StringWriter();
+            anException.printStackTrace(new PrintWriter(tmpStringWriter));
+            String tmpStackTrace = tmpStringWriter.toString();
+            tmpPrintWriter.println(tmpStackTrace);
+        } catch (IOException anIOException) {
+            anIOException.printStackTrace(System.err);
+        } finally {
+            if (tmpPrintWriter != null) {
+                tmpPrintWriter.println();
+                tmpPrintWriter.flush();
+                tmpPrintWriter.close();
+            }
+        }
     }
-
-
 }
