@@ -13,6 +13,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.text.NumberFormat;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -65,7 +66,7 @@ public class PerformanceTest {
 
     private ArrayList<HashMap<String, Integer>> moleculeFragmentList = new ArrayList<>();
 
-    public PerformanceTest(String anArgs, String anArgs2, int anArgs3) throws IOException {
+    public PerformanceTest(String anArgs, String anArgs2, String anArgs3) throws IOException {
         /*Set up exception log file*/
         this.workingPath = (new File("").getAbsoluteFile().getAbsolutePath()) + File.separator;
         LocalDateTime tmpDateTime = LocalDateTime.now();
@@ -96,8 +97,16 @@ public class PerformanceTest {
             FileWriter tmpResultsLogFileWriter = new FileWriter(tmpResultsLogFile, true);
             this.resultsPrintWriter = new PrintWriter(tmpResultsLogFileWriter);
             this.resultsPrintWriter.println("#########################################################################");
+            this.resultsPrintWriter.println();
             this.resultsPrintWriter.println("Processing Time: " + tmpProcessingTime);
+            this.resultsPrintWriter.println();
             this.resultsPrintWriter.println("Application initialized. Loading  files named " + anArgs + " and "+ anArgs2+ ".");
+            this.resultsPrintWriter.println();
+            // memory usages
+            NumberFormat tmpFormat = NumberFormat.getInstance();
+            this.resultsPrintWriter.println("Max memory: " + Runtime.getRuntime().maxMemory()/1024 + " kB");
+            this.resultsPrintWriter.println("Memory usage: " + tmpFormat.format((Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory())/1024) + " / " + tmpFormat.format(Runtime.getRuntime().totalMemory()/1024) + " kB");
+          //  System.out.println("Max memory: " + Runtime.getRuntime().maxMemory()/1024 + " KB");
             // bit fingerprints process file
             File tmpCSVTimeFile = new File(this.workingPath + "/Results/" + PerformanceTest.CSV_TIME_FILE_NAME + tmpProcessingTime + ".csv");
             FileWriter tmpCSVTimeFileWriter = new FileWriter(tmpCSVTimeFile, false);
@@ -107,7 +116,7 @@ public class PerformanceTest {
             FileWriter tmpOriginNetworkOriginFileWriter = new FileWriter(tmpOriginNetworkOriginFile, false);
             this.countPrintWriter = new PrintWriter(tmpOriginNetworkOriginFileWriter);
             // read in CSV files that contains fragments
-            this.generateFingerprints(anArgs3);
+            this.generateFingerprints(Integer.parseInt(anArgs3),1,2);
             this.resultsPrintWriter.flush();
             this.bitPrintWriter.println();
             this.bitPrintWriter.flush();
@@ -156,7 +165,7 @@ public class PerformanceTest {
             this.moleculeListforBitFingerprint.add(dataForGenerateBitFingerprint);
         }
     }
-    public void generateFingerprints(int numberOfMoleculesInProcess) throws Exception {
+    public void generateFingerprints(int numberOfMoleculesInProcess, long endTime, long startTime) throws Exception {
         try {
             this.read();
         } catch (Exception anException) {
@@ -166,34 +175,43 @@ public class PerformanceTest {
             throw new Exception("Fragment load ERROR. Unsuitable (structure) CSV files were tried to be read in. ");
         }
         FragmentFingerprinter printer = new FragmentFingerprinter(this.fragmentList);
+        this.resultsPrintWriter.println();
         this.resultsPrintWriter.println("Number of molecules: " + this.moleculeListforBitFingerprint.size());
         this.resultsPrintWriter.println("Number of fragment: " + this.moleculeListforBitFingerprint.size());
+        this.resultsPrintWriter.println("Succeeded loading of molecules and fragments");
+        this.resultsPrintWriter.println();
+        NumberFormat tmpNumberFormat = NumberFormat.getNumberInstance();
+        this.resultsPrintWriter.println("Memory usage: " + tmpNumberFormat.format((Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory())/1024) + " / " + tmpNumberFormat.format(Runtime.getRuntime().totalMemory()/1024) + " kB");
+       // System.out.println("Memory usage: " + tmpNumberFormat.format((Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory())/(1024*1024) + " MB" + " / " + tmpNumberFormat.format(Runtime.getRuntime().totalMemory()/(1024* 1024) + " MB")));
         this.resultsPrintWriter.println("\n\tGenerate bit fingerprints");
         this.resultsPrintWriter.println();
         this.bitPrintWriter.println("Number of fragments: " + this.fragmentList.size() + " and number of molecules: " + this.moleculeListforBitFingerprint.size());
         this.bitPrintWriter.println("Number of molecules in process, Bit fingerprint process time in ms");
-        for (int i = numberOfMoleculesInProcess; i <= this.moleculeListforBitFingerprint.size(); i+=numberOfMoleculesInProcess) {
+        for (int i = numberOfMoleculesInProcess; i <= this.moleculeListforBitFingerprint.size(); i+=numberOfMoleculesInProcess) { // +=numberOfMoleculesInProcess
                 List<ArrayList<String>> tmpNumberOfMoleculesInProcess = this.moleculeListforBitFingerprint.subList(0, i);
                 try {
-                long startTime = System.currentTimeMillis();
+                 startTime = System.currentTimeMillis();
                     for (ArrayList<String> tmpMolecule : tmpNumberOfMoleculesInProcess) {
                         IBitFingerprint bit = printer.getBitFingerprint(tmpMolecule);
                     }
-                  long endTime = System.currentTimeMillis();
+                     endTime = System.currentTimeMillis();
+                    /*
                     this.resultsPrintWriter.println("Processing " + tmpNumberOfMoleculesInProcess.size() + " valid molecules.");
                     this.resultsPrintWriter.println("Bit fingerprint generation took: " + (endTime - startTime) + " ms.");
                     this.bitPrintWriter.println(tmpNumberOfMoleculesInProcess.size() + "," + (endTime - startTime));
+
+                     */
                 } catch (Exception anException) {
                     this.exceptionsPrintWriter.println("Bit fingerprint generation ERROR. There may be incorrect/invalid elements in the fragment list or molecule list.");
                     this.appendToLogfile(anException);
                     throw new Exception("Bit fingerprint generation ERROR. There may be incorrect/invalid elements in the fragment list or molecule list.");
                 }
-                /*
-                resultsPrintWriter.println("Processing " + sublist.size() + " valid molecules.");
+                resultsPrintWriter.println("Processing " + tmpNumberOfMoleculesInProcess.size() + " valid molecules.");
                 resultsPrintWriter.println("Bit fingerprint generation took: " + (endTime - startTime) + " ms.");
-                bitPrintWriter.println(sublist.size() + "," + (endTime - startTime));
-                 */
+                bitPrintWriter.println(tmpNumberOfMoleculesInProcess.size() + "," + (endTime - startTime));
         }
+        this.resultsPrintWriter.println();
+        this.resultsPrintWriter.println("Memory usage: " + tmpNumberFormat.format((Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory())/1024) + " / " + tmpNumberFormat.format(Runtime.getRuntime().totalMemory()/1024) + " kB");
         this.resultsPrintWriter.println();
         this.resultsPrintWriter.println("#########################################################################");
         this.resultsPrintWriter.println("\n\tGenerate count fingerprints");
@@ -217,6 +235,7 @@ public class PerformanceTest {
                     throw new Exception("Count fingerprint generation ERROR. There may be incorrect/invalid elements in the fragment list oder molecule list");
                 }
             }
+        this.resultsPrintWriter.println("Memory usage: " + tmpNumberFormat.format((Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory())/1024) + " / " + tmpNumberFormat.format(Runtime.getRuntime().totalMemory()/1024) + " kB");
         }
     private void appendToLogfile(Exception anException) {
         if (anException == null) {

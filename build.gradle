@@ -26,10 +26,13 @@
 plugins {
     id 'application'
 }
+
 application {
     mainClassName = 'de.unijena.cheminf.fragment.fingerprint.performanceTest.Main'  //de.unijena.cheminf.fragment.fingerprint.main.Main
    // de/unijena/cheminf/fragment/fingerprint/performanceTest/Main.java
 }
+
+
 
 group 'de.unijena.cheminf.fragment.fingerprint'
 version '0.0.0.1'
@@ -56,6 +59,9 @@ dependencies {
    // testImplementation group: 'org.junit.jupiter', name: 'junit-jupiter-api', version: '5.9.1'
     implementation group: 'org.openscience.cdk', name: 'cdk-bundle', version: cdkVersion
 }
+mainClassName = 'de.unijena.cheminf.fragment.fingerprint.performanceTest.Main'
+applicationName = 'FragmentFingerprint'
+
 tasks.withType(Test).configureEach {
     useJUnitPlatform()
 
@@ -75,20 +81,22 @@ jar {
 //Creates a jar archive that includes all dependencies of the project, i.e. that  MORTAR can be started by executing this jar
 task fatJar(type: Jar) {
     manifest {
-        attributes 'Implementation-Title': 'Fragment fingerprints Jar File',
+        attributes 'Implementation-Title': 'Fragmentfingerprint Fat Jar File',
                 'Implementation-Version': archiveVersion,
                 'Main-Class': mainClassName
+        duplicatesStrategy = DuplicatesStrategy.INCLUDE
     }
-    archiveBaseName = project.name + '-fat'
+    archiveAppendix = 'fat'
     from {
-        configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }
+//        configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }
+        configurations.runtimeClasspath.findAll { it.name.endsWith('jar') && !it.name.endsWith('aarch64.jar') }.collect { zipTree(it) }
     }
     with jar
 }
-
 //Archives artifacts executed with build
 artifacts {
     archives fatJar
 }
+
 
 
