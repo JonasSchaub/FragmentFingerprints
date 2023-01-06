@@ -37,20 +37,20 @@ public class CountFingerprint implements ICountFingerprint {
     /**
      * Is an array containing all predefined unique SMILES.
      */
-    String[] fragmentArrayOfUniqueSmiles;
+    private String[] fragmentArrayOfUniqueSmiles;
     /**
      * The HashMap maps the unique SMILES to the position they have in the array.
      */
-    HashMap<String,Integer> uniqueSmilesToPositionMap;
+    private HashMap<String,Integer> uniqueSmilesToPositionMap;
     /**
      * Map
      */
-    HashMap<Integer, Integer> rawMap;
+    private HashMap<Integer, Integer> rawMap;
     //</editor-fold>
     //
+    //<editor-fold desc="Constructor" defaultstate="collapsed">
     /**
      * Constructor.
-     *
      *
      * @param aFragments
      * @param aMapOfFragmentSmiles
@@ -60,7 +60,9 @@ public class CountFingerprint implements ICountFingerprint {
         this.uniqueSmilesToPositionMap = aMapOfFragmentSmiles;
         this.rawMap = aRawMap;
     }
-
+    //</editor-fold>
+    //
+    //<editor-fold desc="Overridden public methods " defaultstate="collapsed">
     /**
      * Returns the number of bits in this fingerprint.
      * Since fragment fingerprints are key based, the number of bits in the fingerprint
@@ -172,4 +174,6 @@ public class CountFingerprint implements ICountFingerprint {
             return 0;
         }
     }
+    //</editor-fold>
+    //
 }

@@ -28,11 +28,8 @@ plugins {
 }
 
 application {
-    mainClassName = 'de.unijena.cheminf.fragment.fingerprint.performanceTest.Main'  //de.unijena.cheminf.fragment.fingerprint.main.Main
-   // de/unijena/cheminf/fragment/fingerprint/performanceTest/Main.java
+    mainClassName = 'de.unijena.cheminf.fragment.fingerprint.performanceTest.Main'
 }
-
-
 
 group 'de.unijena.cheminf.fragment.fingerprint'
 version '0.0.0.1'
@@ -52,11 +49,8 @@ repositories {
 def cdkVersion = '2.8'
 dependencies {
     implementation group: 'org.jetbrains', name : 'annotations', version: '23.0.0'
-   // testImplementation group: 'junit', name: 'junit', version: '4.13'
     testImplementation(platform('org.junit:junit-bom:5.9.1'))
     testImplementation('org.junit.jupiter:junit-jupiter')
-    // https://mvnrepository.com/artifact/org.junit.jupiter/junit-jupiter-api
-   // testImplementation group: 'org.junit.jupiter', name: 'junit-jupiter-api', version: '5.9.1'
     implementation group: 'org.openscience.cdk', name: 'cdk-bundle', version: cdkVersion
 }
 mainClassName = 'de.unijena.cheminf.fragment.fingerprint.performanceTest.Main'
@@ -78,7 +72,7 @@ jar {
     }
 }
 
-//Creates a jar archive that includes all dependencies of the project, i.e. that  MORTAR can be started by executing this jar
+//Creates a jar archive that includes all dependencies of the project, i.e. that  FragmentFingerprinter can be started by executing this jar
 task fatJar(type: Jar) {
     manifest {
         attributes 'Implementation-Title': 'Fragmentfingerprint Fat Jar File',
@@ -97,6 +91,7 @@ task fatJar(type: Jar) {
 artifacts {
     archives fatJar
 }
+
 
 
 
