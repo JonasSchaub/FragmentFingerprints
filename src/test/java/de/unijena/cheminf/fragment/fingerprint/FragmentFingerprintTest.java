@@ -99,24 +99,38 @@ public class FragmentFingerprintTest  {
      */
     @BeforeAll
     public static void setUp() throws IOException {
+        BufferedReader tmpFragmentSetReader;
+        BufferedReader tmpMoleculeFragmentsReader;
+        try {
+            tmpFragmentSetReader = new BufferedReader(new FileReader("src/test/resources/de/unijena/cheminf/fragment/fingerprint/FragmentList.txt"));
+            tmpMoleculeFragmentsReader = new BufferedReader(new FileReader("src/test/resources/de/unijena/cheminf/fragment/fingerprint/MoleculeFragments.txt"));
+        } catch (IOException anException) {
+            throw new IOException("File is not readable!");
+        }
         // Read CSV file ( fragmentation tab) to  obtain fragments used to create the fingerprint.
-        BufferedReader tmpFragmentSetReader = new BufferedReader(new FileReader("src/test/resources/de/unijena/cheminf/fragment/fingerprint/FragmentList.txt"));
         String tmpLine;
         String tmpSeparatorComma = ",";
-        while ((tmpLine = tmpFragmentSetReader.readLine()) != null) {
-            String[] tmpSmilesOfFragments = tmpLine.split(tmpSeparatorComma);
-            FragmentFingerprintTest.fragmentList.add(tmpSmilesOfFragments[0]);
+        try {
+            while ((tmpLine = tmpFragmentSetReader.readLine()) != null) {
+                String[] tmpSmilesOfFragments = tmpLine.split(tmpSeparatorComma);
+                FragmentFingerprintTest.fragmentList.add(tmpSmilesOfFragments[0]);
+            }
+            FragmentFingerprintTest.fragmentList.remove(0);
+        } catch (IOException anException) {
+            throw new IOException("invalid fragment file. At least one line is not readable.");
         }
-        FragmentFingerprintTest.fragmentList.remove(0);
         // Read CSV file (itemization tab)
-        BufferedReader tmpMoleculeFragmentsReader = new BufferedReader(new FileReader("src/test/resources/de/unijena/cheminf/fragment/fingerprint/MoleculeFragments.txt"));
         String tmpSeparatorSemicolon = ";";
         List<List<String>> tmpList = new ArrayList<>();
         String tmpMoleculeLine;
         System.out.println("\n\tBit and count arrays of the given molecules:");
-        while ((tmpMoleculeLine = tmpMoleculeFragmentsReader.readLine()) != null) {
-            String[] tmpMoleculeFragmentsAndFrequencies = tmpMoleculeLine.split(tmpSeparatorSemicolon);
-            tmpList.add(Arrays.asList(tmpMoleculeFragmentsAndFrequencies));
+        try {
+            while ((tmpMoleculeLine = tmpMoleculeFragmentsReader.readLine()) != null) {
+                String[] tmpMoleculeFragmentsAndFrequencies = tmpMoleculeLine.split(tmpSeparatorSemicolon);
+                tmpList.add(Arrays.asList(tmpMoleculeFragmentsAndFrequencies));
+            }
+        } catch (IOException anException) {
+            throw new IOException("invalid molecule file. At least one line is not readable");
         }
         List<String> tmpSeparateList;
         FragmentFingerprinter tmpFingerprintRepresentation = new FragmentFingerprinter(FragmentFingerprintTest.fragmentList);
@@ -124,8 +138,8 @@ public class FragmentFingerprintTest  {
         LocalDateTime tmpDateTime = LocalDateTime.now();
         String tmpProcessingTime = tmpDateTime.format(DateTimeFormatter.ofPattern("uuuu_MM_dd_HH_mm"));
         new File(tmpWorkingPath + "/Fingerprints").mkdirs();
-        File tmpResultsLogFile = new File(tmpWorkingPath + "/Fingerprints/" + FragmentFingerprintTest.FINGERPRINTS_FILE_NAME + tmpProcessingTime + ".txt");
-        FileWriter tmpResultsLogFileWriter = new FileWriter(tmpResultsLogFile, true);
+        File tmpResultsLogFile = new File(tmpWorkingPath + "/Fingerprints/" + FragmentFingerprintTest.FINGERPRINTS_FILE_NAME  + ".txt");
+        FileWriter tmpResultsLogFileWriter = new FileWriter(tmpResultsLogFile, false);
         PrintWriter tmpResultPrintWriter = new PrintWriter(tmpResultsLogFileWriter);
         int[] tmpBitArray;
         for (int tmpCurrentLine = 1; tmpCurrentLine < tmpList.size(); tmpCurrentLine++) {
@@ -140,23 +154,27 @@ public class FragmentFingerprintTest  {
                 }
             }
             // Illustration the results of the bit arrays for the specified molecules
-            IBitFingerprint tmpBitFingerprint = tmpFingerprintRepresentation.getBitFingerprint(FragmentFingerprintTest.dataForGenerateBitFingerprint);
-            ICountFingerprint tmpCountFingerprint = tmpFingerprintRepresentation.getCountFingerprint(tmpMoleculeFragmentsMap);
-            tmpBitArray = tmpFingerprintRepresentation.getBitArray();
-            int tmpLength = java.util.Arrays.toString(tmpBitArray).length();
-            System.out.println("\t\tNumber of positive bits " + tmpSeparateList.get(0) + ": " + tmpBitFingerprint.cardinality());
-            System.out.println("\t\tIndices of positive bits "+ tmpSeparateList.get(0) + ": "  + tmpBitFingerprint.asBitSet().toString());
-            System.out.println("\t\tCount for the bin with the index 5 " + tmpSeparateList.get(0) + ": " + tmpCountFingerprint.getCountForHash(5));
-            tmpResultPrintWriter.println(java.util.Arrays.toString(tmpBitArray).substring(1,tmpLength-1));
-            tmpResultPrintWriter.flush();
+            try {
+                IBitFingerprint tmpBitFingerprint = tmpFingerprintRepresentation.getBitFingerprint(FragmentFingerprintTest.dataForGenerateBitFingerprint);
+                ICountFingerprint tmpCountFingerprint = tmpFingerprintRepresentation.getCountFingerprint(tmpMoleculeFragmentsMap);
+                tmpBitArray = tmpFingerprintRepresentation.getBitArray();
+                int tmpLength = java.util.Arrays.toString(tmpBitArray).length();
+                System.out.println("\t\tNumber of positive bits " + tmpSeparateList.get(0) + ": " + tmpBitFingerprint.cardinality());
+                System.out.println("\t\tIndices of positive bits " + tmpSeparateList.get(0) + ": " + tmpBitFingerprint.asBitSet().toString());
+                System.out.println("\t\tCount for the bin with the index 5 " + tmpSeparateList.get(0) + ": " + tmpCountFingerprint.getCountForHash(5));
+                tmpResultPrintWriter.println(java.util.Arrays.toString(tmpBitArray).substring(1, tmpLength - 1));
+                tmpResultPrintWriter.flush();
+            } catch (NullPointerException | IllegalArgumentException  anException) {
+                System.out.println("Generation of one fingerprint did not work.");
+            }
             // add all molecule maps
             FragmentFingerprintTest.moleculeFragmentList.add(tmpMoleculeFragmentsMap);
         }
-        // Objects necessary for the test are created (used only in @Test)
-        FragmentFingerprintTest.fragmentFingerprinter = new FragmentFingerprinter(FragmentFingerprintTest.fragmentList);
-        FragmentFingerprintTest.countFingerprintTest = FragmentFingerprintTest.fragmentFingerprinter.getCountFingerprint(FragmentFingerprintTest.moleculeFragmentList.get(FragmentFingerprintTest.moleculeFragmentList.size()-1));
-        FragmentFingerprintTest.bitFingerprintTest = FragmentFingerprintTest.fragmentFingerprinter.getBitFingerprint(FragmentFingerprintTest.dataForGenerateBitFingerprint);
-        //FragmentFingerprintTest.moleculeFragmentList.get(FragmentFingerprintTest.moleculeFragmentList.size()-1)
+
+            // Objects necessary for the test are created (used only in @Test)
+            FragmentFingerprintTest.fragmentFingerprinter = new FragmentFingerprinter(FragmentFingerprintTest.fragmentList);
+            FragmentFingerprintTest.countFingerprintTest = FragmentFingerprintTest.fragmentFingerprinter.getCountFingerprint(FragmentFingerprintTest.moleculeFragmentList.get(FragmentFingerprintTest.moleculeFragmentList.size() - 1));
+            FragmentFingerprintTest.bitFingerprintTest = FragmentFingerprintTest.fragmentFingerprinter.getBitFingerprint(FragmentFingerprintTest.dataForGenerateBitFingerprint);
     }
     //</editor-fold>
     //

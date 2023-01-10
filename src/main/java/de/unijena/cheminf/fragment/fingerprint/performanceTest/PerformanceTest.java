@@ -126,6 +126,7 @@ public class PerformanceTest {
                 tmpMoleculeFileInputStream = new FileInputStream(moleculeFile);
                 tmpFragmentFileInputStream = new FileInputStream(fragmentFile);
             } catch (FileNotFoundException | SecurityException anException) {
+                this.appendToLogfile(anException);
                 throw new IllegalArgumentException("One or more files (name) are invalid: " + anException.getMessage());
             }
             // results files
@@ -138,9 +139,6 @@ public class PerformanceTest {
             this.resultsPrintWriter.println();
             this.resultsPrintWriter.println("Application initialized. Loading  files named " + anArgs + " and "+ anArgs2+ ".");
             this.resultsPrintWriter.println();
-            System.out.println(Runtime.getRuntime().maxMemory()/(1024*1024));
-            // memory usages
-            this.resultsPrintWriter.println("Memory usage: " + (Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory())/(1024*1024) + " / " + Runtime.getRuntime().totalMemory()/(1024*1024) + " Mb");
             // bit fingerprints process file
             File tmpCSVTimeFile = new File(this.workingPath + "/Results/" + PerformanceTest.CSV_TIME_FILE_NAME + tmpProcessingTime + ".csv");
             FileWriter tmpCSVTimeFileWriter = new FileWriter(tmpCSVTimeFile, false);
@@ -150,7 +148,7 @@ public class PerformanceTest {
             FileWriter tmpOriginNetworkOriginFileWriter = new FileWriter(tmpOriginNetworkOriginFile, false);
             this.countPrintWriter = new PrintWriter(tmpOriginNetworkOriginFileWriter);
             // read in CSV files that contains fragments
-            this.generateFingerprints(Integer.parseInt(anArgs3),1,2);
+            this.generateFingerprints(Integer.parseInt(anArgs3),1,2); // TODO delete arguments
             this.resultsPrintWriter.flush();
             this.bitPrintWriter.println();
             this.bitPrintWriter.flush();
@@ -166,23 +164,41 @@ public class PerformanceTest {
     //
     //<editor-fold defaultstate="collapsed" desc="Private methods">
     private void LoadData() throws IOException {
-        BufferedReader tmpFragmentSetReader = new BufferedReader(new FileReader(this.moleculeFile));
+        BufferedReader tmpFragmentSetReader;
+        BufferedReader tmpMoleculeFragmentsReader;
+        try {
+            tmpFragmentSetReader =  new BufferedReader(new FileReader(this.moleculeFile));
+            tmpMoleculeFragmentsReader = new BufferedReader(new FileReader(this.fragmentFile));
+        } catch(IOException anException) {
+            this.appendToLogfile(anException);
+            throw new IOException("File is not readable");
+        }
+        //Read CSV file (fragmentation tab) to obtain fragments used to create fingerprints
         String tmpLine;
         String tmpSeparatorComma = ";";  // TODO separator as argument?
         this.fragmentList = new ArrayList<>();
-        while ((tmpLine = tmpFragmentSetReader.readLine()) != null) {
-            String[] tmpSmilesOfFragments = tmpLine.split(tmpSeparatorComma);
-            this.fragmentList.add(tmpSmilesOfFragments[0]);
+        try {
+            while ((tmpLine = tmpFragmentSetReader.readLine()) != null) {
+                String[] tmpSmilesOfFragments = tmpLine.split(tmpSeparatorComma);
+                this.fragmentList.add(tmpSmilesOfFragments[0]);
+            }
+            this.fragmentList.remove(0);
+        } catch(IOException anException) {
+            this.appendToLogfile(anException);
+            throw new IOException("invalid fragment file. At least one line is not readable.");
         }
-        this.fragmentList.remove(0);
         // Read CSV file (itemization tab)
-        BufferedReader tmpMoleculeFragmentsReader = new BufferedReader(new FileReader(this.fragmentFile));
         String tmpSeparatorSemicolon = ";";
         List<List<String>> tmpList = new ArrayList<>();
         String tmpMoleculeLine;
-        while ((tmpMoleculeLine = tmpMoleculeFragmentsReader.readLine()) != null) {
-            String[] tmpMoleculeFragmentsAndFrequencies = tmpMoleculeLine.split(tmpSeparatorSemicolon);
-            tmpList.add(Arrays.asList(tmpMoleculeFragmentsAndFrequencies));
+        try {
+            while ((tmpMoleculeLine = tmpMoleculeFragmentsReader.readLine()) != null) {
+                String[] tmpMoleculeFragmentsAndFrequencies = tmpMoleculeLine.split(tmpSeparatorSemicolon);
+                tmpList.add(Arrays.asList(tmpMoleculeFragmentsAndFrequencies));
+            }
+        } catch (IOException anException) {
+            this.appendToLogfile(anException);
+            throw new IOException("invalid molecule file. At least one line is not readable");
         }
         tmpMoleculeFragmentsReader.close();
         List<String> tmpSeparateList;
@@ -191,17 +207,22 @@ public class PerformanceTest {
             List<String> ListWithoutNameAndMoleculeSmiles = tmpSeparateList.subList(2, tmpSeparateList.size());
             HashMap<String, Integer> tmpMoleculeFragmentsMap = new HashMap<>();
             ArrayList<String> dataForGenerateBitFingerprint = new ArrayList<>();
-            for (int i = 0; i < ListWithoutNameAndMoleculeSmiles.size(); i++) {
-                if (i % 2 == 0) {
-                    tmpMoleculeFragmentsMap.put(ListWithoutNameAndMoleculeSmiles.get(i), Integer.valueOf(ListWithoutNameAndMoleculeSmiles.get(i + 1)));
-                    dataForGenerateBitFingerprint.add(ListWithoutNameAndMoleculeSmiles.get(i));
+            try {
+                for (int i = 0; i < ListWithoutNameAndMoleculeSmiles.size(); i++) {
+                    if (i % 2 == 0) {
+                        tmpMoleculeFragmentsMap.put(ListWithoutNameAndMoleculeSmiles.get(i), Integer.valueOf(ListWithoutNameAndMoleculeSmiles.get(i + 1)));
+                        dataForGenerateBitFingerprint.add(ListWithoutNameAndMoleculeSmiles.get(i));
+                    }
                 }
+            }catch (IndexOutOfBoundsException anException) {
+                this.appendToLogfile(anException);
+                throw new IndexOutOfBoundsException("the line has not the right length");
             }
             this.moleculeFragmentList.add(tmpMoleculeFragmentsMap);
             this.moleculeListforBitFingerprint.add(dataForGenerateBitFingerprint);
         }
     }
-
+    //
     /**
      *
      * @param numberOfMoleculesInProcess
@@ -212,7 +233,7 @@ public class PerformanceTest {
     private void generateFingerprints(int numberOfMoleculesInProcess, long endTime, long startTime) throws Exception {
         try {
             this.LoadData();
-        } catch (Exception anException) {
+        } catch (IOException anException) {
             this.exceptionsPrintWriter.println("Fragment load ERROR. Unsuitable (structure) CSV files were tried to be read in.");
             this.exceptionsPrintWriter.flush();
             this.appendToLogfile(anException);

@@ -76,15 +76,16 @@ public class FragmentFingerprinter implements IFragmentFingerprinter {
      * to the position the fragments have in the list aFragmentList.
      *
      * @param aFragmentList is the ist in which the predefined fragments are stored.
-     * @throws NullPointerException is thrown if the list aFragmentList is null or contains blank strings.
+     * @throws NullPointerException is thrown if the list aFragmentList is null.
+     * @throws IllegalArgumentException is thrown if the list contains blank strings.
      */
-    public FragmentFingerprinter(List<String> aFragmentList) {
+    public FragmentFingerprinter(List<String> aFragmentList) throws NullPointerException, IllegalArgumentException {
         // Check whether aFragmentList is null or whether there are elements (strings) in the list that are empty.
         Objects.requireNonNull(aFragmentList, "aFragmentList (list of string instances) is null.");
         for(String tmpDefinedUniqueSMILES : aFragmentList) {
             Objects.requireNonNull(tmpDefinedUniqueSMILES, "aFragmentList (at least one list element) is null.");
             if(tmpDefinedUniqueSMILES.isBlank()) {
-                throw new NullPointerException("aFragmentList (at least one list element) is blank.");
+                throw new IllegalArgumentException("aFragmentList (at least one list element) is blank.");
             }
         }
         this.fragmentArray = aFragmentList.toArray(new String[0]);
@@ -108,23 +109,24 @@ public class FragmentFingerprinter implements IFragmentFingerprinter {
      * To be able to calculate the fingerprint for a molecule, the fragments should belong to one molecule.
      * @return BitSet. BitSet is a CDK class that implements the IBitFingerprint interface of CDK.
      * This allows methods to be used that return useful information from the calculated bit fingerprint, such as the number of positive bits in the fingerprint, etc.
-     * @throws NullPointerException is thrown if the list aListOfuniqueSmiles is null or contains blank strings.
+     * @throws NullPointerException is thrown if the list aListOfUniqueSmiles is null.
+     * @throws IllegalArgumentException is thrown if the list aListOfUniqueSmiles contains blank strings.
      */
     @Override
-    public IBitFingerprint getBitFingerprint(List<String> aListOfUniqueSmiles) throws NullPointerException {
+    public IBitFingerprint getBitFingerprint(List<String> aListOfUniqueSmiles) throws NullPointerException, IllegalArgumentException {
         Objects.requireNonNull(aListOfUniqueSmiles, "aFragmentList (list of string instances) is null.");
         BitSet tmpBitSet = new BitSet(this.fragmentArray.length);
         for (String tmpUniqueSmiles : aListOfUniqueSmiles) {
             Objects.requireNonNull(tmpUniqueSmiles, "aFragmentList (at least one list element) is null.");
             if(tmpUniqueSmiles.isBlank()) {
-                throw new NullPointerException("aFragmentList (at least one list element) is blank.");
+                throw new IllegalArgumentException("aFragmentList (at least one list element) is blank.");
             }
             if (this.uniqueSmilesToPositionMap.containsKey(tmpUniqueSmiles)) {
                 int tmpPosition = uniqueSmilesToPositionMap.get(tmpUniqueSmiles);
                 tmpBitSet.set(tmpPosition,true);
             }
         }
-         aFingerprint = new BitSetFingerprint(tmpBitSet);
+        aFingerprint = new BitSetFingerprint(tmpBitSet);
         return aFingerprint;
        // return new BitSetFingerprint(tmpBitSet);
     }
@@ -140,16 +142,20 @@ public class FragmentFingerprinter implements IFragmentFingerprinter {
      * @param aUniqueSmilesToFrequencyMap  is a map that maps fragments in the form of unique SMILES to the frequency of unique SMILES.
      * To be able to calculate the fingerprint for a molecule, the fragments must belong to a molecule.
      * @return count fingerprint
-     * @throws NullPointerException  is thrown if the map aUniqueSmilesToFrequencyMap is null or contains keys or values that are null or blank, respectively.
+     * @throws NullPointerException  is thrown if the map aUniqueSmilesToFrequencyMap is null or contains keys or values that are null respectively.
+     * @throws IllegalArgumentException is thrown if the map aUniqueSmilesToFrequencyMap contains keys or values that are blank, respectively.
      */
     @Override
-    public ICountFingerprint getCountFingerprint(Map<String, Integer> aUniqueSmilesToFrequencyMap) throws NullPointerException {
+    public ICountFingerprint getCountFingerprint(Map<String, Integer> aUniqueSmilesToFrequencyMap) throws NullPointerException,IllegalArgumentException{
         HashMap<Integer, Integer> tmpRawMap = new HashMap<>(this.fragmentArray.length);
         Objects.requireNonNull(aUniqueSmilesToFrequencyMap, "aUniqueSmilesToFrequencyMap (Map of string and integer instances) is null.");
         for (String tmpUniqueSmiles : aUniqueSmilesToFrequencyMap.keySet()) {
-            if(tmpUniqueSmiles == null || aUniqueSmilesToFrequencyMap.get(tmpUniqueSmiles) == null || tmpUniqueSmiles.isBlank()) {
+            if(tmpUniqueSmiles == null || aUniqueSmilesToFrequencyMap.get(tmpUniqueSmiles) == null) {
                 throw new NullPointerException("aUniqueSmilesToFrequencyMap (Map of string and integer instances) contains " +
-                        "instances that are null or strings that are blank.");
+                        "instances that are null.");
+            }
+            if(tmpUniqueSmiles.isBlank()) {
+                throw new IllegalArgumentException("aUniqueSmilesToFrequencyMap (Map of strings an integer instances) contains strings that are blank.");
             }
             if (this.uniqueSmilesToPositionMap.containsKey(tmpUniqueSmiles)) {
                 int tmpPosition = this.uniqueSmilesToPositionMap.get(tmpUniqueSmiles);
@@ -172,17 +178,18 @@ public class FragmentFingerprinter implements IFragmentFingerprinter {
      * once in the list. To be able to calculate the fingerprint for a molecule,
      * the fragments should belong to one molecule.
      * @return count fingerprint
-     * @throws NullPointerException
+     * @throws NullPointerException is thrown if the list aUniqueSmilesToFrequencyList is null.
+     * @throws IllegalArgumentException is thrown if the list aListOfUniqueSmiles contains blank strings.
      */
     @Override
-    public ICountFingerprint getCountFingerprint(List<String>  aUniqueSmilesToFrequencyList) throws NullPointerException {
+    public ICountFingerprint getCountFingerprint(List<String>  aUniqueSmilesToFrequencyList) throws NullPointerException, IllegalArgumentException {
         HashMap<String, Integer> tmpUniqueSmilesToFrequencyCountMap = new HashMap<>();
         int i = 1;
         Objects.requireNonNull(aUniqueSmilesToFrequencyList, "aUniqueSmilesToFrequencyList (list of string instances) is null.");
         for (String tmpSmiles :  aUniqueSmilesToFrequencyList) {
             Objects.requireNonNull(tmpSmiles, "aUniqueSmilesToFrequencyList (at least one list element) is null.");
             if(tmpSmiles.isBlank()) {
-                throw new NullPointerException("aUniqueSmilesToFrequencyList (at least one list element) is blank.");
+                throw new IllegalArgumentException("aUniqueSmilesToFrequencyList (at least one list element) is blank.");
             }
             if (tmpUniqueSmilesToFrequencyCountMap.containsKey(tmpSmiles) == false) {
                 tmpUniqueSmilesToFrequencyCountMap.put(tmpSmiles, i);
