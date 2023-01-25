@@ -74,7 +74,7 @@ public class CountFingerprint implements ICountFingerprint {
     public long size() {
         return this.fragmentArrayOfUniqueSmiles.length;
     }
-
+    //
     /**
      * Returns the number of bins that are populated.
      * The number is equal to the defined fragments.
@@ -86,7 +86,7 @@ public class CountFingerprint implements ICountFingerprint {
     public int numOfPopulatedbins() {
         return this.fragmentArrayOfUniqueSmiles.length;
     }
-
+    //
     /**
      * For each defined structure in the fingerprint, returns the frequency.
      * For an index greater than or equal to 0 and less than fragmentArrayOfUniqueSmiles, the frequency of this unique SMILES is output.
@@ -105,7 +105,7 @@ public class CountFingerprint implements ICountFingerprint {
             return 0;
         }
     }
-
+    //
     /**
      * Returns the hash corresponding to the given index in the fingerprint.
      * Since this is a key-based fingerprint, the hash value is nothing
@@ -118,7 +118,7 @@ public class CountFingerprint implements ICountFingerprint {
     public int getHash(int index) {
         return this.uniqueSmilesToPositionMap.get(this.fragmentArrayOfUniqueSmiles[index]);
     }
-
+    //
     /**
      *
      * @param fp to be merged
@@ -127,7 +127,7 @@ public class CountFingerprint implements ICountFingerprint {
     public void merge(ICountFingerprint fp) {
         throw new UnsupportedOperationException();
     }
-
+    //
     /**
      *
      * @param behaveAsBitFingerprint
@@ -136,7 +136,7 @@ public class CountFingerprint implements ICountFingerprint {
     public void setBehaveAsBitFingerprint(boolean behaveAsBitFingerprint) {
         throw new UnsupportedOperationException();
     }
-
+    //
     /**
      * Whether the fingerprint contains the given hash.
      *The parameter hash is not a calculated hash value, but also corresponds to the position of the bin in the fingerprint.
@@ -154,7 +154,7 @@ public class CountFingerprint implements ICountFingerprint {
             return this.uniqueSmilesToPositionMap.containsKey(this.fragmentArrayOfUniqueSmiles[hash]);
         }
     }
-
+    //
     /**
      * Get the number of times a certain hash exists in the fingerprint.
      * Since the fragment fingerprint is a key-based fingerprint and the hash value therefore indicates the

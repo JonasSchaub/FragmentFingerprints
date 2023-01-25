@@ -49,7 +49,6 @@ import java.util.Map;
 public interface IFragmentFingerprinter extends IFingerprinter {
 
     // <editor-fold defaultstate="collapsed" desc="Public methods">
-
     /**
      * Method that calculates the bit fingerprint  by comparing the unique SMILES of the fragments.
      * The method requires a set of  predefined fragments in the form of unique SMILES and compares the list,
@@ -62,7 +61,7 @@ public interface IFragmentFingerprinter extends IFingerprinter {
      * @return the bit fingerprint
      */
     IBitFingerprint getBitFingerprint(List<String> aListOfUniqueSmiles);
-
+    //
     /**
      * Method that calculates the count fingerprint by comparing the unique SMILES of the fragments.
      * The method requires a set of predefined fragments in the form of unique SMILES and compares the keys of the map,
@@ -76,7 +75,7 @@ public interface IFragmentFingerprinter extends IFingerprinter {
      * @return the count fingerprint
      */
     ICountFingerprint getCountFingerprint(Map<String, Integer> aUniqueSmilesToFrequencyMap);
-
+    //
     /**
      * Method that calculates the count fingerprint by comparing the unique SMILES of the fragments.
      * The method requires a set of predefined fragments in the form of unique SMILES and compares the list, which must be

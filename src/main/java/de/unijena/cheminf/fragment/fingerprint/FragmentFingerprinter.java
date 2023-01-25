@@ -63,9 +63,13 @@ public class FragmentFingerprinter implements IFragmentFingerprinter {
      */
     private HashMap<String, Integer> uniqueSmilesToPositionMap;
     /**
+     * Is a bit fingerprint
+     */
+    private BitSetFingerprint aBitFingerprint;
+    /**
      *
      */
-    private BitSetFingerprint aFingerprint;
+    private HashMap<Integer,Integer> rawCountMap;
     //</editor-fold>
     //
     // <editor-fold defaultstate="collapsed" desc="Constructor">
@@ -126,9 +130,8 @@ public class FragmentFingerprinter implements IFragmentFingerprinter {
                 tmpBitSet.set(tmpPosition,true);
             }
         }
-        aFingerprint = new BitSetFingerprint(tmpBitSet);
-        return aFingerprint;
-       // return new BitSetFingerprint(tmpBitSet);
+        aBitFingerprint = new BitSetFingerprint(tmpBitSet);
+        return aBitFingerprint;
     }
     //
     /**
@@ -147,7 +150,7 @@ public class FragmentFingerprinter implements IFragmentFingerprinter {
      */
     @Override
     public ICountFingerprint getCountFingerprint(Map<String, Integer> aUniqueSmilesToFrequencyMap) throws NullPointerException,IllegalArgumentException{
-        HashMap<Integer, Integer> tmpRawMap = new HashMap<>(this.fragmentArray.length);
+        this.rawCountMap = new HashMap<>(this.fragmentArray.length);
         Objects.requireNonNull(aUniqueSmilesToFrequencyMap, "aUniqueSmilesToFrequencyMap (Map of string and integer instances) is null.");
         for (String tmpUniqueSmiles : aUniqueSmilesToFrequencyMap.keySet()) {
             if(tmpUniqueSmiles == null || aUniqueSmilesToFrequencyMap.get(tmpUniqueSmiles) == null) {
@@ -159,11 +162,11 @@ public class FragmentFingerprinter implements IFragmentFingerprinter {
             }
             if (this.uniqueSmilesToPositionMap.containsKey(tmpUniqueSmiles)) {
                 int tmpPosition = this.uniqueSmilesToPositionMap.get(tmpUniqueSmiles);
-                tmpRawMap.put(tmpPosition,aUniqueSmilesToFrequencyMap.get(tmpUniqueSmiles));
+                this.rawCountMap.put(tmpPosition,aUniqueSmilesToFrequencyMap.get(tmpUniqueSmiles));
                // this.countArray[tmpPosition] = aMoleculeFragmentMap.get(tmpUniqueSmiles);
             }
         }
-      return new CountFingerprint(this.fragmentArray, this.uniqueSmilesToPositionMap, tmpRawMap);
+      return new CountFingerprint(this.fragmentArray, this.uniqueSmilesToPositionMap, this.rawCountMap);
     }
     //
     /**
@@ -267,7 +270,7 @@ public class FragmentFingerprinter implements IFragmentFingerprinter {
     //
     // <editor-fold defaultstate="collapsed" desc="Public methods">
     /**
-     *  returns the bit definitions i.e. which  bit stands for which fragment SMILES
+     *  Returns the bit definitions i.e. which  bit stands for which fragment SMILES.
      *
      * @param aBit
      * @return unique SMILES
@@ -275,16 +278,33 @@ public class FragmentFingerprinter implements IFragmentFingerprinter {
     public String getBitDefinition(int aBit) {
       return this.fragmentArray[aBit];
     }
+    //
+    /**
+     * The method generate the bit array.
+     *
+     * @return int[] bit array
+     */
     public int[] getBitArray(){
-        Objects.requireNonNull(aFingerprint, "Bit Fingerprint object is null.");
+        Objects.requireNonNull(aBitFingerprint, "Bit fingerprint object is null.");
         int[] tmpBitArray = new int[this.fragmentArray.length];
-        for(int tmpPositivePositions : aFingerprint.getSetbits()) {
+        for(int tmpPositivePositions : aBitFingerprint.getSetbits()) {
             tmpBitArray[tmpPositivePositions] = 1;
         }
         return tmpBitArray;
     }
+    //
+    /**
+     * The method generate the count array.
+     *
+     * @return int[] count array
+     */
     public int[] getCountArray(){
-        throw new UnsupportedOperationException();
+        Objects.requireNonNull(this.rawCountMap, "Count fingerprint object is null.");
+        int[] tmpCountArray = new int[this.fragmentArray.length];
+        for(int tmpPositivePositions : this.rawCountMap.keySet()) {
+            tmpCountArray[tmpPositivePositions] = this.rawCountMap.get(tmpPositivePositions);
+        }
+        return tmpCountArray;
     }
     // </editor-fold>
     //

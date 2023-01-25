@@ -250,21 +250,21 @@ public class PerformanceTest {
         this.bitPrintWriter.println("Number of fragments: " + this.fragmentList.size() + " and number of molecules: " + this.moleculeListforBitFingerprint.size());
         this.bitPrintWriter.println("Number of molecules in process, Bit fingerprint process time in ms");
         for (int i = numberOfMoleculesInProcess; i <= this.moleculeListforBitFingerprint.size(); i+=numberOfMoleculesInProcess) { // +=numberOfMoleculesInProcess
-                List<ArrayList<String>> tmpNumberOfMoleculesInProcess = this.moleculeListforBitFingerprint.subList(0, i);
-                try {
-                 startTime = System.currentTimeMillis();
-                    for (ArrayList<String> tmpMolecule : tmpNumberOfMoleculesInProcess) {
-                        IBitFingerprint bit = printer.getBitFingerprint(tmpMolecule);
-                    }
-                     endTime = System.currentTimeMillis();
-                } catch (Exception anException) {
-                    this.exceptionsPrintWriter.println("Bit fingerprint generation ERROR. There may be incorrect/invalid elements in the fragment list or molecule list.");
-                    this.appendToLogfile(anException);
-                    throw new Exception("Bit fingerprint generation ERROR. There may be incorrect/invalid elements in the fragment list or molecule list.");
+            List<ArrayList<String>> tmpNumberOfMoleculesInProcess = this.moleculeListforBitFingerprint.subList(0, i);
+            try {
+             startTime = System.currentTimeMillis();
+                for (ArrayList<String> tmpMolecule : tmpNumberOfMoleculesInProcess) {
+                    IBitFingerprint bit = printer.getBitFingerprint(tmpMolecule);
                 }
-                resultsPrintWriter.println("Processing " + tmpNumberOfMoleculesInProcess.size() + " valid molecules.");
-                resultsPrintWriter.println("Bit fingerprint generation took: " + (endTime - startTime) + " ms.");
-                bitPrintWriter.println(tmpNumberOfMoleculesInProcess.size() + "," + (endTime - startTime));
+                 endTime = System.currentTimeMillis();
+            } catch (Exception anException) {
+                this.exceptionsPrintWriter.println("Bit fingerprint generation ERROR. There may be incorrect/invalid elements in the fragment list or molecule list.");
+                this.appendToLogfile(anException);
+                throw new Exception("Bit fingerprint generation ERROR. There may be incorrect/invalid elements in the fragment list or molecule list.");
+            }
+            resultsPrintWriter.println("Processing " + tmpNumberOfMoleculesInProcess.size() + " valid molecules.");
+            resultsPrintWriter.println("Bit fingerprint generation took: " + (endTime - startTime) + " ms.");
+            bitPrintWriter.println(tmpNumberOfMoleculesInProcess.size() + "," + (endTime - startTime));
         }
         this.resultsPrintWriter.println();
         this.resultsPrintWriter.println("#########################################################################");
@@ -273,25 +273,25 @@ public class PerformanceTest {
         this.countPrintWriter.println("Number of fragments: " + this.fragmentList.size() + " and number of molecules: " + this.moleculeListforBitFingerprint.size());
         this.countPrintWriter.println("Number of molecules in process, Count fingerprint process time in ms.");
         for(int i = numberOfMoleculesInProcess; i<= this.moleculeFragmentList.size(); i+=numberOfMoleculesInProcess) {  //i+=2000)
-                List<HashMap<String, Integer>> sub = this.moleculeFragmentList.subList(0, i);
-                try {
-                    long start = System.currentTimeMillis();
-                    for (HashMap<String, Integer> map : sub) {
-                        ICountFingerprint count = printer.getCountFingerprint(map);
-                    }
-                    long end = System.currentTimeMillis();
-                    this.resultsPrintWriter.println("Processing " + sub.size() + " valid molecules.");
-                    this.resultsPrintWriter.println("Count fingerprint generation took: " + (end - start) + " ms.");
-                    this.resultsPrintWriter.println();
-                    this.countPrintWriter.println(sub.size() + "," + (end - start));
-                } catch (Exception anException) {
-                    this.exceptionsPrintWriter.println("Count fingerprint generation ERROR. There may be incorrect/invalid elements in the fragment list oder molecule list");
-                    this.appendToLogfile(anException);
-                    throw new Exception("Count fingerprint generation ERROR. There may be incorrect/invalid elements in the fragment list oder molecule list");
+            List<HashMap<String, Integer>> sub = this.moleculeFragmentList.subList(0, i);
+            try {
+                long start = System.currentTimeMillis();
+                for (HashMap<String, Integer> map : sub) {
+                    ICountFingerprint count = printer.getCountFingerprint(map);
                 }
+                long end = System.currentTimeMillis();
+                this.resultsPrintWriter.println("Processing " + sub.size() + " valid molecules.");
+                this.resultsPrintWriter.println("Count fingerprint generation took: " + (end - start) + " ms.");
+                this.resultsPrintWriter.println();
+                this.countPrintWriter.println(sub.size() + "," + (end - start));
+            } catch (Exception anException) {
+                this.exceptionsPrintWriter.println("Count fingerprint generation ERROR. There may be incorrect/invalid elements in the fragment list oder molecule list");
+                this.appendToLogfile(anException);
+                throw new Exception("Count fingerprint generation ERROR. There may be incorrect/invalid elements in the fragment list oder molecule list");
             }
         }
-
+    }
+    //
     /**
      * Appends the given exception's stack trace to a log file
      *

@@ -29,7 +29,6 @@ package de.unijena.cheminf.fragment.fingerprint;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
-import org.openscience.cdk.exception.CDKException;
 import org.openscience.cdk.fingerprint.IBitFingerprint;
 import org.openscience.cdk.fingerprint.ICountFingerprint;
 
@@ -170,7 +169,6 @@ public class FragmentFingerprintTest  {
             // add all molecule maps
             FragmentFingerprintTest.moleculeFragmentList.add(tmpMoleculeFragmentsMap);
         }
-
             // Objects necessary for the test are created (used only in @Test)
             FragmentFingerprintTest.fragmentFingerprinter = new FragmentFingerprinter(FragmentFingerprintTest.fragmentList);
             FragmentFingerprintTest.countFingerprintTest = FragmentFingerprintTest.fragmentFingerprinter.getCountFingerprint(FragmentFingerprintTest.moleculeFragmentList.get(FragmentFingerprintTest.moleculeFragmentList.size() - 1));
@@ -187,7 +185,6 @@ public class FragmentFingerprintTest  {
      */
     @Test
    public void bitFingerprintTest() {
-      // FragmentFingerprintTest.bitFingerprintTest = FragmentFingerprintTest.fragmentFingerprinter.getBitFingerprint(FragmentFingerprintTest.dataForGenerateBitFingerprint);
         //Test number of positive indices
         int tmpNumberPositiveBitsTest = 9;
         Assertions.assertEquals(tmpNumberPositiveBitsTest, FragmentFingerprintTest.bitFingerprintTest.cardinality());
@@ -222,6 +219,7 @@ public class FragmentFingerprintTest  {
 
         Assertions.assertArrayEquals(tmpTestArray, FragmentFingerprintTest.fragmentFingerprinter.getBitArray());
     }
+    //
     /**
      * Tests the other methods used in the creation of the count fingerprint, if the input is a map
      * Test molecule: Variamycin
@@ -245,6 +243,7 @@ public class FragmentFingerprintTest  {
         // Test the count value for the bin with index 10.
         Assertions.assertEquals(0, FragmentFingerprintTest.countFingerprintTest.getCountForHash(10));
     }
+    //
     /**
      * Tests the size of the fingerprint
      * Test molecule: Variamycin
@@ -256,6 +255,7 @@ public class FragmentFingerprintTest  {
         // Test size of the fingerprint
         Assertions.assertEquals(28,FragmentFingerprintTest.fragmentFingerprinter.getSize());
     }
+    //
     /**
      * Tests the method getCountFingerprint, the input must be a list
      *
@@ -314,16 +314,53 @@ public class FragmentFingerprintTest  {
         // Test the count value for the bin with index 10.
         Assertions.assertEquals(0, tmpCountFingerprintInputList.getCountForHash(0));
     }
-
+    //
+    /**
+     * Tests the method getBitArray().
+     *
+     * Test molecule: Variamycin
+     *
+     * @throws Exception if anything goes wrong
+     */
     @Test
-    public void getBitArray() throws CDKException {
+    public void getBitArrayTest() throws Exception {
+        //Test bit array
+        int[] tmpTestBitArray = new int[FragmentFingerprintTest.fragmentFingerprinter.getSize()];
+        tmpTestBitArray[3] = 1;
+        tmpTestBitArray[5] = 1;
+        tmpTestBitArray[9] = 1;
+        tmpTestBitArray[14] = 1;
+        tmpTestBitArray[16] = 1;
+        tmpTestBitArray[17] = 1;
+        tmpTestBitArray[18] = 1;
+        tmpTestBitArray[26] = 1;
+        tmpTestBitArray[27] = 1;
+        Assertions.assertArrayEquals(tmpTestBitArray,FragmentFingerprintTest.fragmentFingerprinter.getBitArray());
+    }
+    //
+    /**
+     * Tests the method getCountArray().
+     *
+     * Test molecule: Variamycin
+     *
+     * @throws Exception if anything goes wrong
+     */
+    @Test
+    public void getCountArrayTest() throws Exception {
+        //Test count array
+        int[] tmpTestCountArray = new int[FragmentFingerprintTest.fragmentFingerprinter.getSize()];
+        tmpTestCountArray[3] = 1;
+        tmpTestCountArray[5] = 2;
+        tmpTestCountArray[9] = 1;
+        tmpTestCountArray[14] = 5;
+        tmpTestCountArray[16] = 2;
+        tmpTestCountArray[17] = 8;
+        tmpTestCountArray[18] = 2;
+        tmpTestCountArray[26] = 5;
+        tmpTestCountArray[27] = 2;
+        Assertions.assertArrayEquals(tmpTestCountArray,FragmentFingerprintTest.fragmentFingerprinter.getCountArray());
     }
     //</editor-fold>
     //
-
-
-
-
-
 }
 
