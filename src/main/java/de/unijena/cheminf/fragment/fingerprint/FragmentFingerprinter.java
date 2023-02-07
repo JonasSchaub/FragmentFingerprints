@@ -88,8 +88,8 @@ public class FragmentFingerprinter implements IFragmentFingerprinter {
         Objects.requireNonNull(aFragmentList, "aFragmentList (list of string instances) is null.");
         for(String tmpDefinedUniqueSMILES : aFragmentList) {
             Objects.requireNonNull(tmpDefinedUniqueSMILES, "aFragmentList (at least one list element) is null.");
-            if(tmpDefinedUniqueSMILES.isBlank()) {
-                throw new IllegalArgumentException("aFragmentList (at least one list element) is blank.");
+            if(tmpDefinedUniqueSMILES.isBlank() || tmpDefinedUniqueSMILES.isEmpty()) {
+                throw new IllegalArgumentException("aFragmentList (at least one list element) is blank/empty.");
             }
         }
         this.fragmentArray = aFragmentList.toArray(new String[0]);
@@ -122,8 +122,8 @@ public class FragmentFingerprinter implements IFragmentFingerprinter {
         BitSet tmpBitSet = new BitSet(this.fragmentArray.length);
         for (String tmpUniqueSmiles : aListOfUniqueSmiles) {
             Objects.requireNonNull(tmpUniqueSmiles, "aFragmentList (at least one list element) is null.");
-            if(tmpUniqueSmiles.isBlank()) {
-                throw new IllegalArgumentException("aFragmentList (at least one list element) is blank.");
+            if(tmpUniqueSmiles.isBlank() ||tmpUniqueSmiles.isEmpty()) {
+                throw new IllegalArgumentException("aFragmentList (at least one list element) is blank/empty.");
             }
             if (this.uniqueSmilesToPositionMap.containsKey(tmpUniqueSmiles)) {
                 int tmpPosition = uniqueSmilesToPositionMap.get(tmpUniqueSmiles);
@@ -191,8 +191,8 @@ public class FragmentFingerprinter implements IFragmentFingerprinter {
         Objects.requireNonNull(aUniqueSmilesToFrequencyList, "aUniqueSmilesToFrequencyList (list of string instances) is null.");
         for (String tmpSmiles :  aUniqueSmilesToFrequencyList) {
             Objects.requireNonNull(tmpSmiles, "aUniqueSmilesToFrequencyList (at least one list element) is null.");
-            if(tmpSmiles.isBlank()) {
-                throw new IllegalArgumentException("aUniqueSmilesToFrequencyList (at least one list element) is blank.");
+            if(tmpSmiles.isBlank() || tmpSmiles.isEmpty()) {
+                throw new IllegalArgumentException("aUniqueSmilesToFrequencyList (at least one list element) is blank/empty.");
             }
             if (tmpUniqueSmilesToFrequencyCountMap.containsKey(tmpSmiles) == false) {
                 tmpUniqueSmilesToFrequencyCountMap.put(tmpSmiles, i);

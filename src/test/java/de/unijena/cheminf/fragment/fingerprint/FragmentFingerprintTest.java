@@ -38,8 +38,6 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.BitSet;
@@ -47,7 +45,7 @@ import java.util.HashMap;
 import java.util.List;
 
 /**
- *  Class to test the correct working of  FragmentFingerprinter
+ *  Class to test the correct working of FragmentFingerprinter
  */
 public class FragmentFingerprintTest  {
     //<editor-fold desc="private static class variables" defaultstate="collapsed">
@@ -115,6 +113,7 @@ public class FragmentFingerprintTest  {
                 FragmentFingerprintTest.fragmentList.add(tmpSmilesOfFragments[0]);
             }
             FragmentFingerprintTest.fragmentList.remove(0);
+            tmpFragmentSetReader.close();
         } catch (IOException anException) {
             throw new IOException("invalid fragment file. At least one line is not readable.");
         }
@@ -128,14 +127,13 @@ public class FragmentFingerprintTest  {
                 String[] tmpMoleculeFragmentsAndFrequencies = tmpMoleculeLine.split(tmpSeparatorSemicolon);
                 tmpList.add(Arrays.asList(tmpMoleculeFragmentsAndFrequencies));
             }
+            tmpMoleculeFragmentsReader.close();
         } catch (IOException anException) {
             throw new IOException("invalid molecule file. At least one line is not readable");
         }
         List<String> tmpSeparateList;
         FragmentFingerprinter tmpFingerprintRepresentation = new FragmentFingerprinter(FragmentFingerprintTest.fragmentList);
         String tmpWorkingPath = (new File("").getAbsoluteFile().getAbsolutePath()) + File.separator;
-        LocalDateTime tmpDateTime = LocalDateTime.now();
-        String tmpProcessingTime = tmpDateTime.format(DateTimeFormatter.ofPattern("uuuu_MM_dd_HH_mm"));
         new File(tmpWorkingPath + "/Fingerprints").mkdirs();
         File tmpResultsLogFile = new File(tmpWorkingPath + "/Fingerprints/" + FragmentFingerprintTest.FINGERPRINTS_FILE_NAME  + ".txt");
         FileWriter tmpResultsLogFileWriter = new FileWriter(tmpResultsLogFile, false);
@@ -169,10 +167,10 @@ public class FragmentFingerprintTest  {
             // add all molecule maps
             FragmentFingerprintTest.moleculeFragmentList.add(tmpMoleculeFragmentsMap);
         }
-            // Objects necessary for the test are created (used only in @Test)
-            FragmentFingerprintTest.fragmentFingerprinter = new FragmentFingerprinter(FragmentFingerprintTest.fragmentList);
-            FragmentFingerprintTest.countFingerprintTest = FragmentFingerprintTest.fragmentFingerprinter.getCountFingerprint(FragmentFingerprintTest.moleculeFragmentList.get(FragmentFingerprintTest.moleculeFragmentList.size() - 1));
-            FragmentFingerprintTest.bitFingerprintTest = FragmentFingerprintTest.fragmentFingerprinter.getBitFingerprint(FragmentFingerprintTest.dataForGenerateBitFingerprint);
+        // Objects necessary for the test are created (used only in @Test)
+        FragmentFingerprintTest.fragmentFingerprinter = new FragmentFingerprinter(FragmentFingerprintTest.fragmentList);
+        FragmentFingerprintTest.countFingerprintTest = FragmentFingerprintTest.fragmentFingerprinter.getCountFingerprint(FragmentFingerprintTest.moleculeFragmentList.get(FragmentFingerprintTest.moleculeFragmentList.size() - 1));
+        FragmentFingerprintTest.bitFingerprintTest = FragmentFingerprintTest.fragmentFingerprinter.getBitFingerprint(FragmentFingerprintTest.dataForGenerateBitFingerprint);
     }
     //</editor-fold>
     //
