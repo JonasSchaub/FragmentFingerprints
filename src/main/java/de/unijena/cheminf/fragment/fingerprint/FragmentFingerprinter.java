@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2022 Betuel Sevindik, Felix Baensch, Jonas Schaub, Christoph Steinbeck, and Achim Zielesny
+ * Copyright (c) 2023 Betuel Sevindik, Felix Baensch, Jonas Schaub, Christoph Steinbeck, and Achim Zielesny
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -21,6 +21,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
+
 package de.unijena.cheminf.fragment.fingerprint;
 
 import org.openscience.cdk.exception.CDKException;
@@ -36,8 +37,9 @@ import java.util.Map;
 import java.util.Objects;
 
 /**
- * Class to generate fingerprints. The fingerprints that can be generated are the bit fingerprint and the count fingerprint
- * Fragment fingerprints are  key-based fingerprints. Thus, the class requires to be predefined structures/fragments in
+ * Class to generate fingerprints. The fingerprints that can be generated are the bit fingerprint and the
+ * count fingerprint. Fragment fingerprints are  key-based fingerprints.
+ * Thus, the class requires to be predefined structures/fragments in
  * the form of unique SMILES to create the fingerprint. These structures must be passed when the
  * class is called (in the constructor). The class implements the interface IFragmentFingerprinter,
  * which inherits the IFingerprinter (CDK), which allows the class to compute fingerprints in 2 ways.
@@ -65,9 +67,9 @@ public class FragmentFingerprinter implements IFragmentFingerprinter {
     /**
      * Is a bit fingerprint
      */
-    private BitSetFingerprint aBitFingerprint;
+    private BitSetFingerprint bitFingerprint;
     /**
-     *
+     * This map only assigns frequencies to positions if there is a match.
      */
     private HashMap<Integer,Integer> rawCountMap;
     //</editor-fold>
@@ -112,7 +114,8 @@ public class FragmentFingerprinter implements IFragmentFingerprinter {
      * @param aListOfUniqueSmiles is a list that stores fragments in the form of unique SMILES.
      * To be able to calculate the fingerprint for a molecule, the fragments should belong to one molecule.
      * @return BitSet. BitSet is a CDK class that implements the IBitFingerprint interface of CDK.
-     * This allows methods to be used that return useful information from the calculated bit fingerprint, such as the number of positive bits in the fingerprint, etc.
+     * This allows methods to be used that return useful information from the calculated bit fingerprint,
+     * such as the number of positive bits in the fingerprint, etc.
      * @throws NullPointerException is thrown if the list aListOfUniqueSmiles is null.
      * @throws IllegalArgumentException is thrown if the list aListOfUniqueSmiles contains blank strings.
      */
@@ -130,8 +133,8 @@ public class FragmentFingerprinter implements IFragmentFingerprinter {
                 tmpBitSet.set(tmpPosition,true);
             }
         }
-        aBitFingerprint = new BitSetFingerprint(tmpBitSet);
-        return aBitFingerprint;
+        bitFingerprint = new BitSetFingerprint(tmpBitSet);
+        return bitFingerprint;
     }
     //
     /**
@@ -142,11 +145,14 @@ public class FragmentFingerprinter implements IFragmentFingerprinter {
      * and stored in a locally initialized map. I.e. this HashMap maps the position of the unique SMILES to the
      * frequency of this unique SMILES, which is specified with the input map.
      *
-     * @param aUniqueSmilesToFrequencyMap  is a map that maps fragments in the form of unique SMILES to the frequency of unique SMILES.
+     * @param aUniqueSmilesToFrequencyMap  is a map that maps fragments in the form of unique SMILES to the
+     * frequency of unique SMILES.
      * To be able to calculate the fingerprint for a molecule, the fragments must belong to a molecule.
      * @return count fingerprint
-     * @throws NullPointerException  is thrown if the map aUniqueSmilesToFrequencyMap is null or contains keys or values that are null respectively.
-     * @throws IllegalArgumentException is thrown if the map aUniqueSmilesToFrequencyMap contains keys or values that are blank, respectively.
+     * @throws NullPointerException  is thrown if the map aUniqueSmilesToFrequencyMap is
+     * null or contains keys or values that are null respectively.
+     * @throws IllegalArgumentException is thrown if the map aUniqueSmilesToFrequencyMap
+     * contains keys or values that are blank, respectively.
      */
     @Override
     public ICountFingerprint getCountFingerprint(Map<String, Integer> aUniqueSmilesToFrequencyMap) throws NullPointerException,IllegalArgumentException{
@@ -166,7 +172,7 @@ public class FragmentFingerprinter implements IFragmentFingerprinter {
                // this.countArray[tmpPosition] = aMoleculeFragmentMap.get(tmpUniqueSmiles);
             }
         }
-      return new CountFingerprint(this.fragmentArray, this.uniqueSmilesToPositionMap, this.rawCountMap);
+        return new CountFingerprint(this.fragmentArray, this.uniqueSmilesToPositionMap, this.rawCountMap);
     }
     //
     /**
@@ -186,7 +192,7 @@ public class FragmentFingerprinter implements IFragmentFingerprinter {
      */
     @Override
     public ICountFingerprint getCountFingerprint(List<String>  aUniqueSmilesToFrequencyList) throws NullPointerException, IllegalArgumentException {
-        HashMap<String, Integer> tmpUniqueSmilesToFrequencyCountMap = new HashMap<>();
+        HashMap<String, Integer> tmpUniqueSmilesToFrequencyCountMap = new HashMap<>(this.fragmentArray.length);
         int i = 1;
         Objects.requireNonNull(aUniqueSmilesToFrequencyList, "aUniqueSmilesToFrequencyList (list of string instances) is null.");
         for (String tmpSmiles :  aUniqueSmilesToFrequencyList) {
@@ -204,8 +210,7 @@ public class FragmentFingerprinter implements IFragmentFingerprinter {
     }
     //
     /**
-     *
-     * @return
+     * {@inheritDoc}
      */
     @Override
     public String getVersionDescription() {
@@ -213,10 +218,7 @@ public class FragmentFingerprinter implements IFragmentFingerprinter {
     }
     //
     /**
-     *
-     * @param mol molecule
-     * @return
-     * @throws CDKException
+     * {@inheritDoc}
      */
     @Override
     public BitSet getFingerprint(IAtomContainer mol) throws CDKException {
@@ -224,10 +226,7 @@ public class FragmentFingerprinter implements IFragmentFingerprinter {
     }
     //
     /**
-     *
-     * @param container {@link IAtomContainer} for which the fingerprint should be calculated.
-     * @return
-     * @throws CDKException
+     * {@inheritDoc}
      */
     @Override
     public IBitFingerprint getBitFingerprint(IAtomContainer container) throws CDKException {
@@ -235,10 +234,7 @@ public class FragmentFingerprinter implements IFragmentFingerprinter {
     }
     //
     /**
-     *
-     * @param container {@link IAtomContainer} for which the fingerprint should be calculated.
-     * @return
-     * @throws CDKException
+     * {@inheritDoc}
      */
     @Override
     public ICountFingerprint getCountFingerprint(IAtomContainer container) throws CDKException {
@@ -246,10 +242,7 @@ public class FragmentFingerprinter implements IFragmentFingerprinter {
     }
     //
     /**
-     *
-     * @param container IAtomContainer for which the fingerprint should be calculated.
-     * @return
-     * @throws CDKException
+     * {@inheritDoc}
      */
     @Override
     public Map<String, Integer> getRawFingerprint(IAtomContainer container) throws CDKException {
@@ -257,6 +250,8 @@ public class FragmentFingerprinter implements IFragmentFingerprinter {
     }
     //
     /**
+     * {@inheritDoc}
+     *
      * Since the FragmentFingerprinter is a key-based fingerprint, the size of the fingerprint
      * corresponds to the number of predefined fragments(unique SMILES)
      *
@@ -284,10 +279,10 @@ public class FragmentFingerprinter implements IFragmentFingerprinter {
      *
      * @return int[] bit array
      */
-    public int[] getBitArray(){
-        Objects.requireNonNull(aBitFingerprint, "Bit fingerprint object is null.");
+    public int[] getBitArray() {
+        Objects.requireNonNull(bitFingerprint, "Bit fingerprint object is null.");
         int[] tmpBitArray = new int[this.fragmentArray.length];
-        for(int tmpPositivePositions : aBitFingerprint.getSetbits()) {
+        for(int tmpPositivePositions : bitFingerprint.getSetbits()) {
             tmpBitArray[tmpPositivePositions] = 1;
         }
         return tmpBitArray;
@@ -298,7 +293,7 @@ public class FragmentFingerprinter implements IFragmentFingerprinter {
      *
      * @return int[] count array
      */
-    public int[] getCountArray(){
+    public int[] getCountArray() {
         Objects.requireNonNull(this.rawCountMap, "Count fingerprint object is null.");
         int[] tmpCountArray = new int[this.fragmentArray.length];
         for(int tmpPositivePositions : this.rawCountMap.keySet()) {
@@ -307,5 +302,4 @@ public class FragmentFingerprinter implements IFragmentFingerprinter {
         return tmpCountArray;
     }
     // </editor-fold>
-    //
 }

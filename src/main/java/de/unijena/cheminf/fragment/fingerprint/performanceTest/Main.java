@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2022 Betuel Sevindik, Felix Baensch, Jonas Schaub, Christoph Steinbeck, and Achim Zielesny
+ * Copyright (c) 2023 Betuel Sevindik, Felix Baensch, Jonas Schaub, Christoph Steinbeck, and Achim Zielesny
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -31,7 +31,7 @@ package de.unijena.cheminf.fragment.fingerprint.performanceTest;
  */
 public class Main {
     /**
-     * Starts the application.Command line arguments must be the name of CSV-files to read
+     * Starts the application.Command line arguments must be the name of CSV-files to read.
      *
      * @param args the command line arguments
      */
@@ -39,7 +39,7 @@ public class Main {
         try {
             //PerformanceTest tmpApplication = new PerformanceTest("Fragments_Ertl_algorithm_200k_COCONUT.csv", "Items_Ertl_algorithm_200k_COCONUT.csv","20000");
             PerformanceTest tmpApplication = new PerformanceTest(args[0], args[1], args[2]);
-        }catch (Exception anException) {
+        } catch (Exception anException) {
             anException.printStackTrace(System.err);
             System.exit(1);
         }

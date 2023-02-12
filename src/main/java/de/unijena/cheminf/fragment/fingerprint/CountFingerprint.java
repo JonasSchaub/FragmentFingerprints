@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2022 Betuel Sevindik, Felix Baensch, Jonas Schaub, Christoph Steinbeck, and Achim Zielesny
+ * Copyright (c) 2023 Betuel Sevindik, Felix Baensch, Jonas Schaub, Christoph Steinbeck, and Achim Zielesny
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -25,7 +25,6 @@
 package de.unijena.cheminf.fragment.fingerprint;
 
 import org.openscience.cdk.fingerprint.ICountFingerprint;
-
 import java.util.HashMap;
 
 /**
@@ -33,42 +32,52 @@ import java.util.HashMap;
  * ICountFingerprint provides useful methods to obtain information about the calculated count fingerprint.
  */
 public class CountFingerprint implements ICountFingerprint {
-    //<editor-fold desc="private  class variables" defaultstate="collapsed">
+    //<editor-fold desc="private final class variables" defaultstate="collapsed">
     /**
      * Is an array containing all predefined unique SMILES.
      */
-    private String[] fragmentArrayOfUniqueSmiles;
+    private final String[] fragmentArrayOfUniqueSmiles;
     /**
      * The HashMap maps the unique SMILES to the position they have in the array.
      */
-    private HashMap<String,Integer> uniqueSmilesToPositionMap;
+    private final HashMap<String,Integer> uniqueSmilesToPositionMap;
     /**
-     * Map
+     * The HashMap maps the position of unique SMILES to the frequency
      */
-    private HashMap<Integer, Integer> rawMap;
+    private final HashMap<Integer, Integer> uniqueSmilesPositionToFrequencyCountRawMap;
+    //</editor-fold>
+    //
+    //<editor-fold desc="private class variables" defaultstate="collapsed">
+    private boolean behaveAsBitFingerprint;
     //</editor-fold>
     //
     //<editor-fold desc="Constructor" defaultstate="collapsed">
     /**
      * Constructor.
      *
-     * @param aFragments
-     * @param aMapOfFragmentSmiles
+     * @param aFragments is a string array that stores all fragments that are in the form of unique SMILES.
+     * @param aMapOfFragmentSmiles is a map that assigns the unique SMILES to the positions they occupy in aFragments.
+     * @param aPositionToFrequencyMap is the raw map. It maps the positions of the unique SMILES to the
+     *                                frequency of these SMILES.
      */
-    public CountFingerprint(String[] aFragments, HashMap<String, Integer> aMapOfFragmentSmiles, HashMap<Integer, Integer> aRawMap) {
+    public CountFingerprint(String[] aFragments, HashMap<String, Integer> aMapOfFragmentSmiles, HashMap<Integer, Integer> aPositionToFrequencyMap) {
+        if(aFragments == null || aMapOfFragmentSmiles == null || aPositionToFrequencyMap == null) {
+            throw new NullPointerException("At least one of the arguments is null.");
+        }
         this.fragmentArrayOfUniqueSmiles = aFragments;
         this.uniqueSmilesToPositionMap = aMapOfFragmentSmiles;
-        this.rawMap = aRawMap;
+        this.uniqueSmilesPositionToFrequencyCountRawMap = aPositionToFrequencyMap;
+        this.behaveAsBitFingerprint = false;
     }
     //</editor-fold>
     //
     //<editor-fold desc="Overridden public methods " defaultstate="collapsed">
     /**
-     * Returns the number of bits in this fingerprint.
+     * {@inheritDoc}
+     *
      * Since fragment fingerprints are key based, the number of bits in the fingerprint
      * is equal to the number of predefined fragments (unique SMILES).
      *
-     * @return the size of the fingerprint.
      */
     @Override
     public long size() {
@@ -76,11 +85,8 @@ public class CountFingerprint implements ICountFingerprint {
     }
     //
     /**
-     * Returns the number of bins that are populated.
-     * The number is equal to the defined fragments.
      *
-     * @return the number of populated bins
-     * @see    #size()
+     * {@inheritDoc}
      */
     @Override
     public int numOfPopulatedbins() {
@@ -88,31 +94,40 @@ public class CountFingerprint implements ICountFingerprint {
     }
     //
     /**
-     * For each defined structure in the fingerprint, returns the frequency.
-     * For an index greater than or equal to 0 and less than fragmentArrayOfUniqueSmiles, the frequency of this unique SMILES is output.
-     * If the given index is greater than the size of the fingerprint, a NullPinterException is thrown.
+     * {@inheritDoc}
      *
-     * @param index the index of the bin to return the number of hits for.
-     * @return the count for the bin with given index.
+     * For an index specified within the fingerprint size, the corresponding frequency is output.
+     * If the given index is greater than the size of the fingerprint or a negative value,
+     * an IllegalArgumentException is thrown.
+     *
      */
     @Override
     public int getCount(int index) {
-        if (index < this.fragmentArrayOfUniqueSmiles.length && index >= 0 && this.rawMap.containsKey(index)) {
-            return this.rawMap.get(index);
-        } else if (index >= this.fragmentArrayOfUniqueSmiles.length) {
-            return this.rawMap.get(index);
+        if(this.behaveAsBitFingerprint == false) {
+            if (index >= 0 && this.uniqueSmilesPositionToFrequencyCountRawMap.containsKey(index)) {
+                return this.uniqueSmilesPositionToFrequencyCountRawMap.get(index);
+            } else if (index >= this.fragmentArrayOfUniqueSmiles.length || index < 0) {
+                throw new IllegalArgumentException("This position does not exist in the fingerprint ( undefined state).");
+            } else {
+                return 0;
+            }
         } else {
-            return 0;
+            if (index >= 0 && this.uniqueSmilesPositionToFrequencyCountRawMap.containsKey(index)) {
+                return 1;
+            } else if (index >= this.fragmentArrayOfUniqueSmiles.length || index < 0) {
+                throw new IllegalArgumentException("This position does not exist in the fingerprint ( undefined state).");
+            } else {
+                return 0;
+            }
         }
     }
     //
     /**
-     * Returns the hash corresponding to the given index in the fingerprint.
-     * Since this is a key-based fingerprint, the hash value is nothing
-     * more than the position of the bin in the fingerprint (no hash value is calculated).
+     * {@inheritDoc}
      *
-     * @param index the index of the bin to return the hash for.
-     * @return the hash for the bin with the given index.
+     * Since this is a key-based fingerprint, the hash value is  the position of the bin in the
+     * fingerprint (no hash value is calculated).
+     *
      */
     @Override
     public int getHash(int index) {
@@ -120,8 +135,7 @@ public class CountFingerprint implements ICountFingerprint {
     }
     //
     /**
-     *
-     * @param fp to be merged
+     * {@inheritDoc}
      */
     @Override
     public void merge(ICountFingerprint fp) {
@@ -129,49 +143,59 @@ public class CountFingerprint implements ICountFingerprint {
     }
     //
     /**
-     *
-     * @param behaveAsBitFingerprint
+     * {@inheritDoc}
      */
-    @Override
+    @Override// TODO convert count fingerprint in bit fingerprint
     public void setBehaveAsBitFingerprint(boolean behaveAsBitFingerprint) {
-        throw new UnsupportedOperationException();
+        this.behaveAsBitFingerprint = behaveAsBitFingerprint; // true or false
     }
     //
     /**
-     * Whether the fingerprint contains the given hash.
-     *The parameter hash is not a calculated hash value, but also corresponds to the position of the bin in the fingerprint.
-     * @see    #getHash(int)
-     * For hash greater than or equals fingerprint size the method returns false and for all hash less than fingerprint size a true is returned.
+     * {@inheritDoc}
      *
-     * @param hash
-     * @return true if the fingerprint contains the given hash, otherwise false.
+     * The parameter hash is not a calculated hash value, but also corresponds to the
+     * position of the bin in the fingerprint.
+     *
      */
     @Override
     public boolean hasHash(int hash) {
-        if(hash >= this.fragmentArrayOfUniqueSmiles.length){
-            return false;
+        if(hash< this.fragmentArrayOfUniqueSmiles.length && hash>=0) {
+            return true;
+        } else if (hash < 0) {
+            throw new IllegalArgumentException("Negative values are not allowed.");
         } else {
-            return this.uniqueSmilesToPositionMap.containsKey(this.fragmentArrayOfUniqueSmiles[hash]);
+            return false;
         }
     }
     //
     /**
-     * Get the number of times a certain hash exists in the fingerprint.
+     * {@inheritDoc}
+     *
      * Since the fragment fingerprint is a key-based fingerprint and the hash value therefore indicates the
      * position of the respective bin in the fingerprint, each hash value occurs only once in the fingerprint.
      * Therefore, the method returns the frequency of the fragment in the specified bin.
      *
-     * @param hash the index of the bin to return the number of hits for.
-     * @return the number associated with the given hash
+     * @see #getCount(int)
+     *
      */
     @Override
     public int getCountForHash(int hash) {
-        if (hash < this.fragmentArrayOfUniqueSmiles.length && hash >= 0 && this.rawMap.containsKey(hash)) {
-            return this.rawMap.get(hash);
-        } else if (hash >= this.fragmentArrayOfUniqueSmiles.length) {
-            return this.rawMap.get(hash);
+        if(this.behaveAsBitFingerprint == false) {
+            if (hash >= 0 && this.uniqueSmilesPositionToFrequencyCountRawMap.containsKey(hash)) {
+                return this.uniqueSmilesPositionToFrequencyCountRawMap.get(hash);
+            } else if (hash >= this.fragmentArrayOfUniqueSmiles.length || hash < 0) {
+                throw new IllegalArgumentException("This position does not exist in the fingerprint ( undefined state).");
+            } else {
+                return 0;
+            }
         } else {
-            return 0;
+            if (hash >= 0 && this.uniqueSmilesPositionToFrequencyCountRawMap.containsKey(hash)) {
+                return 1;
+            } else if (hash >= this.fragmentArrayOfUniqueSmiles.length || hash < 0) {
+                throw new IllegalArgumentException("This position does not exist in the fingerprint ( undefined state).");
+            } else {
+                return 0;
+            }
         }
     }
     //</editor-fold>
