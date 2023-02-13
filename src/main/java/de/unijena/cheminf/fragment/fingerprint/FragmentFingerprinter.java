@@ -133,8 +133,8 @@ public class FragmentFingerprinter implements IFragmentFingerprinter {
                 tmpBitSet.set(tmpPosition,true);
             }
         }
-        bitFingerprint = new BitSetFingerprint(tmpBitSet);
-        return bitFingerprint;
+        this.bitFingerprint = new BitSetFingerprint(tmpBitSet);
+        return this.bitFingerprint;
     }
     //
     /**
@@ -155,7 +155,7 @@ public class FragmentFingerprinter implements IFragmentFingerprinter {
      * contains keys or values that are blank, respectively.
      */
     @Override
-    public ICountFingerprint getCountFingerprint(Map<String, Integer> aUniqueSmilesToFrequencyMap) throws NullPointerException,IllegalArgumentException{
+    public ICountFingerprint getCountFingerprint(Map<String, Integer> aUniqueSmilesToFrequencyMap) throws NullPointerException,IllegalArgumentException {
         this.rawCountMap = new HashMap<>(this.fragmentArray.length);
         Objects.requireNonNull(aUniqueSmilesToFrequencyMap, "aUniqueSmilesToFrequencyMap (Map of string and integer instances) is null.");
         for (String tmpUniqueSmiles : aUniqueSmilesToFrequencyMap.keySet()) {
@@ -163,8 +163,8 @@ public class FragmentFingerprinter implements IFragmentFingerprinter {
                 throw new NullPointerException("aUniqueSmilesToFrequencyMap (Map of string and integer instances) contains " +
                         "instances that are null.");
             }
-            if(tmpUniqueSmiles.isBlank()) {
-                throw new IllegalArgumentException("aUniqueSmilesToFrequencyMap (Map of strings an integer instances) contains strings that are blank.");
+            if(tmpUniqueSmiles.isBlank() || tmpUniqueSmiles.isEmpty()) {
+                throw new IllegalArgumentException("aUniqueSmilesToFrequencyMap (Map of strings an integer instances) contains strings that are blank/empty.");
             }
             if (this.uniqueSmilesToPositionMap.containsKey(tmpUniqueSmiles)) {
                 int tmpPosition = this.uniqueSmilesToPositionMap.get(tmpUniqueSmiles);
@@ -271,7 +271,11 @@ public class FragmentFingerprinter implements IFragmentFingerprinter {
      * @return unique SMILES
      */
     public String getBitDefinition(int aBit) {
-      return this.fragmentArray[aBit];
+        if(aBit < this.fragmentArray.length) {
+            return this.fragmentArray[aBit];
+        } else {
+            throw new IllegalArgumentException("This bit is not defined/present in the fingerprint.");
+        }
     }
     //
     /**
@@ -280,9 +284,9 @@ public class FragmentFingerprinter implements IFragmentFingerprinter {
      * @return int[] bit array
      */
     public int[] getBitArray() {
-        Objects.requireNonNull(bitFingerprint, "Bit fingerprint object is null.");
+        Objects.requireNonNull(this.bitFingerprint, "Bit fingerprint object is null.");
         int[] tmpBitArray = new int[this.fragmentArray.length];
-        for(int tmpPositivePositions : bitFingerprint.getSetbits()) {
+        for(int tmpPositivePositions : this.bitFingerprint.getSetbits()) {
             tmpBitArray[tmpPositivePositions] = 1;
         }
         return tmpBitArray;

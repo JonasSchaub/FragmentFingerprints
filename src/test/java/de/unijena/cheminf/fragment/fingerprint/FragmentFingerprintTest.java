@@ -361,7 +361,6 @@ public class FragmentFingerprintTest {
      */
     @Test
     public void fragmentFingerprintSizeTest() {
-        // Test size of the fingerprint
         Assertions.assertEquals(28,FragmentFingerprintTest.fragmentFingerprinter.getSize());
     }
     //
@@ -372,7 +371,7 @@ public class FragmentFingerprintTest {
      */
     @Test
     public void countFingerprintInputListSizeTest() {
-        ICountFingerprint tmpCountFingerprintInputList = FragmentFingerprintTest.fragmentFingerprinter.getCountFingerprint(countListOfUniqueSmiles);
+        ICountFingerprint tmpCountFingerprintInputList = FragmentFingerprintTest.fragmentFingerprinter.getCountFingerprint(FragmentFingerprintTest.countListOfUniqueSmiles);
         long tmpSizeTest = 28;
         Assertions.assertEquals(tmpSizeTest, tmpCountFingerprintInputList.size());
     }
@@ -384,7 +383,7 @@ public class FragmentFingerprintTest {
      */
     @Test
     public void countFingerprintInputListNumberOfPopulatedBins() {
-        ICountFingerprint tmpCountFingerprintInputList = FragmentFingerprintTest.fragmentFingerprinter.getCountFingerprint(countListOfUniqueSmiles);
+        ICountFingerprint tmpCountFingerprintInputList = FragmentFingerprintTest.fragmentFingerprinter.getCountFingerprint(FragmentFingerprintTest.countListOfUniqueSmiles);
         int tmpBinsTest = 28;
         Assertions.assertEquals(tmpBinsTest, tmpCountFingerprintInputList.numOfPopulatedbins());
     }
@@ -396,7 +395,7 @@ public class FragmentFingerprintTest {
      */
     @Test
     public void countFingerprintInputListCountValueTest() {
-        ICountFingerprint tmpCountFingerprintInputList = FragmentFingerprintTest.fragmentFingerprinter.getCountFingerprint(countListOfUniqueSmiles);
+        ICountFingerprint tmpCountFingerprintInputList = FragmentFingerprintTest.fragmentFingerprinter.getCountFingerprint(FragmentFingerprintTest.countListOfUniqueSmiles);
         Assertions.assertEquals(5, tmpCountFingerprintInputList.getCount(26));
     }
     //
@@ -407,7 +406,7 @@ public class FragmentFingerprintTest {
      */
     @Test
     public void countFingerprintInputListGetHashTest() {
-        ICountFingerprint tmpCountFingerprintInputList = FragmentFingerprintTest.fragmentFingerprinter.getCountFingerprint(countListOfUniqueSmiles);
+        ICountFingerprint tmpCountFingerprintInputList = FragmentFingerprintTest.fragmentFingerprinter.getCountFingerprint(FragmentFingerprintTest.countListOfUniqueSmiles);
         Assertions.assertEquals(10,tmpCountFingerprintInputList.getHash(10));
     }
     //
@@ -418,7 +417,7 @@ public class FragmentFingerprintTest {
      */
     @Test
     public void countFingerprintInputListHasHashTest() {
-        ICountFingerprint tmpCountFingerprintInputList = FragmentFingerprintTest.fragmentFingerprinter.getCountFingerprint(countListOfUniqueSmiles);
+        ICountFingerprint tmpCountFingerprintInputList = FragmentFingerprintTest.fragmentFingerprinter.getCountFingerprint(FragmentFingerprintTest.countListOfUniqueSmiles);
         Assertions.assertEquals(true, tmpCountFingerprintInputList.hasHash(20));
     }
     //
@@ -429,7 +428,7 @@ public class FragmentFingerprintTest {
      */
     @Test
     public void countFingerprintInputListGetCountForHashTest() {
-        ICountFingerprint tmpCountFingerprintInputList = FragmentFingerprintTest.fragmentFingerprinter.getCountFingerprint(countListOfUniqueSmiles);
+        ICountFingerprint tmpCountFingerprintInputList = FragmentFingerprintTest.fragmentFingerprinter.getCountFingerprint(FragmentFingerprintTest.countListOfUniqueSmiles);
         Assertions.assertEquals(0, tmpCountFingerprintInputList.getCountForHash(0));
     }
     //

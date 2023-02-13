@@ -145,9 +145,9 @@ public class CountFingerprint implements ICountFingerprint {
     /**
      * {@inheritDoc}
      */
-    @Override// TODO convert count fingerprint in bit fingerprint
+    @Override
     public void setBehaveAsBitFingerprint(boolean behaveAsBitFingerprint) {
-        this.behaveAsBitFingerprint = behaveAsBitFingerprint; // true or false
+        this.behaveAsBitFingerprint = behaveAsBitFingerprint;
     }
     //
     /**
@@ -199,5 +199,4 @@ public class CountFingerprint implements ICountFingerprint {
         }
     }
     //</editor-fold>
-    //
 }
