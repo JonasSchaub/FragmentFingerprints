@@ -82,9 +82,9 @@ public class FragmentFingerprintTest {
     /**
      * List only with unique SMILES and without frequencies
      */
-   private static ArrayList<String> dataForGenerateBitFingerprint;
+   private static ArrayList<String> dataForGenerationBitFingerprint;
     /**
-     *
+     * List in which a fragment occurs more than once
      */
    private static ArrayList<String> countListOfUniqueSmiles;
     //</editor-fold>
@@ -99,7 +99,11 @@ public class FragmentFingerprintTest {
     //
     //<editor-fold desc="BeforeAll method" defaultstate="collapsed">
     /**
-     * Start generating fingerprinting data (MORTAR)
+     * Start generating fingerprinting data.
+     * To create the fingerprints, 2 text files are used here. One of these text files contains the predefined
+     * fragments and the other text file contains the fragments associated with the molecules.
+     * Structure of the text files can be seen in resources folder
+     *
      * @BeforeAll ensures that the setUp method is only executed once.
      *
      * @throws IOException is thrown if the constructor is unable to open a text file for logging occurred exceptions.
@@ -153,16 +157,16 @@ public class FragmentFingerprintTest {
             tmpSeparateList = tmpList.get(tmpCurrentLine);
             List<String> ListWithoutNameAndMoleculeSmiles = tmpSeparateList.subList(2, tmpSeparateList.size());
             HashMap<String, Integer> tmpMoleculeFragmentsMap = new HashMap<>();
-            FragmentFingerprintTest.dataForGenerateBitFingerprint = new ArrayList<>(FragmentFingerprintTest.initialCapacityValue);
+            FragmentFingerprintTest.dataForGenerationBitFingerprint = new ArrayList<>(FragmentFingerprintTest.initialCapacityValue);
             for (int i = 0; i < ListWithoutNameAndMoleculeSmiles.size(); i++) {
                 if (i % 2 == 0) {
                     tmpMoleculeFragmentsMap.put(ListWithoutNameAndMoleculeSmiles.get(i), Integer.valueOf(ListWithoutNameAndMoleculeSmiles.get(i + 1)));
-                    FragmentFingerprintTest.dataForGenerateBitFingerprint.add(ListWithoutNameAndMoleculeSmiles.get(i));
+                    FragmentFingerprintTest.dataForGenerationBitFingerprint.add(ListWithoutNameAndMoleculeSmiles.get(i));
                 }
             }
             // Illustration the results of the bit arrays for the specified molecules
             try {
-                IBitFingerprint tmpBitFingerprint = tmpFingerprintRepresentation.getBitFingerprint(FragmentFingerprintTest.dataForGenerateBitFingerprint);
+                IBitFingerprint tmpBitFingerprint = tmpFingerprintRepresentation.getBitFingerprint(FragmentFingerprintTest.dataForGenerationBitFingerprint);
                 ICountFingerprint tmpCountFingerprint = tmpFingerprintRepresentation.getCountFingerprint(tmpMoleculeFragmentsMap);
                 tmpBitArray = tmpFingerprintRepresentation.getBitArray();
                 int tmpLength = java.util.Arrays.toString(tmpBitArray).length();
@@ -184,7 +188,7 @@ public class FragmentFingerprintTest {
         // Objects necessary for the test are created (used only in @Test)
         FragmentFingerprintTest.fragmentFingerprinter = new FragmentFingerprinter(FragmentFingerprintTest.fragmentList);
         FragmentFingerprintTest.countFingerprintTest = FragmentFingerprintTest.fragmentFingerprinter.getCountFingerprint(FragmentFingerprintTest.moleculeFragmentList.get(FragmentFingerprintTest.moleculeFragmentList.size() - 1));
-        FragmentFingerprintTest.bitFingerprintTest = FragmentFingerprintTest.fragmentFingerprinter.getBitFingerprint(FragmentFingerprintTest.dataForGenerateBitFingerprint);
+        FragmentFingerprintTest.bitFingerprintTest = FragmentFingerprintTest.fragmentFingerprinter.getBitFingerprint(FragmentFingerprintTest.dataForGenerationBitFingerprint);
         // Variamycin fragments
         FragmentFingerprintTest.countListOfUniqueSmiles = new ArrayList<>(FragmentFingerprintTest.initialCapacityValue);
         FragmentFingerprintTest.countListOfUniqueSmiles.add("[H]OC");

@@ -37,7 +37,7 @@ public class Main {
      */
     public static void main(String[] args)  {
         try {
-            //PerformanceTest tmpApplication = new PerformanceTest("Fragments_Ertl_algorithm_200k_COCONUT.csv", "Items_Ertl_algorithm_200k_COCONUT.csv","20000");
+           // PerformanceTest tmpApplication = new PerformanceTest("Fragments_Ertl_algorithm_200k_COCONUT.csv", "Items_Ertl_algorithm_200k_COCONUT.csv","20000");
             PerformanceTest tmpApplication = new PerformanceTest(args[0], args[1], args[2]);
         } catch (Exception anException) {
             anException.printStackTrace(System.err);

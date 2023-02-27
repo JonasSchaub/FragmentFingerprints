@@ -31,7 +31,7 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Interface for implementing fragment fingerprints.
+ * Interface for implementing fragment fingerprinters.
  * The interface IFragmentFingerprinter inherits from the CDK interface IFingerprinter and extends it with
  * further methods. IFingerprinter is an interface for the calculation of fingerprints.
  * I.e. classes that implement IFingerprinter can calculate fingerprints for a given IAtomContainer,
@@ -50,7 +50,8 @@ import java.util.Map;
 public interface IFragmentFingerprinter extends IFingerprinter {
     // <editor-fold defaultstate="collapsed" desc="Public methods">
     /**
-     * Method that calculates the bit fingerprint  by comparing the unique SMILES of the fragments.
+     * Method for calculating the bit fingerprint by comparing the unique SMILES of the fragments with
+     * the predefined fragments, which are also in the form of unique SMILES.
      * The method requires a set of  predefined fragments in the form of unique SMILES and compares the list,
      * which must be passed as an argument to the method, with the set of fragments (unique SMILES).
      * To get the expected fingerprint, unique SMILES should be used.
@@ -64,7 +65,8 @@ public interface IFragmentFingerprinter extends IFingerprinter {
     IBitFingerprint getBitFingerprint(List<String> aListOfUniqueSmiles);
     //
     /**
-     * Method that calculates the count fingerprint by comparing the unique SMILES of the fragments.
+     * Method for calculating the count fingerprint by comparing the unique SMILES of the fragments with
+     * the predefined fragments, which are also in the form of unique SMILES.
      * The method requires a set of predefined fragments in the form of unique SMILES and compares the keys of the map,
      * which must be passed as an argument to the method, with the set of fragments (unique SMILES).
      * To obtain the expected fingerprint, unique SMILES should be used and the keys in the input map
