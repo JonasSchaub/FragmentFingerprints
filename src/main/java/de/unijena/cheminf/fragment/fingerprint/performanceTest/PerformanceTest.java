@@ -62,16 +62,16 @@ public class PerformanceTest {
     /**
      * Name of CSV file with the results of the performance test of the bit fingerprints.
      */
-    private static final String CSV_BIT_FINGERPRINT_PROCESS_RESULT = "CSV_BIT_PROCESS_TIME";
+    private static final String CSV_BIT_FINGERPRINT_PROCESS_RESULT_FILE_NAME = "CSV_BIT_PROCESS_TIME";
     /**
      * Name of CSV file with the results of the performance test of the count fingerprints.
      */
-    private static final String CSV_COUNT_FINGERPRINT_PROCESS_RESULT = "CSV_COUNT_PROCESS_TIME";
+    private static final String CSV_COUNT_FINGERPRINT_PROCESS_RESULT_FILE_NAME = "CSV_COUNT_PROCESS_TIME";
     //</editor-fold>
     //
     //<editor-fold defaultstate="collapsed" desc="Private final class variables">
     /**
-     * Initial capacity of the lists.
+     * Initial capacity of the lists in which the data for generating the fingerprints are stored.
      */
     private final int INITIAL_CAPACITY_VALUE = 200000;
     /**
@@ -86,11 +86,11 @@ public class PerformanceTest {
      */
     private String workingPath;
     /**
-     * List which is contains all bit fingerprints
+     * List which is contains all the data of the molecules needed to generate the bit fingerprint.
      */
     private ArrayList<ArrayList<String>> moleculeListForBitFingerprint = new ArrayList<>(this.INITIAL_CAPACITY_VALUE);
     /**
-     * Is a list that contains all fragments, the fingerprint is then generated based on these fragments.
+     * List that contains all fragments, the fingerprint is then generated based on these fragments.
      */
     private ArrayList<String> fragmentList = new ArrayList<>(this.INITIAL_CAPACITY_VALUE);
     /**
@@ -118,7 +118,7 @@ public class PerformanceTest {
      */
     private PrintWriter exceptionsPrintWriter;
     /**
-     * Is a list in which all molecule fragments are stored that are read in from the CSV file.
+     * List in which all molecule fragments are stored that are read in from the CSV file.
      */
     private ArrayList<HashMap<String, Integer>> moleculeFragmentList = new ArrayList<>(this.INITIAL_CAPACITY_VALUE);
     //</editor-fold>
@@ -133,15 +133,15 @@ public class PerformanceTest {
      * individually and once together.
      * Subsequently, the fingerprints are created, and the results are documented in the corresponding files.
      *
-     * @param aFragmentFile is the file name of the fragments (fragments are represented by unique SMILES in the file )
-     *              that are read in to create the fingerprints.
-     * @param aMoleculeFile is the file name of the molecules (molecules are represented by unique SMILES in the file )
-     *               that are read in to create the fingerprints.
-     * @param aNumberOfMoleculesInProcess defines the size of the fragments to be read in as well as the
-     *                                    molecule in the two files.
+     * @param anArgs the command line arguments, anArgs[0] and anArgs[1] must be the names of the text files to load.
+     *               The text files must be located in the same directory as the application's JAR file. The command
+     *               line anArgs[2] must be the number of the molecules in process.
      * @throws IOException is thrown if the constructor is unable to open a text file for logging occurred exceptions.
      */
-    public PerformanceTest(String aFragmentFile, String aMoleculeFile, String aNumberOfMoleculesInProcess) throws IOException {
+    public PerformanceTest(String[] anArgs) throws IOException {
+        if(anArgs.length !=3) {
+            throw new IllegalArgumentException("Three arguments (two file names and the number of the molecules in process) are required.");
+        }
         /*Set up exception log file*/
         this.workingPath = (new File("").getAbsoluteFile().getAbsolutePath()) + File.separator;
         LocalDateTime tmpDateTime = LocalDateTime.now();
@@ -157,8 +157,8 @@ public class PerformanceTest {
         this.exceptionsPrintWriter.flush();
         try {
             // Load fragment files
-            this.moleculeFile = new File(this.workingPath + aFragmentFile);
-            this.fragmentFile = new File(this.workingPath + aMoleculeFile);
+            this.moleculeFile = new File(this.workingPath + anArgs[0]);
+            this.fragmentFile = new File(this.workingPath + anArgs[1]);
             FileInputStream tmpFragmentFileInputStream;
             FileInputStream tmpMoleculeFileInputStream;
             try {
@@ -176,19 +176,19 @@ public class PerformanceTest {
             this.resultsPrintWriter.println();
             this.resultsPrintWriter.println("Processing Time: " + tmpProcessingTime);
             this.resultsPrintWriter.println();
-            this.resultsPrintWriter.println("Application initialized. Loading  files named " + aFragmentFile + " and "+ aMoleculeFile + ".");
+            this.resultsPrintWriter.println("Application initialized. Loading  files named " + anArgs[0] + " and "+ anArgs[1] + ".");
             this.resultsPrintWriter.println();
             // bit fingerprints process file
-            File tmpBitFingerprintsResultFile = new File(this.workingPath + "/Results/" + PerformanceTest.CSV_BIT_FINGERPRINT_PROCESS_RESULT + tmpProcessingTime + ".csv");
+            File tmpBitFingerprintsResultFile = new File(this.workingPath + "/Results/" + PerformanceTest.CSV_BIT_FINGERPRINT_PROCESS_RESULT_FILE_NAME + tmpProcessingTime + ".csv");
             FileWriter tmpBitFingerprintsResultWriter = new FileWriter(tmpBitFingerprintsResultFile, false);
             this.bitPrintWriter = new PrintWriter(tmpBitFingerprintsResultWriter);
             // count fingerprints process file
-            File tmpCountFingerprintsResultFile = new File(this.workingPath + "/Results/" + PerformanceTest.CSV_COUNT_FINGERPRINT_PROCESS_RESULT + tmpProcessingTime + ".csv");
+            File tmpCountFingerprintsResultFile = new File(this.workingPath + "/Results/" + PerformanceTest.CSV_COUNT_FINGERPRINT_PROCESS_RESULT_FILE_NAME + tmpProcessingTime + ".csv");
             FileWriter tmpCountFingerprintResultWriter = new FileWriter(tmpCountFingerprintsResultFile, false);
             this.countPrintWriter = new PrintWriter(tmpCountFingerprintResultWriter);
             // read in CSV files that contains fragments
             try {
-                this.loadData();
+                this.importDataFromTextFile();
             } catch (IOException anException) {
                 this.exceptionsPrintWriter.println("Fragment load ERROR. Unsuitable (structure) CSV files were tried to be read in.");
                 this.exceptionsPrintWriter.flush();
@@ -196,7 +196,7 @@ public class PerformanceTest {
                 throw new Exception("Fragment load ERROR. Unsuitable (structure) CSV files were tried to be read in. ");
             }
             // generate bit and count fingerprints
-            this.generateFingerprints(Integer.parseInt(aNumberOfMoleculesInProcess),1,2); // TODO delete arguments
+            this.generateFingerprints(Integer.parseInt(anArgs[2]),1,2); // TODO delete arguments
             this.resultsPrintWriter.flush();
             this.bitPrintWriter.println();
             this.bitPrintWriter.flush();
@@ -218,7 +218,7 @@ public class PerformanceTest {
      * For the method to work properly, it is important that the two files are in a specific form predicted
      * for the method. Thus, each line in the fragment file corresponds to a fragment. Components
      * within a line must be separated by
-     * a semicolon. The fragment represented by a unique SMILES must be at the very front of the line.
+     * a semicolon. The fragment represented by a unique SMILES must be at the very front (first position) of the line.
      * All other information within the line is ignored.
      *
      * The same applies to the molecule file. Here, too, a molecule is defined in each line. However, each line
@@ -228,7 +228,7 @@ public class PerformanceTest {
      *
      * @throws IOException is thrown if an error occurs when reading in the two text files.
      */
-    private void loadData() throws IOException {
+    private void importDataFromTextFile() throws IOException {
         BufferedReader tmpFragmentSetReader;
         BufferedReader tmpMoleculeFragmentsReader;
         try {

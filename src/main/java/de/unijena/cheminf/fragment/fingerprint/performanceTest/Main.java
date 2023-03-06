@@ -31,14 +31,21 @@ package de.unijena.cheminf.fragment.fingerprint.performanceTest;
  */
 public class Main {
     /**
-     * Starts the application.Command line arguments must be the name of CSV-files to read.
+     * Starts the application. The first and second command line arguments must be
+     * the name of a text file to read (must be located in the same directory as the application's .jar file)
+     * Important for the correctness of the text files to be read is that both text files must start with a header.
+     * In addition, a molecule must be represented in each line of the text files and both text files must contain
+     * a ";" as separator. The first text file must contain a SMILES string at the first position of
+     * each line (all other positions are ignored). The first two positions of each line of the second file
+     * are ignored. These positions contain the molecule name/ID and the corresponds SMILES string. And all other
+     * positions within a line must alternately contain a SMILES string and an
+     * integer value separated by the delimiter (representing the frequency of the SMILES string).
      *
      * @param args the command line arguments
      */
     public static void main(String[] args)  {
         try {
-           // PerformanceTest tmpApplication = new PerformanceTest("Fragments_Ertl_algorithm_200k_COCONUT.csv", "Items_Ertl_algorithm_200k_COCONUT.csv","20000");
-            PerformanceTest tmpApplication = new PerformanceTest(args[0], args[1], args[2]);
+            PerformanceTest tmpApplication = new PerformanceTest(args);
         } catch (Exception anException) {
             anException.printStackTrace(System.err);
             System.exit(1);

@@ -38,7 +38,7 @@ import java.util.Map;
  * including a bit and count fingerprint. The extension of the IFingerprinter by further methods now allows the
  * calculation of a fingerprint  by the mere comparison of strings. In this context, these strings are to correspond to
  * the unique SMILES of fragments. The extension of the IFingerprinter includes the overloading of the methods that are
- * responsible forthe calculation of a count and bit fingerprint. These methods originally expect an
+ * responsible for the calculation of a count and bit fingerprint. These methods originally expect an
  * IAtomContainer as a parameter.
  * By overloading these methods, the fingerprints of count and bit  can be calculated without the need for an
  * IAtomContainer is required, as this calculation is based only on the comparison of strings/unique SMILES
@@ -59,7 +59,8 @@ public interface IFragmentFingerprinter extends IFingerprinter {
      *
      * @param aListOfUniqueSmiles is a list that stores fragments in the form of unique SMILES.
      *                            To be able to calculate the fingerprint for a molecule,
-     *                            the fragments should belong to one molecule.
+     *                            the fragments should belong to one molecule. The fragments are substructures
+     *                            of the molecule.
      * @return the bit fingerprint
      */
     IBitFingerprint getBitFingerprint(List<String> aListOfUniqueSmiles);
@@ -76,7 +77,8 @@ public interface IFragmentFingerprinter extends IFingerprinter {
      * @param aUniqueSmilesToFrequencyMap is a map that maps fragments in the form of unique SMILES to
      *                                    the frequency of unique SMILES.
      *                                    To be able to calculate the fingerprint for a molecule, the fragments
-     *                                    must belong to a molecule.
+     *                                    must belong to a molecule. The fragments are substructures
+     *                                    of the molecule.
      * @return the count fingerprint
      */
     ICountFingerprint getCountFingerprint(Map<String, Integer> aUniqueSmilesToFrequencyMap);

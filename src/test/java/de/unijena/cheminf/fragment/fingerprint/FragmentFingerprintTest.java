@@ -45,6 +45,8 @@ import java.util.List;
 
 /**
  * Class to test the correct working of FragmentFingerprinter
+ *
+ * @author Betuel Sevindik
  */
 public class FragmentFingerprintTest {
     //<editor-fold desc="private static final class variables" defaultstate="collapsed">
@@ -53,14 +55,14 @@ public class FragmentFingerprintTest {
      */
     private static final String FINGERPRINTS_FILE_NAME = "Fingerprints";
     /**
-     * Initial capacity of the lists.
+     * Initial capacity of the lists in which the data for generating the fingerprints are stored.
      */
     private static final int initialCapacityValue = 200;
     //</editor-fold>
     //
     //<editor-fold desc="private static class variables" defaultstate="collapsed">
     /**
-     * Is a list in which all molecule fragments are stored that are read in from the CSV file.
+     * List in which all molecule fragments are stored that are read in from the CSV file.
      */
     private static ArrayList<HashMap<String, Integer>> moleculeFragmentList = new ArrayList<>(FragmentFingerprintTest.initialCapacityValue); // TODO local variable if only test the last molecule
     /**
@@ -102,7 +104,7 @@ public class FragmentFingerprintTest {
      * Start generating fingerprinting data.
      * To create the fingerprints, 2 text files are used here. One of these text files contains the predefined
      * fragments and the other text file contains the fragments associated with the molecules.
-     * Structure of the text files can be seen in resources folder
+     * Structure of the text files can be seen in resources folder.
      *
      * @BeforeAll ensures that the setUp method is only executed once.
      *
@@ -118,7 +120,10 @@ public class FragmentFingerprintTest {
         } catch (IOException anException) {
             throw new IOException("File is not readable!");
         }
-        // Read CSV file ( fragmentation tab) to  obtain fragments used to create the fingerprint.
+        /* Read CSV file to obtain fragments used to create the fingerprint. A fragment in the form of
+        unique SMILES is displayed at the first position of each line. Only these unique
+        SMILES from the file are stored in the list.
+         */
         String tmpLine;
         String tmpSeparatorComma = ",";
         try {
@@ -131,7 +136,7 @@ public class FragmentFingerprintTest {
         } catch (IOException anException) {
             throw new IOException("invalid fragment file. At least one line is not readable.");
         }
-        // Read CSV file (itemization tab)
+        // Read CSV file
         String tmpSeparatorSemicolon = ";";
         List<List<String>> tmpList = new ArrayList<>(FragmentFingerprintTest.initialCapacityValue);
         String tmpMoleculeLine;
@@ -168,13 +173,12 @@ public class FragmentFingerprintTest {
             try {
                 IBitFingerprint tmpBitFingerprint = tmpFingerprintRepresentation.getBitFingerprint(FragmentFingerprintTest.dataForGenerationBitFingerprint);
                 ICountFingerprint tmpCountFingerprint = tmpFingerprintRepresentation.getCountFingerprint(tmpMoleculeFragmentsMap);
-                tmpBitArray = tmpFingerprintRepresentation.getBitArray();
+                tmpBitArray = tmpFingerprintRepresentation.getBitArray(FragmentFingerprintTest.dataForGenerationBitFingerprint);
                 int tmpLength = java.util.Arrays.toString(tmpBitArray).length();
                 tmpCountFingerprint.setBehaveAsBitFingerprint(false);
                 System.out.println("\t\tNumber of positive bits " + tmpSeparateList.get(0) + ": " + tmpBitFingerprint.cardinality());
                 System.out.println("\t\tIndices of positive bits " + tmpSeparateList.get(0) + ": " + tmpBitFingerprint.asBitSet().toString());
                 System.out.println("\t\tCount for the bin with the index 5 " + tmpSeparateList.get(0) + ": " + tmpCountFingerprint.getCount(5));
-                System.out.println("\t\tget hash" + tmpSeparateList.get(0) + ": " + tmpCountFingerprint.getHash(5));
                 tmpResultPrintWriter.println(java.util.Arrays.toString(tmpBitArray).substring(1, tmpLength - 1));
                 tmpResultPrintWriter.flush();
             } catch( IllegalArgumentException  anException) {
@@ -282,6 +286,10 @@ public class FragmentFingerprintTest {
      */
     @Test
     public void bitFingerprintBitArrayTest() {
+        ArrayList<String> test = new ArrayList<>();
+        test.add("CCC");
+        test.add("HCO");
+        test.add("*O*");
         int[] tmpTestArray = new int[28];
         tmpTestArray[3] = 1;
         tmpTestArray[5] = 1;
@@ -292,7 +300,7 @@ public class FragmentFingerprintTest {
         tmpTestArray[18] = 1;
         tmpTestArray[26] = 1;
         tmpTestArray[27] = 1;
-        Assertions.assertArrayEquals(tmpTestArray, FragmentFingerprintTest.fragmentFingerprinter.getBitArray());
+        Assertions.assertArrayEquals(tmpTestArray, FragmentFingerprintTest.fragmentFingerprinter.getBitArray(test));
     }
     //
     /**
@@ -454,7 +462,7 @@ public class FragmentFingerprintTest {
         tmpTestBitArray[18] = 1;
         tmpTestBitArray[26] = 1;
         tmpTestBitArray[27] = 1;
-        Assertions.assertArrayEquals(tmpTestBitArray,FragmentFingerprintTest.fragmentFingerprinter.getBitArray());
+        Assertions.assertArrayEquals(tmpTestBitArray,FragmentFingerprintTest.fragmentFingerprinter.getBitArray(FragmentFingerprintTest.dataForGenerationBitFingerprint));
     }
     //
     /**
@@ -475,6 +483,10 @@ public class FragmentFingerprintTest {
         tmpTestCountArray[26] = 5;
         tmpTestCountArray[27] = 2;
         Assertions.assertArrayEquals(tmpTestCountArray,FragmentFingerprintTest.fragmentFingerprinter.getCountArray());
+    }
+    @Test
+    public void getBitDefinitionTest() {
+        Assertions.assertEquals("*OC(*)=O",FragmentFingerprintTest.fragmentFingerprinter.getBitDefinition(2));
     }
     //</editor-fold>
 }

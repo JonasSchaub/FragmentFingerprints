@@ -30,11 +30,13 @@ import java.util.HashMap;
 /**
  * The CountFingerprint class implements the CDK interface ICountFingerprint.
  * ICountFingerprint provides useful methods to obtain information about the calculated count fingerprint.
+ *
+ * @author Betuel Sevindik
  */
 public class CountFingerprint implements ICountFingerprint {
     //<editor-fold desc="private final class variables" defaultstate="collapsed">
     /**
-     * Is an array containing all predefined unique SMILES.
+     * An array containing all predefined unique SMILES.
      */
     private final String[] fragmentArrayOfUniqueSmiles;
     /**
@@ -56,16 +58,16 @@ public class CountFingerprint implements ICountFingerprint {
      * Constructor.
      *
      * @param aFragments is a string array that stores all fragments that are in the form of unique SMILES.
-     * @param aMapOfFragmentSmiles is a map that assigns the unique SMILES to the positions they occupy in aFragments.
+     * @param aSmilesToFragmentMap is a map that assigns the unique SMILES to the positions they occupy in aFragments.
      * @param aPositionToFrequencyMap is the raw map. It maps the positions of the unique SMILES to the
      *                                frequency of these SMILES.
      */
-    public CountFingerprint(String[] aFragments, HashMap<String, Integer> aMapOfFragmentSmiles, HashMap<Integer, Integer> aPositionToFrequencyMap) {
-        if(aFragments == null || aMapOfFragmentSmiles == null || aPositionToFrequencyMap == null) {
+    public CountFingerprint(String[] aFragments, HashMap<String, Integer> aSmilesToFragmentMap, HashMap<Integer, Integer> aPositionToFrequencyMap) {
+        if(aFragments == null || aSmilesToFragmentMap == null || aPositionToFrequencyMap == null) {
             throw new NullPointerException("At least one of the arguments is null.");
         }
         this.fragmentArrayOfUniqueSmiles = aFragments;
-        this.uniqueSmilesToPositionMap = aMapOfFragmentSmiles;
+        this.uniqueSmilesToPositionMap = aSmilesToFragmentMap;
         this.uniqueSmilesPositionToFrequencyCountRawMap = aPositionToFrequencyMap;
         this.behaveAsBitFingerprint = false;
     }
@@ -75,7 +77,7 @@ public class CountFingerprint implements ICountFingerprint {
     /**
      * {@inheritDoc}
      *
-     * Since fragment fingerprints are key based, the number of bits in the fingerprint
+     * Since fragment fingerprints are key-based, the number of bits in the fingerprint
      * is equal to the number of predefined fragments (unique SMILES).
      *
      */
@@ -85,8 +87,11 @@ public class CountFingerprint implements ICountFingerprint {
     }
     //
     /**
-     *
      * {@inheritDoc}
+     *
+     * Fragment fingerprints are key-based fingerprints,
+     * therefore the number of populated bins corresponds to the number of predefined fragments (unique SMILES).
+     *
      */
     @Override
     public int numOfPopulatedbins() {
@@ -100,14 +105,15 @@ public class CountFingerprint implements ICountFingerprint {
      * If the given index is greater than the size of the fingerprint or a negative value,
      * an IllegalArgumentException is thrown.
      *
+     * @throws IllegalArgumentException is thrown if the given index do not exist in the fingerprint.
      */
     @Override
-    public int getCount(int index) {
+    public int getCount(int index) throws IllegalArgumentException {
         if(this.behaveAsBitFingerprint == false) {
             if (index >= 0 && this.uniqueSmilesPositionToFrequencyCountRawMap.containsKey(index)) {
                 return this.uniqueSmilesPositionToFrequencyCountRawMap.get(index);
             } else if (index >= this.fragmentArrayOfUniqueSmiles.length || index < 0) {
-                throw new IllegalArgumentException("This position does not exist in the fingerprint ( undefined state).");
+                throw new IllegalArgumentException("This position does not exist in the fingerprint (undefined state).");
             } else {
                 return 0;
             }
@@ -156,9 +162,10 @@ public class CountFingerprint implements ICountFingerprint {
      * The parameter hash is not a calculated hash value, but also corresponds to the
      * position of the bin in the fingerprint.
      *
+     * @throws IllegalArgumentException is thrown if the given hash value is negative.
      */
     @Override
-    public boolean hasHash(int hash) {
+    public boolean hasHash(int hash) throws IllegalArgumentException {
         if(hash< this.fragmentArrayOfUniqueSmiles.length && hash>=0) {
             return true;
         } else if (hash < 0) {
@@ -177,14 +184,16 @@ public class CountFingerprint implements ICountFingerprint {
      *
      * @see #getCount(int)
      *
+     * @throws IllegalArgumentException is thrown if the given hash value do not exist in the fingerprint.
+     *
      */
     @Override
-    public int getCountForHash(int hash) {
+    public int getCountForHash(int hash) throws IllegalArgumentException {
         if(this.behaveAsBitFingerprint == false) {
             if (hash >= 0 && this.uniqueSmilesPositionToFrequencyCountRawMap.containsKey(hash)) {
                 return this.uniqueSmilesPositionToFrequencyCountRawMap.get(hash);
             } else if (hash >= this.fragmentArrayOfUniqueSmiles.length || hash < 0) {
-                throw new IllegalArgumentException("This position does not exist in the fingerprint ( undefined state).");
+                throw new IllegalArgumentException("This position does not exist in the fingerprint (undefined state).");
             } else {
                 return 0;
             }
@@ -192,11 +201,12 @@ public class CountFingerprint implements ICountFingerprint {
             if (hash >= 0 && this.uniqueSmilesPositionToFrequencyCountRawMap.containsKey(hash)) {
                 return 1;
             } else if (hash >= this.fragmentArrayOfUniqueSmiles.length || hash < 0) {
-                throw new IllegalArgumentException("This position does not exist in the fingerprint ( undefined state).");
+                throw new IllegalArgumentException("This position does not exist in the fingerprint (undefined state).");
             } else {
                 return 0;
             }
         }
     }
     //</editor-fold>
+    //
 }
