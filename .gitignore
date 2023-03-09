@@ -11,7 +11,6 @@
 .mtj.tmp/
 
 # Package Files #
-*.jar
 *.war
 *.nar
 *.ear
@@ -39,3 +38,9 @@ gradle-app.setting
 
 # Cache of project
 .gradletasknamecache
+
+# PerformanceTest results #
+Results
+
+# de.unijena.chemoinf.fragment.fingerprint #
+src/test/resources/de/unijena/cheminf/fragment/fingerprint/Fingerprints
