@@ -280,16 +280,12 @@ public class FragmentFingerprintTest {
     }
     //
     /**
-     * Tests the generated bit array for correctness.
+     * Tests the method getBitArray(List<String>)
      *
      * Test molecule: Variamycin
      */
     @Test
-    public void bitFingerprintBitArrayTest() {
-        ArrayList<String> test = new ArrayList<>();
-        test.add("CCC");
-        test.add("HCO");
-        test.add("*O*");
+    public void getBitArrayInputListTest() {
         int[] tmpTestArray = new int[28];
         tmpTestArray[3] = 1;
         tmpTestArray[5] = 1;
@@ -300,11 +296,31 @@ public class FragmentFingerprintTest {
         tmpTestArray[18] = 1;
         tmpTestArray[26] = 1;
         tmpTestArray[27] = 1;
-        Assertions.assertArrayEquals(tmpTestArray, FragmentFingerprintTest.fragmentFingerprinter.getBitArray(test));
+        Assertions.assertArrayEquals(tmpTestArray, FragmentFingerprintTest.fragmentFingerprinter.getBitArray(FragmentFingerprintTest.dataForGenerationBitFingerprint));
     }
     //
     /**
-     * Tests the other methods used in the creation of the count fingerprint, if the input is a map
+     * Tests the method getBitArray(Map<String,Integer>)
+     *
+     * Test molecule: Variamycin
+     */
+    @Test
+    public void getBitArrayInputMapTest() {
+        int[] tmpTestArray = new int[28];
+        tmpTestArray[3] = 1;
+        tmpTestArray[5] = 1;
+        tmpTestArray[9] = 1;
+        tmpTestArray[14] = 1;
+        tmpTestArray[16] = 1;
+        tmpTestArray[17] = 1;
+        tmpTestArray[18] = 1;
+        tmpTestArray[26] = 1;
+        tmpTestArray[27] = 1;
+        Assertions.assertArrayEquals(tmpTestArray, FragmentFingerprintTest.fragmentFingerprinter.getBitArray(FragmentFingerprintTest.moleculeFragmentList.get(FragmentFingerprintTest.moleculeFragmentList.size() - 1)));
+    }
+    //
+    /**
+     * Tests the size of the count fingerprint
      *
      * Test molecule: Variamycin
      *
@@ -445,33 +461,12 @@ public class FragmentFingerprintTest {
     }
     //
     /**
-     * Tests the method getBitArray().
+     * Tests the method getCountArray(List<String>).
      *
      * Test molecule: Variamycin
      */
     @Test
-    public void getBitArrayTest() {
-        //Test bit array
-        int[] tmpTestBitArray = new int[FragmentFingerprintTest.fragmentFingerprinter.getSize()];
-        tmpTestBitArray[3] = 1;
-        tmpTestBitArray[5] = 1;
-        tmpTestBitArray[9] = 1;
-        tmpTestBitArray[14] = 1;
-        tmpTestBitArray[16] = 1;
-        tmpTestBitArray[17] = 1;
-        tmpTestBitArray[18] = 1;
-        tmpTestBitArray[26] = 1;
-        tmpTestBitArray[27] = 1;
-        Assertions.assertArrayEquals(tmpTestBitArray,FragmentFingerprintTest.fragmentFingerprinter.getBitArray(FragmentFingerprintTest.dataForGenerationBitFingerprint));
-    }
-    //
-    /**
-     * Tests the method getCountArray().
-     *
-     * Test molecule: Variamycin
-     */
-    @Test
-    public void getCountArrayTest() {
+    public void getCountArrayInputListTest() {
         int[] tmpTestCountArray = new int[FragmentFingerprintTest.fragmentFingerprinter.getSize()];
         tmpTestCountArray[3] = 1;
         tmpTestCountArray[5] = 2;
@@ -482,8 +477,33 @@ public class FragmentFingerprintTest {
         tmpTestCountArray[18] = 2;
         tmpTestCountArray[26] = 5;
         tmpTestCountArray[27] = 2;
-        Assertions.assertArrayEquals(tmpTestCountArray,FragmentFingerprintTest.fragmentFingerprinter.getCountArray());
+        Assertions.assertArrayEquals(tmpTestCountArray,FragmentFingerprintTest.fragmentFingerprinter.getCountArray(FragmentFingerprintTest.countListOfUniqueSmiles));
     }
+    //
+    /**
+     * Tests the method getCountArray(Map<String,Integer>)
+     *
+     * Test molecule: Variamycin
+     */
+    @Test
+    public void getCountArrayInputMapTest() {
+        int[] tmpTestCountArray = new int[FragmentFingerprintTest.fragmentFingerprinter.getSize()];
+        tmpTestCountArray[3] = 1;
+        tmpTestCountArray[5] = 2;
+        tmpTestCountArray[9] = 1;
+        tmpTestCountArray[14] = 5;
+        tmpTestCountArray[16] = 2;
+        tmpTestCountArray[17] = 8;
+        tmpTestCountArray[18] = 2;
+        tmpTestCountArray[26] = 5;
+        tmpTestCountArray[27] = 2;
+        FragmentFingerprintTest.fragmentFingerprinter.getCountArray(FragmentFingerprintTest.moleculeFragmentList.get(FragmentFingerprintTest.moleculeFragmentList.size() - 1));
+    }
+    //
+    /**
+     * Tests the method getBitDefinition()
+     *
+     */
     @Test
     public void getBitDefinitionTest() {
         Assertions.assertEquals("*OC(*)=O",FragmentFingerprintTest.fragmentFingerprinter.getBitDefinition(2));
