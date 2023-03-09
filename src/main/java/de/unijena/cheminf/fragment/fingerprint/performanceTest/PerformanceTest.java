@@ -42,6 +42,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 
 /**
@@ -67,6 +68,10 @@ public class PerformanceTest {
      * Name of CSV file with the results of the performance test of the count fingerprints.
      */
     private static final String CSV_COUNT_FINGERPRINT_PROCESS_RESULT_FILE_NAME = "CSV_COUNT_PROCESS_TIME";
+    /**
+     * Name of the CSV file with the results of the generated bit arrays.
+     */
+    private static final String BIT_ARRAY_RESULT_FILE_NAME = "BIT_ARRAY_TIME";
     //</editor-fold>
     //
     //<editor-fold defaultstate="collapsed" desc="Private final class variables">
@@ -77,7 +82,11 @@ public class PerformanceTest {
     /**
      * Separator for separating the lines in the input files
      */
-    private final String LINE_SEPARATOR = ";";
+    private final String LINE_SEPARATOR_COMMA = ",";
+    /**
+     * Separator for separating the lines in the input files.
+     */
+    private final String LINE_SEPARATOR_SEMICOLON = ";";
     //</editor-fold>
     //
     //<editor-fold defaultstate="collapsed" desc="Private  class variables">
@@ -93,6 +102,10 @@ public class PerformanceTest {
      * List that contains all fragments, the fingerprint is then generated based on these fragments.
      */
     private ArrayList<String> fragmentList = new ArrayList<>(this.INITIAL_CAPACITY_VALUE);
+    /**
+     * Stores the name/ID of the molecules from moleculeFile
+     */
+    private List<String> listOfMoleculeNames;
     /**
      * CSV file containing the resulting fragments and their frequencies for each given SMILES (molecule).
      */
@@ -118,7 +131,13 @@ public class PerformanceTest {
      */
     private PrintWriter exceptionsPrintWriter;
     /**
-     * List in which all molecule fragments are stored that are read in from the CSV file.
+     * PrintWriter to log the generated bit arrays.
+     */
+    private PrintWriter bitArrayPrintWriter;
+    /**
+     * list stores the HashMap of each molecule. The HashMap assigns
+     * the unique SMILES (fragments) of the molecule to the frequency of the molecule,
+     * which is read out from the molecule file.
      */
     private ArrayList<HashMap<String, Integer>> moleculeFragmentList = new ArrayList<>(this.INITIAL_CAPACITY_VALUE);
     //</editor-fold>
@@ -135,15 +154,17 @@ public class PerformanceTest {
      *
      * @param anArgs the command line arguments, anArgs[0] and anArgs[1] must be the names of the text files to load.
      *               The text files must be located in the same directory as the application's JAR file. The command
-     *               line anArgs[2] must be the number of the molecules in process.
+     *               line anArgs[3] must be the name of the path, where the performance test results are
+     *               stored. The command line anArgs[2] must be the number of the molecules in process.
      * @throws IOException is thrown if the constructor is unable to open a text file for logging occurred exceptions.
      */
     public PerformanceTest(String[] anArgs) throws IOException {
-        if(anArgs.length !=3) {
-            throw new IllegalArgumentException("Three arguments (two file names and the number of the molecules in process) are required.");
+        if(anArgs.length !=4) {
+            throw new IllegalArgumentException("Four arguments (three file names and the number of the molecules in process) are required.");
         }
+        String tmpFilePath =  (new File("").getAbsoluteFile().getAbsolutePath()) + File.separator;
         /*Set up exception log file*/
-        this.workingPath = (new File("").getAbsoluteFile().getAbsolutePath()) + File.separator;
+        this.workingPath = (new File(anArgs[2]).getAbsoluteFile().getAbsolutePath()) + File.separator;
         LocalDateTime tmpDateTime = LocalDateTime.now();
         String tmpProcessingTime = tmpDateTime.format(DateTimeFormatter.ofPattern("uuuu_MM_dd_HH_mm"));
         new File(this.workingPath + "/Results").mkdirs();
@@ -157,8 +178,8 @@ public class PerformanceTest {
         this.exceptionsPrintWriter.flush();
         try {
             // Load fragment files
-            this.moleculeFile = new File(this.workingPath + anArgs[0]);
-            this.fragmentFile = new File(this.workingPath + anArgs[1]);
+            this.moleculeFile = new File(tmpFilePath + anArgs[0]);
+            this.fragmentFile = new File(tmpFilePath + anArgs[1]);
             FileInputStream tmpFragmentFileInputStream;
             FileInputStream tmpMoleculeFileInputStream;
             try {
@@ -186,6 +207,10 @@ public class PerformanceTest {
             File tmpCountFingerprintsResultFile = new File(this.workingPath + "/Results/" + PerformanceTest.CSV_COUNT_FINGERPRINT_PROCESS_RESULT_FILE_NAME + tmpProcessingTime + ".csv");
             FileWriter tmpCountFingerprintResultWriter = new FileWriter(tmpCountFingerprintsResultFile, false);
             this.countPrintWriter = new PrintWriter(tmpCountFingerprintResultWriter);
+            // bit array file
+            File tmpBitArrayFingerprintResultFile = new File(this.workingPath + "/Results/" + PerformanceTest.BIT_ARRAY_RESULT_FILE_NAME + tmpProcessingTime+ ".txt");
+            FileWriter tmpBitArrayFingerprintResultWriter = new FileWriter(tmpBitArrayFingerprintResultFile, false);
+            this.bitArrayPrintWriter = new PrintWriter(tmpBitArrayFingerprintResultWriter);
             // read in CSV files that contains fragments
             try {
                 this.importDataFromTextFile();
@@ -196,11 +221,12 @@ public class PerformanceTest {
                 throw new Exception("Fragment load ERROR. Unsuitable (structure) CSV files were tried to be read in. ");
             }
             // generate bit and count fingerprints
-            this.generateFingerprints(Integer.parseInt(anArgs[2]),1,2); // TODO delete arguments
+            this.generateFingerprints(Integer.parseInt(anArgs[3]),1,2); // TODO delete arguments
             this.resultsPrintWriter.flush();
             this.bitPrintWriter.println();
             this.bitPrintWriter.flush();
             this.countPrintWriter.flush();
+            this.bitArrayPrintWriter.flush();
             this.exceptionsPrintWriter.flush();
         } catch (Exception anException) {
             this.appendToLogfile(anException);
@@ -243,7 +269,7 @@ public class PerformanceTest {
         this.fragmentList = new ArrayList<>(this.INITIAL_CAPACITY_VALUE);
         try {
             while ((tmpLine = tmpFragmentSetReader.readLine()) != null) {
-                String[] tmpSmilesOfFragments = tmpLine.split(this.LINE_SEPARATOR);
+                String[] tmpSmilesOfFragments = tmpLine.split(this.LINE_SEPARATOR_SEMICOLON);
                 this.fragmentList.add(tmpSmilesOfFragments[0]);
             }
             this.fragmentList.remove(0);
@@ -256,7 +282,7 @@ public class PerformanceTest {
         String tmpMoleculeLine;
         try {
             while ((tmpMoleculeLine = tmpMoleculeFragmentsReader.readLine()) != null) {
-                String[] tmpMoleculeFragmentsAndFrequencies = tmpMoleculeLine.split(this.LINE_SEPARATOR);
+                String[] tmpMoleculeFragmentsAndFrequencies = tmpMoleculeLine.split(this.LINE_SEPARATOR_SEMICOLON);
                 tmpList.add(Arrays.asList(tmpMoleculeFragmentsAndFrequencies));
             }
         } catch (IOException anException) {
@@ -265,8 +291,10 @@ public class PerformanceTest {
         }
         tmpMoleculeFragmentsReader.close();
         List<String> tmpSeparateList;
+        this.listOfMoleculeNames = new ArrayList<>();
         for (int tmpCurrentLine = 1; tmpCurrentLine < tmpList.size(); tmpCurrentLine++) {
             tmpSeparateList = tmpList.get(tmpCurrentLine);
+            this.listOfMoleculeNames.add(tmpSeparateList.get(0));
             List<String> ListWithoutNameAndMoleculeSmiles = tmpSeparateList.subList(2, tmpSeparateList.size());
             HashMap<String, Integer> tmpMoleculeFragmentsMap = new HashMap<>();
             ArrayList<String> dataForGenerateBitFingerprint = new ArrayList<>();
@@ -279,7 +307,7 @@ public class PerformanceTest {
                 }
             } catch (IndexOutOfBoundsException anException) {
                 this.appendToLogfile(anException);
-                throw new IndexOutOfBoundsException("the line has not the right length");
+                throw new IndexOutOfBoundsException("The line has not the right length");
             }
             this.moleculeFragmentList.add(tmpMoleculeFragmentsMap);
             this.moleculeListForBitFingerprint.add(dataForGenerateBitFingerprint);
@@ -295,7 +323,7 @@ public class PerformanceTest {
      * @throws Exception is thrown if an error occurs when generating the fingerprints.
      */
     private void generateFingerprints(int aNumberOfMoleculesInProcess, long aEndTime, long aStartTime) throws Exception {
-        FragmentFingerprinter printer = new FragmentFingerprinter(this.fragmentList);
+        FragmentFingerprinter tmpFragmentFingerprinter = new FragmentFingerprinter(this.fragmentList);
         this.resultsPrintWriter.println();
         this.resultsPrintWriter.println("Number of molecules: " + this.moleculeListForBitFingerprint.size());
         this.resultsPrintWriter.println("Number of fragment: " + this.moleculeListForBitFingerprint.size());
@@ -305,22 +333,30 @@ public class PerformanceTest {
         this.resultsPrintWriter.println();
         this.bitPrintWriter.println("Number of fragments: " + this.fragmentList.size() + " and number of molecules: " + this.moleculeListForBitFingerprint.size());
         this.bitPrintWriter.println("Number of molecules in process, Bit fingerprint process time in ms");
+        this.bitArrayPrintWriter.println("Molecule name/ID, bit array");
         for (int i = aNumberOfMoleculesInProcess; i <= this.moleculeListForBitFingerprint.size(); i+= aNumberOfMoleculesInProcess) {
             List<ArrayList<String>> tmpNumberOfMoleculesInProcess = this.moleculeListForBitFingerprint.subList(0, i);
             aStartTime = System.currentTimeMillis();
             for (ArrayList<String> tmpMolecule : tmpNumberOfMoleculesInProcess) {
                 try {
-                    IBitFingerprint bit = printer.getBitFingerprint(tmpMolecule);
+                    IBitFingerprint bit = tmpFragmentFingerprinter.getBitFingerprint(tmpMolecule);
                 } catch (Exception anException) {
-                    this.exceptionsPrintWriter.println("Bit fingerprint generation ERROR. There may be incorrect/invalid elements in the fragment list or molecule list.");
+                    this.exceptionsPrintWriter.println("Bit fingerprint generation ERROR. There may be incorrect/invalid elements in the fragment list oder molecule list");
                     this.appendToLogfile(anException);
-                    throw new Exception("Bit fingerprint generation ERROR. There may be incorrect/invalid elements in the fragment list or molecule list.");
+                    throw new Exception("Bit fingerprint generation ERROR. There may be incorrect/invalid elements in the fragment list oder molecule list");
                 }
             }
             aEndTime = System.currentTimeMillis();
             resultsPrintWriter.println("Processing " + tmpNumberOfMoleculesInProcess.size() + " valid molecules.");
             resultsPrintWriter.println("Bit fingerprint generation took: " + (aEndTime - aStartTime) + " ms.");
             bitPrintWriter.println(tmpNumberOfMoleculesInProcess.size() + "," + (aEndTime - aStartTime));
+        }
+        int[] tmpBitArray = new int[this.fragmentList.size()];
+        for(Iterator tmpMoleculeNameIterator = this.listOfMoleculeNames.iterator(), tmpMolecule = this.moleculeListForBitFingerprint.iterator(); tmpMoleculeNameIterator.hasNext() && tmpMolecule.hasNext();) { //ArrayList<String> tmpMolecule : this.moleculeListForBitFingerprint
+            List<String> tmpListOfMolecule = (List<String>) tmpMolecule.next();
+            String tmpMoleculeNameOrID = (String) tmpMoleculeNameIterator.next();
+            tmpBitArray = tmpFragmentFingerprinter.getBitArray(tmpListOfMolecule);
+            this.bitArrayPrintWriter.println(tmpMoleculeNameOrID + "," + java.util.Arrays.toString(tmpBitArray));
         }
         this.resultsPrintWriter.println();
         this.resultsPrintWriter.println("#########################################################################");
@@ -329,11 +365,11 @@ public class PerformanceTest {
         this.countPrintWriter.println("Number of fragments: " + this.fragmentList.size() + " and number of molecules: " + this.moleculeListForBitFingerprint.size());
         this.countPrintWriter.println("Number of molecules in process, Count fingerprint process time in ms.");
         for(int i = aNumberOfMoleculesInProcess; i<= this.moleculeFragmentList.size(); i+= aNumberOfMoleculesInProcess) {  //i+=2000)
-            List<HashMap<String, Integer>> sub = this.moleculeFragmentList.subList(0, i);
+            List<HashMap<String, Integer>> tmpNumberOfMoleculesInProcessList = this.moleculeFragmentList.subList(0, i);
             long start = System.currentTimeMillis();
-            for (HashMap<String, Integer> map : sub) {
+            for (HashMap<String, Integer> tmpUniqueSmilesToFrequencyMap : tmpNumberOfMoleculesInProcessList) {
                 try {
-                    ICountFingerprint count = printer.getCountFingerprint(map);
+                    ICountFingerprint count = tmpFragmentFingerprinter.getCountFingerprint(tmpUniqueSmilesToFrequencyMap);
                 } catch (Exception anException) {
                     this.exceptionsPrintWriter.println("Count fingerprint generation ERROR. There may be incorrect/invalid elements in the fragment list oder molecule list");
                     this.appendToLogfile(anException);
@@ -341,10 +377,10 @@ public class PerformanceTest {
                 }
             }
             long end = System.currentTimeMillis();
-            this.resultsPrintWriter.println("Processing " + sub.size() + " valid molecules.");
+            this.resultsPrintWriter.println("Processing " + tmpNumberOfMoleculesInProcessList.size() + " valid molecules.");
             this.resultsPrintWriter.println("Count fingerprint generation took: " + (end - start) + " ms.");
             this.resultsPrintWriter.println();
-            this.countPrintWriter.println(sub.size() + "," + (end - start));
+            this.countPrintWriter.println(tmpNumberOfMoleculesInProcessList.size() + "," + (end - start));
         }
     }
     //
@@ -361,6 +397,7 @@ public class PerformanceTest {
         try {
             FileWriter tmpFileWriter = new FileWriter(this.workingPath
                     + "/Results/" + PerformanceTest.EXCEPTIONS_LOG_FILE_NAME, true);
+            this.exceptionsPrintWriter = new PrintWriter(tmpFileWriter);
             StringWriter tmpStringWriter = new StringWriter();
             anException.printStackTrace(new PrintWriter(tmpStringWriter));
             String tmpStackTrace = tmpStringWriter.toString();
