@@ -24,6 +24,7 @@
 
 package de.unijena.cheminf.fragment.fingerprint;
 
+import org.apache.commons.lang3.ObjectUtils;
 import org.openscience.cdk.fingerprint.ICountFingerprint;
 import java.util.HashMap;
 
@@ -36,7 +37,7 @@ import java.util.HashMap;
 public class CountFingerprint implements ICountFingerprint {
     //<editor-fold desc="private final class variables" defaultstate="collapsed">
     /**
-     * An array containing all predefined unique SMILES.
+     * Containing all predefined unique SMILES.
      */
     private final String[] fragmentArrayOfUniqueSmiles;
     /**
@@ -61,8 +62,9 @@ public class CountFingerprint implements ICountFingerprint {
      * @param aSmilesToFragmentMap is a map that assigns the unique SMILES to the positions they occupy in aFragments.
      * @param aPositionToFrequencyMap is the raw map. It maps the positions of the unique SMILES to the
      *                                frequency of these SMILES.
+     * @throws NullPointerException is thrown if the arguments are null.
      */
-    public CountFingerprint(String[] aFragments, HashMap<String, Integer> aSmilesToFragmentMap, HashMap<Integer, Integer> aPositionToFrequencyMap) {
+    public CountFingerprint(String[] aFragments, HashMap<String, Integer> aSmilesToFragmentMap, HashMap<Integer, Integer> aPositionToFrequencyMap) throws NullPointerException {
         if(aFragments == null || aSmilesToFragmentMap == null || aPositionToFrequencyMap == null) {
             throw new NullPointerException("At least one of the arguments is null.");
         }
