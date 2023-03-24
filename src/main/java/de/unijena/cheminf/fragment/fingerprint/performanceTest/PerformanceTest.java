@@ -135,7 +135,7 @@ public class PerformanceTest {
      */
     private PrintWriter bitArrayPrintWriter;
     /**
-     * list stores the HashMap of each molecule. The HashMap assigns
+     * list stores each molecule as HashMap. The HashMap assigns
      * the unique SMILES (fragments) of the molecule to the frequency of the molecule,
      * which is read out from the molecule file.
      */
@@ -264,7 +264,7 @@ public class PerformanceTest {
             this.appendToLogfile(anException);
             throw new IOException("File is not readable");
         }
-        //Read CSV file (fragmentation tab) to obtain fragments used to create fingerprints
+        //Read CSV file (fragments file) to obtain fragments used to create fingerprints
         String tmpLine;
         this.fragmentList = new ArrayList<>(this.INITIAL_CAPACITY_VALUE);
         try {
@@ -277,7 +277,7 @@ public class PerformanceTest {
             this.appendToLogfile(anException);
             throw new IOException("invalid fragment file. At least one line is not readable.");
         }
-        // Read CSV file (itemization tab)
+        // Read CSV file (molecules file)
         List<List<String>> tmpList = new ArrayList<>(this.INITIAL_CAPACITY_VALUE);
         String tmpMoleculeLine;
         try {
@@ -315,7 +315,7 @@ public class PerformanceTest {
     }
     //
     /**
-     * Starts the generation of the fingerprints. And writes the results into the corresponding text files.
+     * Starts the generation of the fingerprints. And writes the results into the corresponding text file.
      *
      * @param aNumberOfMoleculesInProcess specifies how many fingerprints are to be generated.
      * @param aEndTime System time in ms.
