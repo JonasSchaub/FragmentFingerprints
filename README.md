@@ -36,10 +36,10 @@ a growing number of input molecules. It requires four command line arguments:
 
 * file name of a text file (located in the same directory as the JAR) to read in the key fragments.
   An example file for this can be found in the folder <a href="https://github.com/JonasSchaub/FragmentFingerprints/tree/FragmentFingerprint/PerformanceTestCMDApplication">"PerformanceTestCMDApplication"</a> 
-  under the name <i>FragmentsFile_PerformanceTest_1226.csv</i>.
+  under the name <i>FragmentsFile_PerformanceTest.csv</i>.
 * file name of a text file (located in the same directory as the JAR) to read in molecules more precisely their fragments.
   An example file for this can be found in the folder <a href="https://github.com/JonasSchaub/FragmentFingerprints/tree/FragmentFingerprint/PerformanceTestCMDApplication">"PerformanceTestCMDApplication"</a>
-  under the name <i>MoleculesFile_PerformanceTest_1226.csv</i>.
+  under the name <i>MoleculesFile_PerformanceTest.csv</i>.
 * path name for saving the folders with the performance test results.
 * integer number that specifies with how many molecules the generation of the fingerprints should start. 
   In each round, the number of molecules to be processed increases by + integer number.
