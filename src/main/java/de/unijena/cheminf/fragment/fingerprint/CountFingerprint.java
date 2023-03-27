@@ -24,9 +24,11 @@
 
 package de.unijena.cheminf.fragment.fingerprint;
 
-import org.apache.commons.lang3.ObjectUtils;
 import org.openscience.cdk.fingerprint.ICountFingerprint;
+
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
 /**
  * The CountFingerprint class implements the CDK interface ICountFingerprint.
@@ -44,14 +46,18 @@ public class CountFingerprint implements ICountFingerprint {
      * The HashMap maps the unique SMILES to the position they have in the array.
      */
     private final HashMap<String,Integer> uniqueSmilesToPositionMap;
-    /**
-     * The HashMap maps the position of unique SMILES to the frequency
-     */
-    private final HashMap<Integer, Integer> uniqueSmilesPositionToFrequencyCountRawMap;
     //</editor-fold>
     //
     //<editor-fold desc="private class variables" defaultstate="collapsed">
+    /**
+     * changes the behavior of the fingerprint. If behaveAsBitFingerprint == true, the count fingerprint
+     * behaves the same as a bit fingerprint.
+     */
     private boolean behaveAsBitFingerprint;
+    /**
+     * The HashMap maps the position of unique SMILES to the frequency
+     */
+    private  HashMap<Integer, Integer> uniqueSmilesPositionToFrequencyCountRawMap;
     //</editor-fold>
     //
     //<editor-fold desc="Constructor" defaultstate="collapsed">
@@ -144,10 +150,28 @@ public class CountFingerprint implements ICountFingerprint {
     //
     /**
      * {@inheritDoc}
+     *
+     * Method for merging the given fingerprint fp into an actual fingerprint.
      */
     @Override
     public void merge(ICountFingerprint fp) {
-        throw new UnsupportedOperationException();
+        List<Integer> tmpKeysToRemove = new ArrayList<>(this.fragmentArrayOfUniqueSmiles.length);
+        for (int i = 0; i < fp.numOfPopulatedbins(); i++) {
+            Integer tmpCount = this.uniqueSmilesPositionToFrequencyCountRawMap.get(fp.getHash(i));
+            if (tmpCount == null) {
+                tmpCount = 0;
+            }
+            this.uniqueSmilesPositionToFrequencyCountRawMap.put(fp.getHash(i), tmpCount + fp.getCount(i));
+        }
+        for(int tmpKeys : this.uniqueSmilesPositionToFrequencyCountRawMap.keySet()) {
+            int tmpValue = this.uniqueSmilesPositionToFrequencyCountRawMap.get(tmpKeys);
+            if(tmpValue == 0) {
+               tmpKeysToRemove.add(tmpKeys);
+            }
+        }
+        for(int tmpKey : tmpKeysToRemove) {
+            this.uniqueSmilesPositionToFrequencyCountRawMap.remove(tmpKey);
+        }
     }
     //
     /**
