@@ -347,16 +347,16 @@ public class PerformanceTest {
                 }
             }
             aEndTime = System.currentTimeMillis();
-            resultsPrintWriter.println("Processing " + tmpNumberOfMoleculesInProcess.size() + " valid molecules.");
-            resultsPrintWriter.println("Bit fingerprint generation took: " + (aEndTime - aStartTime) + " ms.");
-            bitPrintWriter.println(tmpNumberOfMoleculesInProcess.size() + "," + (aEndTime - aStartTime));
+            this.resultsPrintWriter.println("Processing " + tmpNumberOfMoleculesInProcess.size() + " valid molecules.");
+            this.resultsPrintWriter.println("Bit fingerprint generation took: " + (aEndTime - aStartTime) + " ms.");
+            this.bitPrintWriter.println(tmpNumberOfMoleculesInProcess.size() + "," + (aEndTime - aStartTime));
         }
         int[] tmpBitArray = new int[this.fragmentList.size()];
         for(Iterator tmpMoleculeNameIterator = this.listOfMoleculeNames.iterator(), tmpMolecule = this.moleculeListForBitFingerprint.iterator(); tmpMoleculeNameIterator.hasNext() && tmpMolecule.hasNext();) { //ArrayList<String> tmpMolecule : this.moleculeListForBitFingerprint
             List<String> tmpListOfMolecule = (List<String>) tmpMolecule.next();
             String tmpMoleculeNameOrID = (String) tmpMoleculeNameIterator.next();
             tmpBitArray = tmpFragmentFingerprinter.getBitArray(tmpListOfMolecule);
-            this.bitArrayPrintWriter.println(tmpMoleculeNameOrID + "," + java.util.Arrays.toString(tmpBitArray));
+            this.bitArrayPrintWriter.println(tmpMoleculeNameOrID + ":" + java.util.Arrays.toString(tmpBitArray));
         }
         this.resultsPrintWriter.println();
         this.resultsPrintWriter.println("#########################################################################");
@@ -394,6 +394,7 @@ public class PerformanceTest {
             return;
         }
         this.exceptionsPrintWriter = null;
+        PrintWriter m = null;
         try {
             FileWriter tmpFileWriter = new FileWriter(this.workingPath
                     + "/Results/" + PerformanceTest.EXCEPTIONS_LOG_FILE_NAME, true);
