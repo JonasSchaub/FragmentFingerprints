@@ -7,7 +7,7 @@ It can be executed from the command-line (command: java -jar) to do a performanc
 a growing number of input molecules. It requires four command line arguments: 
 
 * file name of a text file (located in the same directory as the JAR) to read in the key fragments.
-  An example file for this can be found in the folder     "https://github.com/JonasSchaub/FragmentFingerprints/tree/FragmentFingerprint/PerformanceTestCMDApplication"
+  An example file for this can be found in the folder "https://github.com/JonasSchaub/FragmentFingerprints/tree/FragmentFingerprint/PerformanceTestCMDApplication"
   under the name FragmentsFile_PerformanceTest.csv
 * file name of a text file (located in the same directory as the JAR) to read in molecules more precisely their fragments.
   An example file for this can be found in the folder "https://github.com/JonasSchaub/FragmentFingerprints/tree/FragmentFingerprint/PerformanceTestCMDApplication">"PerformanceTestCMDApplication"
