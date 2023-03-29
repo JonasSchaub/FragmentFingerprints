@@ -277,6 +277,9 @@ public class PerformanceTest {
             this.appendToLogfile(anException);
             throw new IOException("invalid fragment file. At least one line is not readable.");
         }
+        finally {
+            tmpFragmentSetReader.close();
+        }
         // Read CSV file (molecules file)
         List<List<String>> tmpList = new ArrayList<>(this.INITIAL_CAPACITY_VALUE);
         String tmpMoleculeLine;
@@ -289,7 +292,9 @@ public class PerformanceTest {
             this.appendToLogfile(anException);
             throw new IOException("invalid molecule file. At least one line is not readable");
         }
-        tmpMoleculeFragmentsReader.close();
+        finally {
+            tmpMoleculeFragmentsReader.close();
+        }
         List<String> tmpSeparateList;
         this.listOfMoleculeNames = new ArrayList<>();
         for (int tmpCurrentLine = 1; tmpCurrentLine < tmpList.size(); tmpCurrentLine++) {
@@ -300,7 +305,7 @@ public class PerformanceTest {
             ArrayList<String> dataForGenerateBitFingerprint = new ArrayList<>();
             try {
                 for (int i = 0; i < ListWithoutNameAndMoleculeSmiles.size(); i++) {
-                    if (i % 2 == 0) {
+                    if (i % 2 == 0) { // magic number to store the data from the file into a HashMap
                         tmpMoleculeFragmentsMap.put(ListWithoutNameAndMoleculeSmiles.get(i), Integer.valueOf(ListWithoutNameAndMoleculeSmiles.get(i + 1)));
                         dataForGenerateBitFingerprint.add(ListWithoutNameAndMoleculeSmiles.get(i));
                     }
@@ -393,12 +398,9 @@ public class PerformanceTest {
         if (anException == null) {
             return;
         }
-        this.exceptionsPrintWriter = null;
-        PrintWriter m = null;
         try {
             FileWriter tmpFileWriter = new FileWriter(this.workingPath
                     + "/Results/" + PerformanceTest.EXCEPTIONS_LOG_FILE_NAME, true);
-            this.exceptionsPrintWriter = new PrintWriter(tmpFileWriter);
             StringWriter tmpStringWriter = new StringWriter();
             anException.printStackTrace(new PrintWriter(tmpStringWriter));
             String tmpStackTrace = tmpStringWriter.toString();

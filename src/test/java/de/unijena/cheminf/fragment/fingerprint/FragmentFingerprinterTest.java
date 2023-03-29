@@ -64,7 +64,7 @@ public class FragmentFingerprinterTest {
     /**
      * List in which all molecule fragments are stored that are read in from the CSV file.
      */
-    private static ArrayList<HashMap<String, Integer>> moleculeFragmentList = new ArrayList<>(FragmentFingerprinterTest.initialCapacityValue); // TODO local variable if only test the last molecule
+    private static ArrayList<HashMap<String, Integer>> moleculeFragmentList = new ArrayList<>(FragmentFingerprinterTest.initialCapacityValue);
     /**
      * Is a list that contains all fragments, the fingerprint is then generated based on these fragments.
      */
@@ -115,7 +115,7 @@ public class FragmentFingerprinterTest {
         BufferedReader tmpFragmentSetReader;
         BufferedReader tmpMoleculeFragmentsReader;
         try {
-            tmpFragmentSetReader = new BufferedReader(new FileReader("src/test/resources/de/unijena/cheminf/fragment/fingerprint/FragmentList.txt")); //src/test/resources/de/unijena/cheminf/fragment/fingerprint/FragmentList.txt
+            tmpFragmentSetReader = new BufferedReader(new FileReader("src/test/resources/de/unijena/cheminf/fragment/fingerprint/FragmentList.txt"));
             tmpMoleculeFragmentsReader = new BufferedReader(new FileReader("src/test/resources/de/unijena/cheminf/fragment/fingerprint/MoleculeFragments.txt"));
         } catch (IOException anException) {
             throw new IOException("File is not readable!");
@@ -132,9 +132,11 @@ public class FragmentFingerprinterTest {
                 FragmentFingerprinterTest.fragmentList.add(tmpSmilesOfFragments[0]);
             }
             FragmentFingerprinterTest.fragmentList.remove(0);
-            tmpFragmentSetReader.close();
         } catch (IOException anException) {
             throw new IOException("invalid fragment file. At least one line is not readable.");
+        }
+        finally {
+            tmpFragmentSetReader.close();
         }
         // Read CSV file
         String tmpSeparatorSemicolon = ";";
@@ -146,9 +148,11 @@ public class FragmentFingerprinterTest {
                 String[] tmpMoleculeFragmentsAndFrequencies = tmpMoleculeLine.split(tmpSeparatorSemicolon);
                 tmpList.add(Arrays.asList(tmpMoleculeFragmentsAndFrequencies));
             }
-            tmpMoleculeFragmentsReader.close();
         } catch (IOException anException) {
             throw new IOException("invalid molecule file. At least one line is not readable");
+        }
+        finally {
+            tmpMoleculeFragmentsReader.close();
         }
         List<String> tmpSeparateList;
         FragmentFingerprinter tmpFingerprintRepresentation = new FragmentFingerprinter(FragmentFingerprinterTest.fragmentList);
@@ -158,7 +162,6 @@ public class FragmentFingerprinterTest {
         FileWriter tmpResultsLogFileWriter = new FileWriter(tmpResultsLogFile, false);
         PrintWriter tmpResultPrintWriter = new PrintWriter(tmpResultsLogFileWriter);
         int[] tmpBitArray;
-        int io = 0;
         for (int tmpCurrentLine = 1; tmpCurrentLine < tmpList.size(); tmpCurrentLine++) {
             tmpSeparateList = tmpList.get(tmpCurrentLine);
             List<String> ListWithoutNameAndMoleculeSmiles = tmpSeparateList.subList(2, tmpSeparateList.size());
