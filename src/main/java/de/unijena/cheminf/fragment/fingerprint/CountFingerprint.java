@@ -57,24 +57,24 @@ public class CountFingerprint implements ICountFingerprint {
     /**
      * The HashMap maps the position of unique SMILES to the frequency
      */
-    private  HashMap<Integer, Integer> uniqueSmilesPositionToFrequencyCountRawMap;
+    private HashMap<Integer,Integer> uniqueSmilesPositionToFrequencyCountRawMap;
     //</editor-fold>
     //
     //<editor-fold desc="Constructor" defaultstate="collapsed">
     /**
      * Constructor.
      *
-     * @param aFragments is a string array that stores all fragments that are in the form of unique SMILES.
+     * @param anArrayOfFragments is a string array that stores all fragments that are in the form of unique SMILES.
      * @param aSmilesToFragmentMap is a map that assigns the unique SMILES to the positions they occupy in aFragments.
      * @param aPositionToFrequencyMap is the raw map. It maps the positions of the unique SMILES to the
      *                                frequency of these SMILES.
      * @throws NullPointerException is thrown if the arguments are null.
      */
-    public CountFingerprint(String[] aFragments, HashMap<String, Integer> aSmilesToFragmentMap, HashMap<Integer, Integer> aPositionToFrequencyMap) throws NullPointerException {
-        if(aFragments == null || aSmilesToFragmentMap == null || aPositionToFrequencyMap == null) {
+    public CountFingerprint(String[] anArrayOfFragments, HashMap<String, Integer> aSmilesToFragmentMap, HashMap<Integer, Integer> aPositionToFrequencyMap) throws NullPointerException {
+        if(anArrayOfFragments == null || aSmilesToFragmentMap == null || aPositionToFrequencyMap == null) {
             throw new NullPointerException("At least one of the arguments is null.");
         }
-        this.fragmentArrayOfUniqueSmiles = aFragments;
+        this.fragmentArrayOfUniqueSmiles = anArrayOfFragments;
         this.uniqueSmilesToPositionMap = aSmilesToFragmentMap;
         this.uniqueSmilesPositionToFrequencyCountRawMap = aPositionToFrequencyMap;
         this.behaveAsBitFingerprint = false;
@@ -192,7 +192,7 @@ public class CountFingerprint implements ICountFingerprint {
      */
     @Override
     public boolean hasHash(int hash) throws IllegalArgumentException {
-        if(hash< this.fragmentArrayOfUniqueSmiles.length && hash>=0) {
+        if(hash < this.fragmentArrayOfUniqueSmiles.length && hash >= 0) {
             return true;
         } else if (hash < 0) {
             throw new IllegalArgumentException("Negative values are not allowed.");

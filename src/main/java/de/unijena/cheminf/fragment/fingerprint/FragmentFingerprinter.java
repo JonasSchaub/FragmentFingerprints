@@ -149,12 +149,12 @@ public class FragmentFingerprinter implements IFragmentFingerprinter {
             }
         }
         Set<String> tmpSet = new HashSet<>(aListOfUniqueSmiles);
-        ArrayList<String> tmpListOfUniqueSmilesWithoutDuplicates = new ArrayList<>(tmpSet);
-        this.copyListBit = (ArrayList<String>)tmpListOfUniqueSmilesWithoutDuplicates.clone();
-        for(String tmpUniqueSmilesWithoutDuplicates : tmpListOfUniqueSmilesWithoutDuplicates) {
+        ArrayList<String> tmpUniqueSmiles = new ArrayList<>(tmpSet);
+        this.copyListBit = (ArrayList<String>) tmpUniqueSmiles.clone();
+        for(String tmpUniqueSmilesWithoutDuplicates : tmpUniqueSmiles) {
             if (this.uniqueSmilesToPositionMap.containsKey(tmpUniqueSmilesWithoutDuplicates)) {
                 int tmpPosition = uniqueSmilesToPositionMap.get(tmpUniqueSmilesWithoutDuplicates);
-                tmpBitSet.set(tmpPosition,true);
+                tmpBitSet.set(tmpPosition, true);
             }
         }
         this.cacheBitFingerprint = new BitSetFingerprint(tmpBitSet);
@@ -227,7 +227,7 @@ public class FragmentFingerprinter implements IFragmentFingerprinter {
             if(tmpSmiles.isBlank() || tmpSmiles.isEmpty()) {
                 throw new IllegalArgumentException("aUniqueSmilesToFrequencyList (at least one list element) is blank/empty.");
             }
-            if (tmpUniqueSmilesToFrequencyCountMap.containsKey(tmpSmiles) == false) {
+            if (!tmpUniqueSmilesToFrequencyCountMap.containsKey(tmpSmiles)) {
                 tmpUniqueSmilesToFrequencyCountMap.put(tmpSmiles, 1);
             } else {
                 tmpUniqueSmilesToFrequencyCountMap.put(tmpSmiles, tmpUniqueSmilesToFrequencyCountMap.get(tmpSmiles) + 1);
@@ -340,7 +340,7 @@ public class FragmentFingerprinter implements IFragmentFingerprinter {
      */
     public int[] getBitArray(Map<String,Integer> aUniqueSmilesToFrequencyMap) throws NullPointerException, IllegalArgumentException {
         Objects.requireNonNull(aUniqueSmilesToFrequencyMap, "aUniqueSmilesToFrequencyMap (Map of string and integer instances) is null.");
-        List<String> tmpListOfUniqueSmiles = new ArrayList<>();
+        List<String> tmpListOfUniqueSmiles = new ArrayList<>(aUniqueSmilesToFrequencyMap.size());
         for(String tmpUniqueSmiles : aUniqueSmilesToFrequencyMap.keySet()) {
             if(tmpUniqueSmiles == null || aUniqueSmilesToFrequencyMap.get(tmpUniqueSmiles) == null) {
                 throw new NullPointerException("aUniqueSmilesToFrequencyMap (Map of string and integer instances) contains " +
@@ -367,7 +367,7 @@ public class FragmentFingerprinter implements IFragmentFingerprinter {
      */
     public int[] getCountArray(Map<String, Integer> aUniqueSmilesToFrequencyMap) throws NullPointerException, IllegalArgumentException {
         Objects.requireNonNull(aUniqueSmilesToFrequencyMap, "aUniqueSmilesToFrequencyMap (Map of string and integer instances) is null.");
-        List<String> tmpListOfUniqueSmiles = new ArrayList<>();
+        List<String> tmpListOfUniqueSmiles = new ArrayList<>(aUniqueSmilesToFrequencyMap.size());
         for(String tmpUniqueSmiles : aUniqueSmilesToFrequencyMap.keySet()) {
             if(tmpUniqueSmiles == null || aUniqueSmilesToFrequencyMap.get(tmpUniqueSmiles) == null) {
                 throw new NullPointerException("aUniqueSmilesToFrequencyMap (Map of string and integer instances) contains " +
