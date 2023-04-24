@@ -28,24 +28,23 @@ package de.unijena.cheminf.fragment.fingerprint.performanceTest;
  * Main class for starting the PerformanceTest application.
  *
  * @author Betuel Sevindik
+ * @version 1.0.0.0
  */
 public class Main {
     /**
-     * Starts the application. The first and second command line arguments must be
-     * the name of a text file to read (must be located in the same directory as the application's .jar file)
-     * Important for the correctness of the text files to be read is that both text files must start with a header.
-     * In addition, a molecule must be represented in each line of the text files and both text files must contain
-     * a ";" as separator. The first text file must contain a SMILES string at the first position of
-     * each line (all other positions are ignored). The first two positions of each line of the second file
-     * are ignored. These positions contain the molecule name/ID and the corresponds SMILES string. And all other
-     * positions within a line must alternately contain a SMILES string and an
-     * integer value separated by the delimiter (representing the frequency of the SMILES string).
+     * Starts the application.
+     * @see PerformanceTest
      *
      * @param args the command line arguments
      */
     public static void main(String[] args)  {
         try {
-            PerformanceTest tmpApplication = new PerformanceTest(args);
+            String[] arg1 = new String[4];
+            arg1[0] = "src/test/resources/de/unijena/cheminf/fragment/fingerprint/FragmentList.txt";
+            arg1[1] = "src/test/resources/de/unijena/cheminf/fragment/fingerprint/MoleculeFragments.txt";
+            arg1[2] = "deneme_SON";
+            arg1[3] = "1";
+            PerformanceTest tmpApplication = new PerformanceTest(arg1);
         } catch (Exception anException) {
             anException.printStackTrace(System.err);
             System.exit(1);

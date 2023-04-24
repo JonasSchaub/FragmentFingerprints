@@ -42,5 +42,5 @@ gradle-app.setting
 # PerformanceTest results #
 Results
 
-# de.unijena.chemoinf.fragment.fingerprint #
-src/test/resources/de/unijena/cheminf/fragment/fingerprint/Fingerprints
+# Fingerprint results #
+Fingerprints

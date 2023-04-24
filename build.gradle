@@ -82,8 +82,8 @@ task fatJar(type: Jar) {
     }
     archiveAppendix = 'fat'
     from {
-//        configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }
-        configurations.runtimeClasspath.findAll { it.name.endsWith('jar') && !it.name.endsWith('aarch64.jar') }.collect { zipTree(it) }
+        configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }
+        //configurations.runtimeClasspath.findAll { it.name.endsWith('jar') && !it.name.endsWith('aarch64.jar') }.collect { zipTree(it) }
     }
     with jar
 }

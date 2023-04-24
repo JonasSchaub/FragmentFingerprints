@@ -1,22 +1,21 @@
 ---------------------------------
 PERFORMANCE TEST CMD APPLICATION
 ---------------------------------
-The subfolder "https://github.com/JonasSchaub/FragmentFingerprints/tree/FragmentFingerprint/PerformanceTestCMDApplication/jar"
+The folder "PerformanceTestCMDApplication"
 contains the executable JAVA archive FragmentFingerprinter-fat.jar.
-It can be executed from the command-line (command: java -jar) to do a performance snapshot of fragment fingerprinter's scaling behaviour for
+It can be executed from the command line (command: java -jar) to do a performance snapshot of fragment fingerprinter's scaling behaviour for
 a growing number of input molecules. It requires four command line arguments: 
 
 * file name of a text file (located in the same directory as the JAR) to read in the key fragments.
-  An example file for this can be found in the folder "https://github.com/JonasSchaub/FragmentFingerprints/tree/FragmentFingerprint/PerformanceTestCMDApplication"
+  An example file for this can be found in the folder "PerformanceTestCMDApplication"
   under the name FragmentsFile_PerformanceTest.csv
-* file name of a text file (located in the same directory as the JAR) to read in molecules more precisely their fragments.
-  An example file for this can be found in the folder "https://github.com/JonasSchaub/FragmentFingerprints/tree/FragmentFingerprint/PerformanceTestCMDApplication">"PerformanceTestCMDApplication"
+* file name of a text file (located in the same directory as the JAR) to read in molecules or, more precisely, their fragments.
+  An example file for this can be found in the folder "PerformanceTestCMDApplication"
   under the name MoleculesFile_PerformanceTest.csv
 * path name for saving the folders with the performance test results.
-* integer number that specifies with how many molecules the generation of the fingerprints should start. 
+* integer number (bin size) that specifies with how many molecules the generation of the fingerprints should start.
   In each round, the number of molecules to be processed increases by + integer number.
 
-Example usage: <code>java -jar FragmentFingerprinter-fat.jar first-input-file-in-same-dir-name.txt second-input-file-in same-dir-name.txt third-path-name-to-save-results 10</code>
-<br>The CMD application will then import the data sets and create bit and count fingerprints. The application will also create output files of the 
+Example usage: java -jar  The CMD application will then import the data sets and create bit and count fingerprints. The application will also create output files of the
 measured runtimes and a file in which the generated fingerprints are stored line by line. So that each line 
 represents a fingerprint whose components are separated by commas.
