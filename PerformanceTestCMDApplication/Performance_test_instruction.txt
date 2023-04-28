@@ -13,9 +13,11 @@ a growing number of input molecules. It requires four command line arguments:
   An example file for this can be found in the folder "PerformanceTestCMDApplication"
   under the name MoleculesFile_PerformanceTest.csv
 * path name for saving the folders with the performance test results.
-* integer number (bin size) that specifies with how many molecules the generation of the fingerprints should start.
-  In each round, the number of molecules to be processed increases by + integer number.
+* integer number (bin size). I.e how many molecules are to be processed (in addition) per iteration.
 
-Example usage: java -jar  The CMD application will then import the data sets and create bit and count fingerprints. The application will also create output files of the
+Example usage: java -jar  FragmentFingerprinter-fat-0.0.0.1 Fragments_File_PerformaceTest_13000.csv
+MoleculeFragments_File_PerformanceTest_13000.csv PerformanceTest_Result 1000
+
+The CMD application will then import the data sets and create bit and count fingerprints. The application will also create output files of the
 measured runtimes and a file in which the generated fingerprints are stored line by line. So that each line 
 represents a fingerprint whose components are separated by commas.

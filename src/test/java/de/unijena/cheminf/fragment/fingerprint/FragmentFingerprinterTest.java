@@ -35,7 +35,6 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
-import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -56,26 +55,27 @@ public class FragmentFingerprinterTest {
      */
     private static final String FINGERPRINTS_FILE_NAME = "Fingerprints";
     /**
-     * Initial capacity of the lists in which the data for generating the fingerprints are stored.
+     * Initial capacity value for molecule list
      */
     private static final int INITIAL_CAPACITY_VALUE = 10;
     /**
-     *  Initial capacity of the lists in which stores //TODO
+     *  Initial capacity value of the list that stores the key fragments.
      */
     private static final int INITIAL_CAPACITY_VALUE_FOR_FRAGMENT_LIST = 28;
     /**
-     * Value for determining the initial capacity of cards
+     * Initial capacity value of maps.
      */
     private static final int INITIAL_CAPACITY_VALUE_FOR_MAP = Math.round((4/3) + 1);
     //</editor-fold>
     //
     //<editor-fold desc="private static class variables" defaultstate="collapsed">
     /**
-     * List in which all molecule fragments are stored that are read in from the CSV file.
+     * The list contains a collection of fragments and their frequencies that were read from a
+     * CSV file and stored as a HashMap.
      */
     private static ArrayList<HashMap<String, Integer>> moleculeFragmentList = new ArrayList<>(FragmentFingerprinterTest.INITIAL_CAPACITY_VALUE);
     /**
-     * Is a list that contains all fragments, the fingerprint is then generated based on these fragments.
+     * The list includes all key fragments that are set during the initialization of the fingerprinter.
      */
     private static ArrayList<String> fragmentList = new ArrayList<>(FragmentFingerprinterTest.INITIAL_CAPACITY_VALUE_FOR_FRAGMENT_LIST);
     /**
@@ -91,11 +91,11 @@ public class FragmentFingerprinterTest {
      */
     private static CountFingerprint countFingerprintTest;
     /**
-     * List only with unique SMILES and without frequencies
+     * List contains molecule fragments without duplicates
      */
    private static ArrayList<String> dataForGeneratingBitFingerprint;
     /**
-     * List in which a fragment occurs more than once
+     * List contains molecule fragments with desired fragment duplicates.
      */
    private static ArrayList<String> countListOfUniqueSmiles;
     //</editor-fold>
@@ -117,7 +117,7 @@ public class FragmentFingerprinterTest {
      *
      * @BeforeAll ensures that the setUp method is only executed once.
      *
-     * @throws IOException is thrown if the constructor is unable to open a text file for logging occurred exceptions.
+     * @throws Exception is thrown if anything goes wrong.
      */
     @BeforeAll
     public static void setUp() throws Exception {
@@ -135,6 +135,7 @@ public class FragmentFingerprinterTest {
             String[] tmpSmilesOfFragments = tmpLine.split(tmpSeparatorComma);
             FragmentFingerprinterTest.fragmentList.add(tmpSmilesOfFragments[0]);
         }
+        tmpFragmentSetReader.close();
         // removing header line value
         FragmentFingerprinterTest.fragmentList.remove(0);
         // Read CSV file
@@ -146,43 +147,37 @@ public class FragmentFingerprinterTest {
             String[] tmpMoleculeFragmentsAndFrequencies = tmpMoleculeLine.split(tmpSeparatorSemicolon);
             tmpListOfMoleculesFragmentsAndFrequenciesList.add(Arrays.asList(tmpMoleculeFragmentsAndFrequencies));
         }
-        List<String> tmpMoleculeFragmentsAndFrequenciesList;
-        // Instance is only used to print fingerprints on the console.
-        FragmentFingerprinter tmpFragmentFingerprintRepresentation = new FragmentFingerprinter(FragmentFingerprinterTest.fragmentList);
+        tmpMoleculeFragmentsReader.close();
+        List<String> tmpNameAndMoleculeFragmentsAndFrequenciesList;
+        FragmentFingerprinterTest.fragmentFingerprinter = new FragmentFingerprinter(FragmentFingerprinterTest.fragmentList);
         String tmpFingerprintOutputPath = (new File("").getAbsoluteFile().getAbsolutePath()) + File.separator;
         new File(tmpFingerprintOutputPath + "Fingerprints").mkdirs();
-        File tmpFingerprintResultFile = new File(tmpFingerprintOutputPath + "/Fingerprints/" + FragmentFingerprinterTest.FINGERPRINTS_FILE_NAME  + ".txt");
+        File tmpFingerprintResultFile = new File(tmpFingerprintOutputPath + "Fingerprints" +File.separator+ FragmentFingerprinterTest.FINGERPRINTS_FILE_NAME  + ".txt");
         FileWriter tmpFingerprintResultsFileWriter = new FileWriter(tmpFingerprintResultFile, false);
         PrintWriter tmpFingerprintResultPrintWriter = new PrintWriter(tmpFingerprintResultsFileWriter);
         int[] tmpBitArray;
         for (int tmpCurrentLineIndex = 1; tmpCurrentLineIndex < tmpListOfMoleculesFragmentsAndFrequenciesList.size(); tmpCurrentLineIndex++) {
-            tmpMoleculeFragmentsAndFrequenciesList = tmpListOfMoleculesFragmentsAndFrequenciesList.get(tmpCurrentLineIndex);
-            List<String> tmpListWithoutNameAndMoleculeSmiles = tmpMoleculeFragmentsAndFrequenciesList.subList(2, tmpMoleculeFragmentsAndFrequenciesList.size());
-            HashMap<String, Integer> tmpMoleculeFragmentsMap = new HashMap<>(tmpListWithoutNameAndMoleculeSmiles.size()*INITIAL_CAPACITY_VALUE_FOR_MAP);
+            tmpNameAndMoleculeFragmentsAndFrequenciesList = tmpListOfMoleculesFragmentsAndFrequenciesList.get(tmpCurrentLineIndex);
+            List<String> tmpListWithoutNameAndMoleculeSmiles = tmpNameAndMoleculeFragmentsAndFrequenciesList.subList(2, tmpNameAndMoleculeFragmentsAndFrequenciesList.size());
+            HashMap<String, Integer> tmpMoleculeFragmentsMap = new HashMap<>(tmpListWithoutNameAndMoleculeSmiles.size()*FragmentFingerprinterTest.INITIAL_CAPACITY_VALUE_FOR_MAP);
             FragmentFingerprinterTest.dataForGeneratingBitFingerprint = new ArrayList<>(FragmentFingerprinterTest.INITIAL_CAPACITY_VALUE);
             for (int i = 0; i < tmpListWithoutNameAndMoleculeSmiles.size(); i++) {
-                if (i % 2 == 0) {
+                if (i % 2 == 0) { // magic number to store the fragment SMILES and their frequencies from the file into a HashMap
                     tmpMoleculeFragmentsMap.put(tmpListWithoutNameAndMoleculeSmiles.get(i), Integer.valueOf(tmpListWithoutNameAndMoleculeSmiles.get(i + 1)));
                     FragmentFingerprinterTest.dataForGeneratingBitFingerprint.add(tmpListWithoutNameAndMoleculeSmiles.get(i));
                 }
             }
             //Illustration of the results of the bit arrays for the specified molecules
-            IBitFingerprint tmpBitFingerprint = tmpFragmentFingerprintRepresentation.getBitFingerprint(FragmentFingerprinterTest.dataForGeneratingBitFingerprint);
-            ICountFingerprint tmpCountFingerprint = tmpFragmentFingerprintRepresentation.getCountFingerprint(tmpMoleculeFragmentsMap);
-            tmpBitArray = tmpFragmentFingerprintRepresentation.getCountArray(FragmentFingerprinterTest.dataForGeneratingBitFingerprint);
+            tmpBitArray = FragmentFingerprinterTest.fragmentFingerprinter.getBitArray(FragmentFingerprinterTest.dataForGeneratingBitFingerprint);
+            // number of characters
             int tmpLength = java.util.Arrays.toString(tmpBitArray).length();
-            tmpCountFingerprint.setBehaveAsBitFingerprint(false);
-            System.out.println("\t\tNumber of positive bits " + tmpMoleculeFragmentsAndFrequenciesList.get(0) + ": " + tmpBitFingerprint.cardinality());
-            System.out.println("\t\tIndices of positive bits " + tmpMoleculeFragmentsAndFrequenciesList.get(0) + ": " + tmpBitFingerprint.asBitSet().toString());
-            System.out.println("\t\thas hash for the bin with the index 28 " + tmpMoleculeFragmentsAndFrequenciesList.get(0) + ": " + tmpCountFingerprint.hasHash(28));
-           // System.out.println("\t\tHash for the bin with the index 28 " + tmpSeparateList.get(0) + ": " + tmpCountFingerprint.getHash(28));
             tmpFingerprintResultPrintWriter.println(java.util.Arrays.toString(tmpBitArray).substring(1, tmpLength - 1));
             tmpFingerprintResultPrintWriter.flush();
             // add all molecule maps
             FragmentFingerprinterTest.moleculeFragmentList.add(tmpMoleculeFragmentsMap);
         }
+        tmpFingerprintResultPrintWriter.close();
         // Objects necessary for the test are created (used only in @Test)
-        FragmentFingerprinterTest.fragmentFingerprinter = new FragmentFingerprinter(FragmentFingerprinterTest.fragmentList);
         FragmentFingerprinterTest.countFingerprintTest = FragmentFingerprinterTest.fragmentFingerprinter.getCountFingerprint(FragmentFingerprinterTest.moleculeFragmentList.get(FragmentFingerprinterTest.moleculeFragmentList.size() - 1));
         FragmentFingerprinterTest.bitFingerprintTest = FragmentFingerprinterTest.fragmentFingerprinter.getBitFingerprint(FragmentFingerprinterTest.dataForGeneratingBitFingerprint);
 
@@ -216,10 +211,6 @@ public class FragmentFingerprinterTest {
         FragmentFingerprinterTest.countListOfUniqueSmiles.add("C");
         FragmentFingerprinterTest.countListOfUniqueSmiles.add("CCC");
         FragmentFingerprinterTest.countListOfUniqueSmiles.add("[H]OC");
-        System.out.println(bitFingerprintTest.cardinality()+"----cardinality tesst");
-        System.out.println(fragmentFingerprinter.getVersionDescription() + "----version");
-
-        System.out.println(java.util.Arrays.toString(fragmentFingerprinter.getCountArray(countListOfUniqueSmiles))+"----count ARray liste");
     }
     //</editor-fold>
     //
@@ -243,8 +234,8 @@ public class FragmentFingerprinterTest {
      */
     @Test
     public void bitFingerprintSizeTest() {
-        long tmpFingerprintSizeOfVariamcyin =  FragmentFingerprinterTest.bitFingerprintTest.size();
-        Assertions.assertEquals(64, tmpFingerprintSizeOfVariamcyin);
+        long tmpVariamycinFingerprintSize =  FragmentFingerprinterTest.bitFingerprintTest.size();
+        Assertions.assertEquals(64, tmpVariamycinFingerprintSize);
     }
     //
     /**
@@ -264,8 +255,8 @@ public class FragmentFingerprinterTest {
         tmpBitSetTest.set(18);
         tmpBitSetTest.set(26);
         tmpBitSetTest.set(27);
-        BitSet tmpBitSetOfVariamycin = FragmentFingerprinterTest.bitFingerprintTest.asBitSet();
-        Assertions.assertEquals(tmpBitSetTest,tmpBitSetOfVariamycin);
+        BitSet tmpVariamycinBitSet = FragmentFingerprinterTest.bitFingerprintTest.asBitSet();
+        Assertions.assertEquals(tmpBitSetTest, tmpVariamycinBitSet);
     }
     //
     /**
@@ -297,8 +288,8 @@ public class FragmentFingerprinterTest {
         tmpTestArray[18] = 1;
         tmpTestArray[26] = 1;
         tmpTestArray[27] = 1;
-        int[] tmpVariamycinArray = FragmentFingerprinterTest.fragmentFingerprinter.getBitArray(FragmentFingerprinterTest.dataForGeneratingBitFingerprint);
-        Assertions.assertArrayEquals(tmpTestArray, tmpVariamycinArray);
+        int[] tmpVariamycinBitArray = FragmentFingerprinterTest.fragmentFingerprinter.getBitArray(FragmentFingerprinterTest.dataForGeneratingBitFingerprint);
+        Assertions.assertArrayEquals(tmpTestArray, tmpVariamycinBitArray);
     }
     //
     /**
@@ -331,8 +322,8 @@ public class FragmentFingerprinterTest {
     @Test
     public void countFingerprintSizeTest() {
         long tmpCountFingerprintSizeTest = 28;
-        long tmpCountFingerprintSizeOfVariamycin = FragmentFingerprinterTest.countFingerprintTest.size();
-        Assertions.assertEquals(tmpCountFingerprintSizeTest, FragmentFingerprinterTest.countFingerprintTest.size());
+        long tmpVariamycinCountFingerprintSize = FragmentFingerprinterTest.countFingerprintTest.size();
+        Assertions.assertEquals(tmpCountFingerprintSizeTest, tmpVariamycinCountFingerprintSize);
     }
     //
     /**
@@ -343,8 +334,8 @@ public class FragmentFingerprinterTest {
     @Test
     public void numberOfPopulatedBinsTest() {
         int tmpBinsTest = 28;
-        int tmpCountFingerprintNumberOfPopulatedBinsOfVariamycin = FragmentFingerprinterTest.countFingerprintTest.numOfPopulatedbins();
-        Assertions.assertEquals(tmpBinsTest, tmpCountFingerprintNumberOfPopulatedBinsOfVariamycin);
+        int tmpVariamycinCountFingerprintNumberOfPopulatedBins = FragmentFingerprinterTest.countFingerprintTest.numOfPopulatedbins();
+        Assertions.assertEquals(tmpBinsTest, tmpVariamycinCountFingerprintNumberOfPopulatedBins);
     }
     //
     /**
@@ -392,7 +383,7 @@ public class FragmentFingerprinterTest {
     public void hasHashTest() {
         boolean tmpHasHashForGivenIndex = false;
         boolean tmpHasHashForGivenIndexInVariamycinFingerprint = FragmentFingerprinterTest.countFingerprintTest.hasHash(30);
-        Assertions.assertEquals(false, tmpHasHashForGivenIndexInVariamycinFingerprint);
+        Assertions.assertEquals(tmpHasHashForGivenIndex, tmpHasHashForGivenIndexInVariamycinFingerprint);
     }
     //
     /**
@@ -415,8 +406,8 @@ public class FragmentFingerprinterTest {
     @Test
     public void fragmentFingerprintSizeTest() {
         int tmpFingerprintSizeTest = 28;
-        int tmpFingerprintSizeOfVariamycin = FragmentFingerprinterTest.fragmentFingerprinter.getSize();
-        Assertions.assertEquals(tmpFingerprintSizeTest, tmpFingerprintSizeOfVariamycin);
+        int tmpVariamycinFingerprintSize = FragmentFingerprinterTest.fragmentFingerprinter.getSize();
+        Assertions.assertEquals(tmpFingerprintSizeTest, tmpVariamycinFingerprintSize);
     }
     //
     /**
@@ -444,7 +435,7 @@ public class FragmentFingerprinterTest {
     }
     //
     /**
-     * Tests the count value at position 26 in the count fingerprints.
+     * Tests the count value at position 26 in the count fingerprint.
      *
      * Test molecule: Variamycin
      */
@@ -456,7 +447,7 @@ public class FragmentFingerprinterTest {
     }
     //
     /**
-     * Tests the hash value at position 10 in the count fingerprints.
+     * Tests the hash value at position 10 in the count fingerprint.
      *
      * Test molecule: Variamycin
      */
@@ -476,7 +467,7 @@ public class FragmentFingerprinterTest {
     public void hasHashTestInputList() {
         boolean tmpHasHashForGivenIndex = true;
         boolean tmpHasHashForGivenIndexInVariamycinFingerprint = FragmentFingerprinterTest.fragmentFingerprinter.getCountFingerprint(FragmentFingerprinterTest.countListOfUniqueSmiles).hasHash(20);
-        Assertions.assertEquals(true, tmpHasHashForGivenIndexInVariamycinFingerprint);
+        Assertions.assertEquals(tmpHasHashForGivenIndex, tmpHasHashForGivenIndexInVariamycinFingerprint);
     }
     //
     /**
@@ -488,7 +479,7 @@ public class FragmentFingerprinterTest {
     public void getCountForHashTestInputList() {
         int tmpCountForHashTest = 0;
         int tmpCountForHashInVariamycinFingerprint = FragmentFingerprinterTest.fragmentFingerprinter.getCountFingerprint(FragmentFingerprinterTest.countListOfUniqueSmiles).getCountForHash(0);
-        Assertions.assertEquals(0,tmpCountForHashInVariamycinFingerprint);
+        Assertions.assertEquals(tmpCountForHashTest,tmpCountForHashInVariamycinFingerprint);
     }
     //
     /**
@@ -508,8 +499,8 @@ public class FragmentFingerprinterTest {
         tmpTestCountArray[18] = 2;
         tmpTestCountArray[26] = 5;
         tmpTestCountArray[27] = 2;
-        int[] tmpCountArrayOfVariamycin = FragmentFingerprinterTest.fragmentFingerprinter.getCountArray(FragmentFingerprinterTest.countListOfUniqueSmiles);
-        Assertions.assertArrayEquals(tmpTestCountArray, tmpCountArrayOfVariamycin);
+        int[] tmpVariamycinCountArray = FragmentFingerprinterTest.fragmentFingerprinter.getCountArray(FragmentFingerprinterTest.countListOfUniqueSmiles);
+        Assertions.assertArrayEquals(tmpTestCountArray, tmpVariamycinCountArray);
     }
     //
     /**
@@ -529,8 +520,8 @@ public class FragmentFingerprinterTest {
         tmpTestCountArray[18] = 2;
         tmpTestCountArray[26] = 5;
         tmpTestCountArray[27] = 2;
-        int[] tmpCountArrayOfVariamycin = FragmentFingerprinterTest.fragmentFingerprinter.getCountArray(FragmentFingerprinterTest.moleculeFragmentList.get(FragmentFingerprinterTest.moleculeFragmentList.size() - 1));
-        Assertions.assertArrayEquals(tmpTestCountArray, tmpCountArrayOfVariamycin);
+        int[] tmpVariamycinCountArray = FragmentFingerprinterTest.fragmentFingerprinter.getCountArray(FragmentFingerprinterTest.moleculeFragmentList.get(FragmentFingerprinterTest.moleculeFragmentList.size() - 1));
+        Assertions.assertArrayEquals(tmpTestCountArray, tmpVariamycinCountArray);
     }
     //
     /**
@@ -542,6 +533,157 @@ public class FragmentFingerprinterTest {
         String tmpBitDefinitionForGivenBitTest = "[H]Oc";
         String tmpBitDefinitionForGivenBitInVariamycinFingerprint = FragmentFingerprinterTest.fragmentFingerprinter.getBitDefinition(27);
         Assertions.assertEquals(tmpBitDefinitionForGivenBitTest, tmpBitDefinitionForGivenBitInVariamycinFingerprint);
+    }
+    //</editor-fold>
+    //
+    //<editor-fold desc="Test count arrays of all molecules" defaultstate="collapsed">
+    /**
+     * Tests count array
+     *
+     * Test molecule: Valdiazen
+     */
+    @Test
+    public void getValdiazenCountArray() {
+        int[] tmpTestCountArray = new int[FragmentFingerprinterTest.fragmentFingerprinter.getSize()];
+        tmpTestCountArray[0] = 1;
+        tmpTestCountArray[8] = 1;
+        tmpTestCountArray[17] = 1;
+        int[] tmpValdiazenCountArray = FragmentFingerprinterTest.fragmentFingerprinter.getCountArray(FragmentFingerprinterTest.moleculeFragmentList.get(0));
+        Assertions.assertArrayEquals(tmpTestCountArray, tmpValdiazenCountArray);
+    }
+    //
+    /**
+     * Tests count array
+     *
+     * Test molecule: Napthomycin D
+     */
+    @Test
+    public void getNapthomycinDCountArray() {
+        int[] tmpTestCountArray = new int[FragmentFingerprinterTest.fragmentFingerprinter.getSize()];
+        tmpTestCountArray[15] = 1;
+        tmpTestCountArray[25] = 2;
+        tmpTestCountArray[17] = 3;
+        tmpTestCountArray[27] = 1;
+        tmpTestCountArray[5] = 3;
+        tmpTestCountArray[7] = 1;
+        tmpTestCountArray[21] = 1;
+        tmpTestCountArray[12] = 1;
+        tmpTestCountArray[6] = 1;
+        tmpTestCountArray[26] = 1;
+        int[] tmpNapthomycinDCountArray = FragmentFingerprinterTest.fragmentFingerprinter.getCountArray(FragmentFingerprinterTest.moleculeFragmentList.get(1));
+        Assertions.assertArrayEquals(tmpTestCountArray, tmpNapthomycinDCountArray);
+    }
+    //
+    /**
+     * Tests count array
+     *
+     * Test molecule: Nona-2,6-dienal
+     */
+    @Test
+    public void getNonaDienalCountArray() {
+        int[] tmpTestCountArray = new int[FragmentFingerprinterTest.fragmentFingerprinter.getSize()];
+        tmpTestCountArray[21] = 1;
+        tmpTestCountArray[12] = 2;
+        tmpTestCountArray[19] = 1;
+        int[] tmpNonaDienalCountArray = FragmentFingerprinterTest.fragmentFingerprinter.getCountArray(FragmentFingerprinterTest.moleculeFragmentList.get(2));
+        Assertions.assertArrayEquals(tmpTestCountArray, tmpNonaDienalCountArray);
+    }
+    //
+    /**
+     * Tests count array
+     *
+     * Test molecule: Istanbulin A
+     */
+    @Test
+    public void getIstanbulinACountArray() {
+        int[] tmpTestCountArray = new int[FragmentFingerprinterTest.fragmentFingerprinter.getSize()];
+        tmpTestCountArray[16] = 1;
+        tmpTestCountArray[13] = 1;
+        tmpTestCountArray[5] = 1;
+        tmpTestCountArray[24] = 1;
+        int[] tmpIstanbulinACountArray = FragmentFingerprinterTest.fragmentFingerprinter.getCountArray(FragmentFingerprinterTest.moleculeFragmentList.get(3));
+        Assertions.assertArrayEquals(tmpTestCountArray, tmpIstanbulinACountArray);
+    }
+    //
+    /**
+     * Tests count array
+     *
+     * Test molecule: Estradiol
+     */
+    @Test
+    public void getEstradiolCountArray() {
+        int[] tmpTestCountArray = new int[FragmentFingerprinterTest.fragmentFingerprinter.getSize()];
+        tmpTestCountArray[17] = 1;
+        tmpTestCountArray[27] = 1;
+        tmpTestCountArray[4] = 1;
+        int[] tmpEstradiolCountArray = FragmentFingerprinterTest.fragmentFingerprinter.getCountArray(FragmentFingerprinterTest.moleculeFragmentList.get(4));
+        Assertions.assertArrayEquals(tmpTestCountArray, tmpEstradiolCountArray);
+    }
+    //
+    /**
+     * Tests count array
+     *
+     * Test molecule: Flower of Paradise
+     */
+    @Test
+    public void getFlowerOfParadiseCountArray() {
+        int[] tmpTestCountArray = new int[FragmentFingerprinterTest.fragmentFingerprinter.getSize()];
+        tmpTestCountArray[1] = 1;
+        tmpTestCountArray[20] = 1;
+        int[] tmpFlowerOfParadiseCountArray = FragmentFingerprinterTest.fragmentFingerprinter.getCountArray(FragmentFingerprinterTest.moleculeFragmentList.get(5));
+        Assertions.assertArrayEquals(tmpTestCountArray, tmpFlowerOfParadiseCountArray);
+    }
+    //
+    /**
+     * Tests count array
+     *
+     * Test molecule: Curcumin
+     */
+    @Test
+    public void getCurcuminCountArray() {
+        int[] tmpTestCountArray = new int[FragmentFingerprinterTest.fragmentFingerprinter.getSize()];
+        tmpTestCountArray[25] = 2;
+        tmpTestCountArray[18] = 2;
+        tmpTestCountArray[27] = 2;
+        tmpTestCountArray[5] = 3;
+        tmpTestCountArray[20] = 2;
+        int[] tmpCurcuminCountArray = FragmentFingerprinterTest.fragmentFingerprinter.getCountArray(FragmentFingerprinterTest.moleculeFragmentList.get(6));
+        Assertions.assertArrayEquals(tmpTestCountArray, tmpCurcuminCountArray);
+    }
+    //
+    /**
+     * Tests count array
+     *
+     * Test molecule: Robinetidinol
+     *
+     */
+    @Test
+    public void getRobinetidinolCountArray() {
+        int[] tmpTestCountArray = new int[FragmentFingerprinterTest.fragmentFingerprinter.getSize()];
+        tmpTestCountArray[18] = 2;
+        tmpTestCountArray[17] = 2;
+        tmpTestCountArray[27] = 8;
+        tmpTestCountArray[10] = 1;
+        int[] tmpRobinetidinolCountArray = FragmentFingerprinterTest.fragmentFingerprinter.getCountArray(FragmentFingerprinterTest.moleculeFragmentList.get(7));
+        Assertions.assertArrayEquals(tmpTestCountArray, tmpRobinetidinolCountArray);
+    }
+    //
+    /**
+     * Tests count array
+     *
+     * Test molecule: Alkaloid
+     */
+    @Test
+    public void getAlkaloidCountArray() {
+        int[] tmpTestCountArray = new int[FragmentFingerprinterTest.fragmentFingerprinter.getSize()];
+        tmpTestCountArray[23] = 1;
+        tmpTestCountArray[2] = 1;
+        tmpTestCountArray[11] = 1;
+        tmpTestCountArray[5] = 1;
+        tmpTestCountArray[3] = 1;
+        tmpTestCountArray[22] = 1;
+        int[] tmpAlkaloidCountArray = FragmentFingerprinterTest.fragmentFingerprinter.getCountArray(FragmentFingerprinterTest.moleculeFragmentList.get(8));
+        Assertions.assertArrayEquals(tmpTestCountArray, tmpAlkaloidCountArray);
     }
     //</editor-fold>
 }

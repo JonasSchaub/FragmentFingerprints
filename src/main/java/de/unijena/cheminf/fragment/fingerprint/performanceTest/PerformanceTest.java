@@ -47,6 +47,7 @@ import java.util.List;
 
 /**
  * A class for testing the performance of the fragment fingerprinter.
+ * Both bit and count fingerprints are generated for this purpose.
  *
  * @author Betuel Sevindik
  * @version 1.0.0.0
@@ -81,15 +82,15 @@ public class PerformanceTest {
     //
     //<editor-fold defaultstate="collapsed" desc="Private final class variables">
     /**
-     * Initial capacity of the lists in which the data for generating the fingerprints is stored.
+     * Initial capacity of the list in which the data for generating the fingerprints is stored.
      */
     private final int INITIAL_CAPACITY_VALUE_NUMBER_OF_MOLECULES = 13000;
     /**
      * Initial capacity of the lists in which the data for generating the fingerprints is stored.
      */
-    private final int INITIAL_CAPACITY_VALUE_NUMBER_OF_FRAGMENTS = 3988;
+    private final int INITIAL_CAPACITY_VALUE_NUMBER_OF_FRAGMENTS = 4000;
     /**
-     * Value for determining the initial capacity of cards
+     * Initial capacity of maps
      */
     private final int INITIAL_CAPACITY_VALUE = Math.round((4/3) + 1);
     /**
@@ -104,11 +105,12 @@ public class PerformanceTest {
      */
     private String workingPath;
     /**
-     * List contains all fragments of the molecules. These fragments are used in the creation of the bit fingerprint.
+     * The list comprises a collection of fragments from various molecules, each of which is also
+     * stored in separate lists.
      */
     private ArrayList<ArrayList<String>> listOfMoleculeFragmentsList = new ArrayList<>(this.INITIAL_CAPACITY_VALUE_NUMBER_OF_MOLECULES);
     /**
-     * List that contains all fragments, the fingerprint is then generated based on these fragments.
+     * The list includes all key fragments that are set during the initialization of the fingerprinter.
      */
     private ArrayList<String> fragmentList = new ArrayList<>(this.INITIAL_CAPACITY_VALUE_NUMBER_OF_FRAGMENTS);
     /**
@@ -148,9 +150,7 @@ public class PerformanceTest {
      */
     private PrintWriter countFingerprintPrintWriter;
     /**
-     * list stores each molecule as HashMap. The HashMap assigns
-     * the unique SMILES (fragments) of the molecule to the frequency of the molecule,
-     * which is read out from the molecule file.
+     * The list contains a collection of fragments and their frequency stored as a HashMap.
      */
     private ArrayList<HashMap<String, Integer>> moleculeFragmentList = new ArrayList<>(this.INITIAL_CAPACITY_VALUE_NUMBER_OF_MOLECULES);
     //</editor-fold>
@@ -160,16 +160,17 @@ public class PerformanceTest {
      * Constructor.
      * All files listed below as parameters must be located in the same directory as the application JAR file.
      * In the constructor all necessary output files are created.
-     * There are 3 different files to document the result of the performance snapshot. One file is created that
+     * There are 4 different files to document the result of the performance snapshot. One file is created that
      * is essentially a console output and two others that contain the processing time required at each step in
-     * a structured form (CSV). Another file contains the generated fingerprints for each molecule.
-     * The constructor executes the complete application. Everything the application is supposed to do is
-     * realized in the constructor, including the shutdown at the end of the application.
+     * a structured form (CSV). Another file contains the generated bit fingerprints for each molecule. And the last file
+     * contains the generated count fingerprints for each molecule. The constructor executes the complete application.
+     * Everything the application is supposed to do is realized in the constructor, especially the generation of the
+     * bit and count fingerprints and also the shutdown at the end of the application.
      *
      * @param anArgs the command line arguments, anArgs[0] and anArgs[1] must be the names of the text files to load.
      *               The text files must be located in the same directory as the application's JAR file. The command
      *               line anArgs[3] must be the name of the path, where the performance test results are
-     *               stored. The command line anArgs[2] must be the number of the molecules in process.
+     *               stored. The command line anArgs[2] must be the number of the molecules in process (bin size).
      *               <ul>
      *                <li>anArgs[0]:
      *                              <ul>
@@ -177,6 +178,8 @@ public class PerformanceTest {
      *                          <li>First line must contain unique SMILES strings.
      *                          These are set as predefined fragments when the fingerprint is initialized.</li>
      *                          <li>All other lines in the file also the header are ignored.</li>
+     *                          <li>The fragments read from this text file are used to initialize the fingerprint.
+     *                          These fragments represent the key fragments of the fingerprint.</li>
      *                      </ul>
      *                </li>
      *                <li>anArgs[1]:
@@ -188,7 +191,7 @@ public class PerformanceTest {
      *                           <li>third and following rows: alternating pairs of fragment SMILES and abundances
      *                               in the respective molecule</li>
      *                           <li>In this file, the header and columns 1 and 2 are ignored.</li>
-     *                           <li>The SMILES fragments from this file are matched with the predefined fragments
+     *                           <li>The SMILES fragments and their frequencies from this file are matched with the key fragments
      *                               to create the fingerprint.</li>
      *                </ul>
      *               </li>
@@ -267,6 +270,11 @@ public class PerformanceTest {
                 throw new Exception("Fragment load ERROR. Unsuitable (structure) CSV files were tried to be read in. ");
             }
             // generate bit and count fingerprints
+            int tmpMaximumNumberOfMolecules = this.getListOfMoleculeFragmentsListSize();
+            int tmpGivenBinSize = Integer.parseInt(anArgs[3]);
+            if(tmpGivenBinSize > tmpMaximumNumberOfMolecules) {
+                throw new IllegalArgumentException("The specified number of bin sizes exceeds the number of available molecules.");
+            }
             this.generateFingerprints(Integer.parseInt(anArgs[3]));
             this.resultsPrintWriter.flush();
             this.bitPrintWriter.flush();
@@ -315,7 +323,7 @@ public class PerformanceTest {
             this.fragmentList = new ArrayList<>(this.INITIAL_CAPACITY_VALUE_NUMBER_OF_FRAGMENTS);
             try {
                 while ((tmpLine = tmpFragmentSetReader.readLine()) != null) {
-                    String[] tmpSmilesOfFragments = tmpLine.split(","); // this.LINE_SEPARATOR_SEMICOLON
+                    String[] tmpSmilesOfFragments = tmpLine.split(this.LINE_SEPARATOR_SEMICOLON);
                     this.fragmentList.add(tmpSmilesOfFragments[0]);
                 }
                 // removing header line value
@@ -338,6 +346,7 @@ public class PerformanceTest {
             }
             List<String> tmpMoleculeFragmentsAndFrequenciesList;
             this.listOfMoleculeNames = new ArrayList<>();
+            // ignore header
             for (int tmpCurrentLineIndex = 1; tmpCurrentLineIndex < tmpListOfMoleculesFragmentsAndFrequenciesList.size(); tmpCurrentLineIndex++) {
                 tmpMoleculeFragmentsAndFrequenciesList = tmpListOfMoleculesFragmentsAndFrequenciesList.get(tmpCurrentLineIndex);
                 this.listOfMoleculeNames.add(tmpMoleculeFragmentsAndFrequenciesList.get(0));
@@ -363,64 +372,6 @@ public class PerformanceTest {
             throw new IOException("File is not readable");
         }
     }
-
-    /*
-        //Read CSV file (fragments file) to obtain fragments used to create fingerprints
-        String tmpLine;
-        this.fragmentList = new ArrayList<>(this.INITIAL_CAPACITY_VALUE_NUMBER_OF_FRAGMENTS);
-        try {
-            while ((tmpLine = tmpFragmentSetReader.readLine()) != null) {
-                String[] tmpSmilesOfFragments = tmpLine.split(this.LINE_SEPARATOR_SEMICOLON);
-                this.fragmentList.add(tmpSmilesOfFragments[0]);
-            }
-            // removing header line value
-            this.fragmentList.remove(0);
-        } catch(IOException anException) {
-            this.appendToLogfile(anException);
-            throw new IOException("invalid fragment file. At least one line is not readable.");
-        }
-        finally {
-            tmpFragmentSetReader.close();
-        }
-        // Read CSV file (molecules file)
-        List<List<String>> tmpListOfMoleculesFragmentsAndFrequenciesList = new ArrayList<>(this.INITIAL_CAPACITY_VALUE_NUMBER_OF_MOLECULES);
-        String tmpMoleculeLine;
-        try {
-            while ((tmpMoleculeLine = tmpMoleculeFragmentsReader.readLine()) != null) {
-                String[] tmpMoleculeFragmentsAndFrequencies = tmpMoleculeLine.split(this.LINE_SEPARATOR_SEMICOLON);
-                tmpListOfMoleculesFragmentsAndFrequenciesList.add(Arrays.asList(tmpMoleculeFragmentsAndFrequencies));
-            }
-        } catch (IOException anException) {
-            this.appendToLogfile(anException);
-            throw new IOException("invalid molecule file. At least one line is not readable");
-        }
-        finally {
-            tmpMoleculeFragmentsReader.close();
-        }
-        List<String> tmpMoleculeFragmentsAndFrequenciesList;
-        this.listOfMoleculeNames = new ArrayList<>();
-        for (int tmpCurrentLineIndex = 1; tmpCurrentLineIndex < tmpListOfMoleculesFragmentsAndFrequenciesList.size(); tmpCurrentLineIndex++) {
-            tmpMoleculeFragmentsAndFrequenciesList = tmpListOfMoleculesFragmentsAndFrequenciesList.get(tmpCurrentLineIndex);
-            this.listOfMoleculeNames.add(tmpMoleculeFragmentsAndFrequenciesList.get(0));
-            List<String> ListWithoutNameAndMoleculeSmiles = tmpMoleculeFragmentsAndFrequenciesList.subList(2, tmpMoleculeFragmentsAndFrequenciesList.size());
-            HashMap<String, Integer> tmpMoleculeFragmentsMap = new HashMap<>();
-            ArrayList<String> tmpDataToGenerateBitFingerprint = new ArrayList<>();
-            try {
-                for (int i = 0; i < ListWithoutNameAndMoleculeSmiles.size(); i++) {
-                    if (i % 2 == 0) { // magic number to store the data from the file into a HashMap
-                        tmpMoleculeFragmentsMap.put(ListWithoutNameAndMoleculeSmiles.get(i), Integer.valueOf(ListWithoutNameAndMoleculeSmiles.get(i + 1)));
-                        tmpDataToGenerateBitFingerprint.add(ListWithoutNameAndMoleculeSmiles.get(i));
-                    }
-                }
-            } catch (IndexOutOfBoundsException anException) {
-                this.appendToLogfile(anException);
-                throw new IndexOutOfBoundsException("The line has not the right length");
-            }
-            this.moleculeFragmentList.add(tmpMoleculeFragmentsMap);
-            this.listOfMoleculeFragmentsList.add(tmpDataToGenerateBitFingerprint);
-        }
-
-     */
     //
     /**
      * Starts the generation of the fingerprints. And writes the results into the corresponding text file.
@@ -492,27 +443,13 @@ public class PerformanceTest {
             this.resultsPrintWriter.println();
             this.countPrintWriter.println(tmpNumberOfMoleculesInProcessList.size() + "," + (tmpEndTime - start));
         }
-        System.out.println(this.moleculeFragmentList + "-----molecule fragment list");
-
         int[] tmpCountArray;
-        /*
         for(Iterator tmpMoleculeNameIterator = this.listOfMoleculeNames.iterator(), tmpMolecule = this.moleculeFragmentList.iterator(); tmpMoleculeNameIterator.hasNext() && tmpMolecule.hasNext();) {
             HashMap<String, Integer> tmpListOfMolecule = (HashMap<String, Integer>) tmpMolecule.next();
-            System.out.println(tmpListOfMolecule+ "-----list of molecule");
             String tmpMoleculeNameOrID = (String) tmpMoleculeNameIterator.next();
             tmpCountArray = tmpFragmentFingerprinter.getCountArray(tmpListOfMolecule);
-            System.out.println(java.util.Arrays.toString(tmpCountArray)+ "---tmpCountARray");
             this.countFingerprintPrintWriter.println(tmpMoleculeNameOrID + "," + java.util.Arrays.toString(tmpCountArray));
-
-
         }
-
-         */
-        for(HashMap<String, Integer> map : this.moleculeFragmentList) {
-            System.out.println(map+ "---map");
-            System.out.println(java.util.Arrays.toString(tmpFragmentFingerprinter.getCountArray(map)) + "-----count array");
-        }
-
         System.out.println("Bit and count fingerprints were generated successfully.");
     }
     //
@@ -533,6 +470,15 @@ public class PerformanceTest {
             this.exceptionsPrintWriter.println();
             this.exceptionsPrintWriter.flush();
         }
+    }
+    //
+    /**
+     * Returns the number of available molecules.
+     *
+     * @return int molecule number
+     */
+    private int getListOfMoleculeFragmentsListSize() {
+        return this.listOfMoleculeFragmentsList.size();
     }
     //</editor-fold>
 }

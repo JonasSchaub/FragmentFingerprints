@@ -39,9 +39,8 @@ import java.util.Map;
  * calculation of a fingerprint  by the mere comparison of strings. In this context, these strings are to correspond to
  * the unique SMILES of fragments. The extension of the IFingerprinter includes the overloading of the methods that are
  * responsible for the calculation of a count and bit fingerprint. These methods originally expect an
- * IAtomContainer as a parameter.
- * By overloading these methods, the count and bit fingerprints can be calculated without the need for an
- * IAtomContainer, as this calculation is based only on the comparison of strings/unique SMILES
+ * IAtomContainer as a parameter. By overloading these methods, the count and bit fingerprints can be calculated
+ * without the need for an IAtomContainer, as this calculation is based only on the comparison of strings/unique SMILES
  * of fragments.
  *
  *
@@ -51,7 +50,7 @@ import java.util.Map;
 public interface IFragmentFingerprinter extends IFingerprinter {
     // <editor-fold defaultstate="collapsed" desc="Public methods">
     /**
-     * Method for calculating the bit fingerprint. This method must be passed a list of unique SMILES/fragments as
+     * Method for calculating a bit fingerprint. This method must be passed a list of unique SMILES/fragments as
      * argument. The fragments can belong to a molecule or represent arbitrary fragments. The method compares
      * this list of fragments with the list of predefined fragments/unique SMILES that was set when the
      * class was initialized. To get the expected fingerprint, unique SMILES should be used.
@@ -66,7 +65,7 @@ public interface IFragmentFingerprinter extends IFingerprinter {
     IBitFingerprint getBitFingerprint(List<String> aListOfUniqueSmiles);
     //
     /**
-     * Method for calculating the count fingerprint. A map must be passed to this method. This map can represent a
+     * Method for calculating a count fingerprint. A map must be passed to this method. This map can represent a
      * molecule by its fragments, which are represented by unique SMILES in the key set and their frequencies in the
      * value set. However, this map can also contain arbitrary fragment sets. The method compares the unique SMILES
      * in the key set with the predefined fragments specified when the class is initialized to create the fingerprint.
@@ -84,7 +83,7 @@ public interface IFragmentFingerprinter extends IFingerprinter {
     ICountFingerprint getCountFingerprint(Map<String, Integer> aUniqueSmilesToFrequencyMap);
     //
     /**
-     * Method for calculating the count fingerprint. This method must be passed a list of unique SMILES/fragments as
+     * Method for calculating a count fingerprint. This method must be passed a list of unique SMILES/fragments as
      * argument. The fragments can belong to a molecule or represent arbitrary fragments. The method compares
      * this list of fragments with the list of predefined fragments/unique SMILES that was set when the class
      * was initialized.

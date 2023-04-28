@@ -9,7 +9,8 @@ molecule with pre-defined fragments. If a match is found, the corresponding posi
 in the fingerprint are filled. The special feature of the fragment fingerprinter is that fingerprints 
 are generated exclusively by comparing unique SMILES (Strings). This means that both the pre-defined fragments and 
 the substructures or fragments of the molecule for which the fingerprint is 
-being generated must be represented as unique SMILES strings.
+being generated must be represented as unique SMILES strings. The implementation of the fragment fingerprinter based on
+Chemistry Development Kit (CDK).
 
 ## Contents of this repository
 ### Sources
@@ -44,7 +45,8 @@ a growing number of input molecules. It requires four command line arguments:
 * integer number that specifies with how many molecules the generation of the fingerprints should start. 
   In each round, the number of molecules to be processed increases by + integer number.
 
-Example usage: <code>java -jar FragmentFingerprinter-fat.jar first-input-file-in-same-dir-name.txt second-input-file-in same-dir-name.txt third-path-name-to-save-results 10</code>
+Example usage: <code>Example usage: java -jar  FragmentFingerprinter-fat-0.0.0.1 Fragments_File_PerformaceTest_13000.csv
+MoleculeFragments_File_PerformanceTest_13000.csv PerformanceTest_Result 1000</code>
 <br>The CMD application will then import the data sets and create bit and count fingerprints. The application will also create output files of the 
 measured runtimes and a file in which the generated fingerprints are stored line by line. So that each line 
 represents a fingerprint whose components are separated by commas.
@@ -68,6 +70,7 @@ be pre-installed.
   * License: GNU Lesser General Public License 2.1
 * JUnit Jupiter version 5.9.1
   * [JUnit ](https://junit.org/junit5/)
+  * License: Eclipse Public License - v 2.0
 
 ## References and useful links
 **Chemistry Development Kit (CDK)**

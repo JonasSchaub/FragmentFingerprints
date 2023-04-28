@@ -39,12 +39,7 @@ public class Main {
      */
     public static void main(String[] args)  {
         try {
-            String[] arg1 = new String[4];
-            arg1[0] = "src/test/resources/de/unijena/cheminf/fragment/fingerprint/FragmentList.txt";
-            arg1[1] = "src/test/resources/de/unijena/cheminf/fragment/fingerprint/MoleculeFragments.txt";
-            arg1[2] = "deneme_SON";
-            arg1[3] = "1";
-            PerformanceTest tmpApplication = new PerformanceTest(arg1);
+            PerformanceTest tmpApplication = new PerformanceTest(args);
         } catch (Exception anException) {
             anException.printStackTrace(System.err);
             System.exit(1);

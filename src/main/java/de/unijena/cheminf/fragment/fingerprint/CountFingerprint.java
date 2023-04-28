@@ -26,14 +26,13 @@ package de.unijena.cheminf.fragment.fingerprint;
 
 import org.openscience.cdk.fingerprint.ICountFingerprint;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Objects;
 
 /**
  * The CountFingerprint class implements the CDK interface ICountFingerprint.
  * ICountFingerprint provides useful methods to obtain information about the calculated count fingerprint.
- * Instead of using the ICountFingerprint interface that implements the CDK class IntArrayCountFingerprint,
+ * Instead of using the IntArrayCountFingerprint that implements the CDK interface ICountFingerprint,
  * a new CountFingerprint class has been created here that also implements the ICountFingerprint interface.
  * The IntArrayCountFingerprint class assumes hashed count fingerprints, while here they are key-based count
  * fingerprints, so it is necessary to create the CountFingerprint class to treat the fingerprints as
@@ -46,13 +45,19 @@ import java.util.Objects;
 public class CountFingerprint implements ICountFingerprint {
     //<editor-fold desc="private final class variables" defaultstate="collapsed">
     /**
-     * The HashMap maps the predefined (key) fragments/unique SMILES to the position they have in the fragment array
-     * that stores all key fragments. Thus the value of the map is the position of the
-     * predefined fragments in the fingerprint. // TODO ask
+     * Result Map of a count fingerprint. When the count fingerprint is created, if there is a match between
+     * the key fragments/unique SMILES and the passed fragments with the corresponding frequencies,
+     * the position of the key fragment assigned to it during initialization is mapped
+     * to the frequency of this fragment in the molecule. So, in this map, only the positions and frequencies of
+     * the fragments are stored if a match has occurred. In the following, the map can also be referred to as a raw map.
      */
-    private final HashMap<String,Integer> uniqueSmilesToPositionMap;
+    private final HashMap<Integer,Integer> uniqueSmilesPositionToFrequencyCountRawMap;
     /**
-     * Value for determining the initial capacity of cards
+     * Key fragments that are set when the fingerprinter is initialized.
+     */
+    private final String[] predefinedFragmentSmiles;
+    /**
+     * Initial capacity value for maps
      */
     private final int INITIAL_CAPACITY_VALUE = Math.round((4/3) + 1);
     //</editor-fold>
@@ -64,26 +69,15 @@ public class CountFingerprint implements ICountFingerprint {
      */
     private boolean behaveAsBitFingerprint;
     /**
-     * change the behavior of the fingerprint. If behaveAsMergeFingerprint == true, the fingerprint behaves like
-     * a merged fingerprint
+     * The HashMap maps the predefined (key) fragments/unique SMILES to the position they have in the fingerprint.
      */
-    private boolean behaveAsMergeFingerprint;
-    private HashMap<Integer,Integer> rawMapForMergedFingerprint;
-    /**
-     * Result Map of a count fingerprint. When the count fingerprint is created, if there is a match between
-     * the key fragments/unique SMILES and the passed fragments with the corresponding frequencies, usually
-     * belonging to a molecule, the position of the key fragment assigned to it during initialization is mapped
-     * to the frequency of this fragment in the molecule. So, in this map, only the positions and frequencies of
-     * the fragments are stored if a match has occurred. In the following, the map can also be referred to as a raw map.
-     * // TODO ask
-     */
-    private HashMap<Integer,Integer> uniqueSmilesPositionToFrequencyCountRawMap;
+    private HashMap<String,Integer> uniqueSmilesToPositionMap;
     //</editor-fold>
     //
     //<editor-fold desc="Constructor" defaultstate="collapsed">
     /**
      * Constructor.
-     * Initialization of the CountFingerprint.
+     * Initialization of CountFingerprint.
      * The specified parameters are checked for validity.
      * Duplicate fragment SMILES (key fragments) in the given array will be ignored and not be a part of the
      * count fingerprint multiple times.
@@ -111,22 +105,10 @@ public class CountFingerprint implements ICountFingerprint {
                         "instances that are null.");
             }
         }
-        String[] tmpPredefinedFragments = anArrayOfFragments;
-        this.uniqueSmilesToPositionMap = new HashMap<>(tmpPredefinedFragments.length*INITIAL_CAPACITY_VALUE, 0.75f);
-        int tmpValuePosition = 0;
-        for (String tmpKey : tmpPredefinedFragments) {
-            if(!this.uniqueSmilesToPositionMap.containsKey(tmpKey)) {
-                this.uniqueSmilesToPositionMap.put(tmpKey, tmpValuePosition);
-                tmpValuePosition++;
-            } else {
-                continue;
-            }
-            //  this.uniqueSmilesToPositionMap.putIfAbsent(tmpKey, tmpValuePosition);
-            // tmpValuePosition++;
-        }
+        this.predefinedFragmentSmiles = anArrayOfFragments;
+        this.buildUniqueSmilesToPositionMap();
         this.uniqueSmilesPositionToFrequencyCountRawMap = aPositionToFrequencyMap;
         this.behaveAsBitFingerprint = false;
-        this.behaveAsMergeFingerprint = false;
     }
     //</editor-fold>
     //
@@ -196,7 +178,6 @@ public class CountFingerprint implements ICountFingerprint {
     @Override
     public int getHash(int index) {
         String[] tmpPredefinedFragmentsInArray = new String[this.uniqueSmilesToPositionMap.size()];
-        System.out.println(tmpPredefinedFragmentsInArray.length + "---length");
         for(String tmpKeyFragmentPositionInFingerprint : this.uniqueSmilesToPositionMap.keySet()) {
             tmpPredefinedFragmentsInArray[this.uniqueSmilesToPositionMap.get(tmpKeyFragmentPositionInFingerprint)] = tmpKeyFragmentPositionInFingerprint;
         }
@@ -208,14 +189,11 @@ public class CountFingerprint implements ICountFingerprint {
     //
     /**
      * {@inheritDoc}
-     *
-     * Method for merging the given fingerprint fp into a current fingerprint.
-     * Merging is intended only for count fingerprints generated from the same fragment set.
+     * @throws UnsupportedOperationException
      */
     @Override
     public void merge(ICountFingerprint fp) {
-        this.behaveAsMergeFingerprint = true;
-        this.rawMapForMergedFingerprint =  this.mergeFingerprint((CountFingerprint) fp);
+        throw new UnsupportedOperationException();
     }
     //
     /**
@@ -259,18 +237,13 @@ public class CountFingerprint implements ICountFingerprint {
      */
     @Override
     public int getCountForHash(int hash) throws IllegalArgumentException {
-        System.out.println(this.rawMapForMergedFingerprint + "----gemergtes raw map tes");
         if (hash >= this.uniqueSmilesToPositionMap.size() || hash < 0) {
             throw new IllegalArgumentException("This position does not exist in the fingerprint (undefined state).");
         } else if (hash >= 0 && this.uniqueSmilesPositionToFrequencyCountRawMap.containsKey(hash)) {
             if (this.behaveAsBitFingerprint) {
                 return 1;
             } else {
-                if(!this.behaveAsMergeFingerprint)
                 return this.uniqueSmilesPositionToFrequencyCountRawMap.get(hash);
-                else {
-                    return this.rawMapForMergedFingerprint.get(hash);
-                }
             }
         } else {
             return 0;
@@ -290,10 +263,9 @@ public class CountFingerprint implements ICountFingerprint {
         if(!this.uniqueSmilesToPositionMap.containsKey(aSmiles)) {
             throw new IllegalArgumentException("The given SMILES string is not available");
         }
-       int tmpPosition =  this.uniqueSmilesToPositionMap.get(aSmiles);
+        int tmpPosition =  this.uniqueSmilesToPositionMap.get(aSmiles);
         if(this.uniqueSmilesPositionToFrequencyCountRawMap.containsKey(tmpPosition)) {
             if(this.behaveAsBitFingerprint) {
-                //return this.uniqueSmilesPositionToFrequencyCountRawMap.get(tmpPosition);
                 return 1;
             } else {
                 return this.uniqueSmilesPositionToFrequencyCountRawMap.get(tmpPosition);
@@ -302,31 +274,59 @@ public class CountFingerprint implements ICountFingerprint {
             return 0;
         }
     }
-    private HashMap<Integer,Integer> mergeFingerprint(CountFingerprint aCountFingerprint) {
+    //
+    /**
+     * Method for merging the given fingerprint fp into a current fingerprint.
+     * Merging is intended only for count fingerprints generated from the same fragment set.
+     *
+     * @param aCountFingerprint to be merged
+     * @return CountFingerprint, i.e. a merged count fingerprint.
+     */
+    public CountFingerprint mergedCountFingerprint(CountFingerprint aCountFingerprint) {
         if(this.uniqueSmilesToPositionMap.size() != aCountFingerprint.size()) {
             throw new IllegalArgumentException("The two fingerprints are not the same size. Is only possible with" +
                     "fingerprints that come from the same fragment set.");
         }
-        HashMap<Integer, Integer> tmpRawMap = new HashMap<>(this.uniqueSmilesPositionToFrequencyCountRawMap.size()+aCountFingerprint.getRawMap().size()* INITIAL_CAPACITY_VALUE, 0.75f);
-        System.out.println(this.uniqueSmilesPositionToFrequencyCountRawMap.size() +"---size");
-        System.out.println(this.uniqueSmilesPositionToFrequencyCountRawMap + "---ursprungliche map");
-        System.out.println(aCountFingerprint.getRawMap() + "---raw map 2");
-        for( int tmpKey : aCountFingerprint.getRawMap().keySet()) {
-            System.out.println(tmpKey + "---tmpkey");
-            // map with frequencies = 0, so in this case it is not a raw map.
-            if (this.uniqueSmilesPositionToFrequencyCountRawMap.containsKey(tmpKey)) {
-                System.out.println("hallo");
-                tmpRawMap.put(tmpKey, this.uniqueSmilesPositionToFrequencyCountRawMap.get(tmpKey) + aCountFingerprint.getRawMap().get(tmpKey));
+        HashMap<Integer, Integer> tmpRawMap = new HashMap<>(this.uniqueSmilesPositionToFrequencyCountRawMap);
+        for(int tmpKey : aCountFingerprint.getRawMap().keySet()) {
+            if (tmpRawMap.containsKey(tmpKey)) {
+                tmpRawMap.put(tmpKey, tmpRawMap.get(tmpKey) + aCountFingerprint.getRawMap().get(tmpKey));
             } else {
-                System.out.println("nooo");
-                tmpRawMap.put(tmpKey, this.uniqueSmilesPositionToFrequencyCountRawMap.get(tmpKey));
+                tmpRawMap.put(tmpKey, aCountFingerprint.getRawMap().get(tmpKey));
             }
         }
-        return tmpRawMap;
-    }
-    public HashMap<Integer, Integer> getRawMap() {
-        return this.uniqueSmilesPositionToFrequencyCountRawMap;
+        return new CountFingerprint(this.predefinedFragmentSmiles,tmpRawMap);
     }
     //</editor-fold>
     //
+    //<editor-fold desc="Private method" defaultstate="collapsed">
+    /**
+     * Returns the raw map of a count fingerprint
+     *
+     * @return HashMap<Integer,Integer> raw map
+     */
+    private HashMap<Integer, Integer> getRawMap() {
+        return this.uniqueSmilesPositionToFrequencyCountRawMap;
+    }
+    //
+    /**
+     * The key fragments defined during initialization are stored in a map.
+     * The map maps the key fragments to their positions in the fingerprint.
+     *
+     * @return HashMap<String,Integer>
+     */
+    private HashMap<String, Integer> buildUniqueSmilesToPositionMap() {
+        this.uniqueSmilesToPositionMap = new HashMap<>(this.predefinedFragmentSmiles.length*this.INITIAL_CAPACITY_VALUE, 0.75f);
+        int tmpValuePosition = 0;
+        for (String tmpKey : this.predefinedFragmentSmiles) {
+            if(!this.uniqueSmilesToPositionMap.containsKey(tmpKey)) {
+                this.uniqueSmilesToPositionMap.put(tmpKey, tmpValuePosition);
+                tmpValuePosition++;
+            } else {
+                continue;
+            }
+        }
+        return this.uniqueSmilesToPositionMap;
+    }
+    //</editor-fold>
 }
