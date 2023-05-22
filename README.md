@@ -9,8 +9,8 @@ molecule with pre-defined fragments. If a match is found, the corresponding posi
 in the fingerprint are filled. The special feature of the fragment fingerprinter is that fingerprints 
 are generated exclusively by comparing unique SMILES (Strings). This means that both the pre-defined fragments and 
 the substructures or fragments of the molecule for which the fingerprint is 
-being generated must be represented as unique SMILES strings. The implementation of the fragment fingerprinter based on
-Chemistry Development Kit (CDK).
+being generated must be represented as unique SMILES strings. The implementation of the fragment fingerprinter is based on
+the Chemistry Development Kit (CDK).
 
 ## Contents of this repository
 ### Sources
@@ -30,32 +30,62 @@ named "MoleculeList.txt" contains fragments/substructures of molecules.
 In total, 10 molecules with their corresponding fragments are stored in the file.
 
 ### Performance Test CMD Application
-The subfolder <a href="https://github.com/JonasSchaub/FragmentFingerprints/tree/FragmentFingerprint/PerformanceTestCMDApplication/jar">"jar"</a>
+The folder <a href="https://github.com/JonasSchaub/FragmentFingerprints/tree/FragmentFingerprint/PerformanceTestCMDApplication">"PerformanceTestCMDApplication</a>
 contains the executable JAVA archive <i>FragmentFingerprinter-fat.jar</i>.
 It can be executed from the command-line (command: java -jar) to do a performance snapshot of fragment fingerprinter's scaling behaviour for
 a growing number of input molecules. It requires four command line arguments: 
 
 * file name of a text file (located in the same directory as the JAR) to read in the key fragments.
   An example file for this can be found in the folder <a href="https://github.com/JonasSchaub/FragmentFingerprints/tree/FragmentFingerprint/PerformanceTestCMDApplication">"PerformanceTestCMDApplication"</a> 
-  under the name <i>FragmentsFile_PerformanceTest.csv</i>.
+  under the name <i>Fragments_File_PerformanceTest_13000.csv</i>.
 * file name of a text file (located in the same directory as the JAR) to read in molecules more precisely their fragments.
   An example file for this can be found in the folder <a href="https://github.com/JonasSchaub/FragmentFingerprints/tree/FragmentFingerprint/PerformanceTestCMDApplication">"PerformanceTestCMDApplication"</a>
-  under the name <i>MoleculesFile_PerformanceTest.csv</i>.
+  under the name <i>MoleculeFragments_File_PerformanceTest_13000.csv</i>.
 * path name for saving the folders with the performance test results.
+  If an empty/blank string is specified, the application throws an IllegalArgumentException. On the other hand,
+  if only a filename is specified, the result folder is created in the same directory as the Jar.
 * integer number that specifies with how many molecules the generation of the fingerprints should start. 
   In each round, the number of molecules to be processed increases by + integer number.
 
-Example usage: <code>Example usage: java -jar  FragmentFingerprinter-fat-0.0.0.1 Fragments_File_PerformaceTest_13000.csv
-MoleculeFragments_File_PerformanceTest_13000.csv PerformanceTest_Result 1000</code>
+Example usage: <code>Example usage: java -jar  FragmentFingerprinter-fat-0.0.0.1.jar Fragments_File_PerformaceTest_13000.csv MoleculeFragments_File_PerformanceTest_13000.csv PerformanceTest_Result 1000</code>
 <br>The CMD application will then import the data sets and create bit and count fingerprints. The application will also create output files of the 
 measured runtimes and a file in which the generated fingerprints are stored line by line. So that each line 
 represents a fingerprint whose components are separated by commas.
+
+The assignment between the generated fingerprints (see in result file BIT_FINGERPRINT... and COUNT_FINGERPRINT...) and the
+read-in molecules is established as follows: The molecule in the first
+row in the molecule file corresponds to the first fingerprint in the results files, (see in result file BIT_FINGERPRINT... and COUNT_FINGERPRINT...)
+and so on. Basically, the application assumes that the first column
+of each row in the molecule file starts with the molecule name/ID.
+Keeping the file formats of the input files is a prerequisite for the calculation of correct fingerprints.
+The detailed structure of the input files can be found in the Javadoc.
+If the molecule name/ID is in the first column of the specified molecule file, the name/ID will be added to the
+result file when the fingerprints are generated, making it easier to assign the fingerprints to the molecules.
 
 ## Installation
 This is a Gradle project. In order to use the source code for your own software, download or clone the repository and 
 open it in a Gradle-supporting IDE (e.g. IntelliJ) as a Gradle project and execute the build.gradle file. 
 Gradle will then take care of installing all dependencies. A Java Development Kit (JDK) of version 17 or higher must also
 be pre-installed.
+
+## Example initialization and use of the FragmentFingerprinter
+<code>ArrayList<String> tmpKeyFragments = new ArrayList<>();
+<br>tmpKeyFragments.add("[H]OC");
+<br>tmpKeyFragments.add("CCCC");
+<br>tmpKeyFragments.add("c1ccc(cc1)C");
+<br>tmpKeyFragments.add("C");
+<br>tmpKeyFragments.add("c1ccc2c(c1)CCC3C2CCC4(C)CCCC34");
+<br>
+<br>ArrayList<String> tmpMoleculeFragments = new Arraylist<>();
+<br>tmpMoleculeFragments.add("CC");
+<br>tmpMoleculeFragments.add("C=C");
+<br>tmpMoleFragments.add("O=CC=C");
+<br>
+<br>FragmentFingerprinter tmpFragmentFingerprinter = new FragmentFingerprinter(tmpKeyFragments);
+<br>IBitFingerprinter tmpBitFingerprint = tmpFragmentFingerprinter.getBitFingerprint(tmpMoleculeFragments);
+<br>
+<br> tmpBitFingerprint.cardinality(); // returns 2: the number of positive bits.</code>
+      
 
 ## Dependencies
 **Needs to be pre-installed:**

@@ -142,7 +142,6 @@ public class FragmentFingerprinterTest {
         String tmpSeparatorSemicolon = ";";
         List<List<String>> tmpListOfMoleculesFragmentsAndFrequenciesList = new ArrayList<>(FragmentFingerprinterTest.INITIAL_CAPACITY_VALUE);
         String tmpMoleculeLine;
-        System.out.println("\n\tBit and count arrays of the given molecules:");
         while ((tmpMoleculeLine = tmpMoleculeFragmentsReader.readLine()) != null) {
             String[] tmpMoleculeFragmentsAndFrequencies = tmpMoleculeLine.split(tmpSeparatorSemicolon);
             tmpListOfMoleculesFragmentsAndFrequenciesList.add(Arrays.asList(tmpMoleculeFragmentsAndFrequencies));

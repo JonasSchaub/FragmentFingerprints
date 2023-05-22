@@ -57,7 +57,7 @@ public class PerformanceTest {
     /**
      * Name of file for logging occurred exceptions
      */
-    private static final String EXCEPTIONS_LOG_FILE_NAME = "Exceptions_Log.txt";
+    private static final String EXCEPTIONS_LOG_FILE_NAME = "Exceptions_Log";
     /**
      * Name of file for writing results
      */
@@ -65,19 +65,19 @@ public class PerformanceTest {
     /**
      * Name of CSV file with the results of the performance test of the bit fingerprints.
      */
-    private static final String CSV_BIT_FINGERPRINT_PROCESS_RESULT_FILE_NAME = "CSV_BIT_PROCESS_TIME";
+    private static final String CSV_BIT_FINGERPRINT_PROCESS_RESULT_FILE_NAME = "CSV_BIT_PROCESS";
     /**
      * Name of CSV file with the results of the performance test of the count fingerprints.
      */
-    private static final String CSV_COUNT_FINGERPRINT_PROCESS_RESULT_FILE_NAME = "CSV_COUNT_PROCESS_TIME";
+    private static final String CSV_COUNT_FINGERPRINT_PROCESS_RESULT_FILE_NAME = "CSV_COUNT_PROCESS";
     /**
      * Name of the CSV file with the results of the generated bit fingerprints.
      */
-    private static final String BIT_FINGERPRINT_RESULT_FILE_NAME = "BIT_FINGERPRINT_TIME";
+    private static final String BIT_FINGERPRINT_RESULT_FILE_NAME = "BIT_FINGERPRINT";
     /**
      * Name of the CSV file with the results of the generated count fingerprints.
      */
-    private static final String COUNT_FINGERPRINT_RESULT_FILE_NAME = "COUNT_FINGERPRINT_TIME";
+    private static final String COUNT_FINGERPRINT_RESULT_FILE_NAME = "COUNT_FINGERPRINT";
     //</editor-fold>
     //
     //<editor-fold defaultstate="collapsed" desc="Private final class variables">
@@ -216,7 +216,7 @@ public class PerformanceTest {
         String tmpProcessingTime = tmpDateTime.format(DateTimeFormatter.ofPattern("uuuu_MM_dd_HH_mm"));
         new File(tmpOutputPath).mkdirs();
         File tmpExceptionsLogFile = new File( tmpOutputPath
-                + PerformanceTest.EXCEPTIONS_LOG_FILE_NAME + tmpProcessingTime);
+                + PerformanceTest.EXCEPTIONS_LOG_FILE_NAME +"_" + tmpProcessingTime + ".txt");
         FileWriter tmpExceptionsLogFileWriter = new FileWriter(tmpExceptionsLogFile, true);
         this.exceptionsPrintWriter = new PrintWriter(tmpExceptionsLogFileWriter);
         this.exceptionsPrintWriter.println("#########################################################################");
@@ -235,7 +235,7 @@ public class PerformanceTest {
                 throw new IllegalArgumentException("One or more files (name) are invalid: " + anException.getMessage());
             }
             // results files
-            File tmpResultsLogFile = new File(tmpOutputPath + PerformanceTest.RESULTS_FILE_NAME + tmpProcessingTime + ".txt");
+            File tmpResultsLogFile = new File(tmpOutputPath + PerformanceTest.RESULTS_FILE_NAME +"_"+ tmpProcessingTime + ".txt");
             FileWriter tmpResultsLogFileWriter = new FileWriter(tmpResultsLogFile, true);
             this.resultsPrintWriter = new PrintWriter(tmpResultsLogFileWriter);
             this.resultsPrintWriter.println("#########################################################################");
@@ -245,19 +245,19 @@ public class PerformanceTest {
             this.resultsPrintWriter.println("Application initialized. Loading  files named " + anArgs[0] + " and "+ anArgs[1] + ".");
             this.resultsPrintWriter.println();
             // bit fingerprints process file
-            File tmpBitFingerprintsOutputFile = new File(tmpOutputPath + PerformanceTest.CSV_BIT_FINGERPRINT_PROCESS_RESULT_FILE_NAME + tmpProcessingTime + ".csv");
+            File tmpBitFingerprintsOutputFile = new File(tmpOutputPath + PerformanceTest.CSV_BIT_FINGERPRINT_PROCESS_RESULT_FILE_NAME +"_"+ tmpProcessingTime + ".csv");
             FileWriter tmpBitFingerprintsResultWriter = new FileWriter(tmpBitFingerprintsOutputFile, false);
             this.bitPrintWriter = new PrintWriter(tmpBitFingerprintsResultWriter);
             // count fingerprints process file
-            File tmpCountFingerprintsOutputFile = new File(tmpOutputPath + PerformanceTest.CSV_COUNT_FINGERPRINT_PROCESS_RESULT_FILE_NAME + tmpProcessingTime + ".csv");
+            File tmpCountFingerprintsOutputFile = new File(tmpOutputPath + PerformanceTest.CSV_COUNT_FINGERPRINT_PROCESS_RESULT_FILE_NAME +"_"+ tmpProcessingTime + ".csv");
             FileWriter tmpCountFingerprintResultWriter = new FileWriter(tmpCountFingerprintsOutputFile, false);
             this.countPrintWriter = new PrintWriter(tmpCountFingerprintResultWriter);
             // bit fingerprint result file
-            File tmpBitArrayFingerprintResultFile = new File(tmpOutputPath + PerformanceTest.BIT_FINGERPRINT_RESULT_FILE_NAME + tmpProcessingTime+ ".txt");
+            File tmpBitArrayFingerprintResultFile = new File(tmpOutputPath + PerformanceTest.BIT_FINGERPRINT_RESULT_FILE_NAME +"_"+ tmpProcessingTime+ ".txt");
             FileWriter tmpBitArrayFingerprintResultWriter = new FileWriter(tmpBitArrayFingerprintResultFile, false);
             this.bitFingerprintPrintWriter = new PrintWriter(tmpBitArrayFingerprintResultWriter);
             // count fingerprint result file
-            File tmpCountArrayFingerprintResultFile = new File(tmpOutputPath + PerformanceTest.COUNT_FINGERPRINT_RESULT_FILE_NAME + tmpProcessingTime+ ".txt");
+            File tmpCountArrayFingerprintResultFile = new File(tmpOutputPath + PerformanceTest.COUNT_FINGERPRINT_RESULT_FILE_NAME +"_" + tmpProcessingTime+ ".txt");
             FileWriter tmpCountArrayFingerprintResultWriter = new FileWriter(tmpCountArrayFingerprintResultFile, false);
             this.countFingerprintPrintWriter = new PrintWriter(tmpCountArrayFingerprintResultWriter);
             // read in CSV files that contain fragments

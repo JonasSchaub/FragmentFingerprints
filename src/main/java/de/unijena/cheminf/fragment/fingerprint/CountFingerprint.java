@@ -36,8 +36,7 @@ import java.util.Objects;
  * a new CountFingerprint class has been created here that also implements the ICountFingerprint interface.
  * The IntArrayCountFingerprint class assumes hashed count fingerprints, while here they are key-based count
  * fingerprints, so it is necessary to create the CountFingerprint class to treat the fingerprints as
- * key-based fingerprints. This class does not allow the creation of a counting fingerprint. It is only
- * responsible for providing methods for an already created count fingerprint to get information from the fingerprint.
+ * key-based fingerprints.
  *
  * @author Betuel Sevindik
  * @version 1.0.0.0
