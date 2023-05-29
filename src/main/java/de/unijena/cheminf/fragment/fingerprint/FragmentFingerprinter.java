@@ -332,7 +332,7 @@ public class FragmentFingerprinter implements IFragmentFingerprinter {
      */
     public String getBitDefinition(int aBit) throws IllegalArgumentException {
         String[] tmpPredefinedFragmentsInArray = this.getPredefinedFragmentArrayWithoutDuplicates();
-        if(aBit <= tmpPredefinedFragmentsInArray.length && aBit >= 0) {
+        if(aBit < tmpPredefinedFragmentsInArray.length && aBit >= 0) {
             return tmpPredefinedFragmentsInArray[aBit];
         } else {
             throw new IllegalArgumentException("This bit is not defined/present in the fingerprint.");

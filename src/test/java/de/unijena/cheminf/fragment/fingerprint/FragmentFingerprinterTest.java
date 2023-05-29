@@ -155,15 +155,15 @@ public class FragmentFingerprinterTest {
         FileWriter tmpFingerprintResultsFileWriter = new FileWriter(tmpFingerprintResultFile, false);
         PrintWriter tmpFingerprintResultPrintWriter = new PrintWriter(tmpFingerprintResultsFileWriter);
         int[] tmpBitArray;
-        for (int tmpCurrentLineIndex = 1; tmpCurrentLineIndex < tmpListOfMoleculesFragmentsAndFrequenciesList.size(); tmpCurrentLineIndex++) {
-            tmpNameAndMoleculeFragmentsAndFrequenciesList = tmpListOfMoleculesFragmentsAndFrequenciesList.get(tmpCurrentLineIndex);
+        for (int i= 1; i < tmpListOfMoleculesFragmentsAndFrequenciesList.size(); i++) {
+            tmpNameAndMoleculeFragmentsAndFrequenciesList = tmpListOfMoleculesFragmentsAndFrequenciesList.get(i);
             List<String> tmpListWithoutNameAndMoleculeSmiles = tmpNameAndMoleculeFragmentsAndFrequenciesList.subList(2, tmpNameAndMoleculeFragmentsAndFrequenciesList.size());
             HashMap<String, Integer> tmpMoleculeFragmentsMap = new HashMap<>(tmpListWithoutNameAndMoleculeSmiles.size()*FragmentFingerprinterTest.INITIAL_CAPACITY_VALUE_FOR_MAP);
             FragmentFingerprinterTest.dataForGeneratingBitFingerprint = new ArrayList<>(FragmentFingerprinterTest.INITIAL_CAPACITY_VALUE);
-            for (int i = 0; i < tmpListWithoutNameAndMoleculeSmiles.size(); i++) {
-                if (i % 2 == 0) { // magic number to store the fragment SMILES and their frequencies from the file into a HashMap
-                    tmpMoleculeFragmentsMap.put(tmpListWithoutNameAndMoleculeSmiles.get(i), Integer.valueOf(tmpListWithoutNameAndMoleculeSmiles.get(i + 1)));
-                    FragmentFingerprinterTest.dataForGeneratingBitFingerprint.add(tmpListWithoutNameAndMoleculeSmiles.get(i));
+            for (int j = 0; j < tmpListWithoutNameAndMoleculeSmiles.size(); j++) {
+                if (j % 2 == 0) { // magic number to store the fragment SMILES and their frequencies from the file into a HashMap
+                    tmpMoleculeFragmentsMap.put(tmpListWithoutNameAndMoleculeSmiles.get(j), Integer.valueOf(tmpListWithoutNameAndMoleculeSmiles.get(j + 1)));
+                    FragmentFingerprinterTest.dataForGeneratingBitFingerprint.add(tmpListWithoutNameAndMoleculeSmiles.get(j));
                 }
             }
             //Illustration of the results of the bit arrays for the specified molecules

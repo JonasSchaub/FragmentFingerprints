@@ -39,5 +39,10 @@ gradle-app.setting
 # Cache of project
 .gradletasknamecache
 
+# PerformanceTestCMDApplication/PerformanceTest_Result/Results #
+Results
+
+
 # Fingerprint results #
 Fingerprints
+

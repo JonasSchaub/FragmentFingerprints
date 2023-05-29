@@ -42,12 +42,12 @@ a growing number of input molecules. It requires four command line arguments:
   An example file for this can be found in the folder <a href="https://github.com/JonasSchaub/FragmentFingerprints/tree/FragmentFingerprint/PerformanceTestCMDApplication">"PerformanceTestCMDApplication"</a>
   under the name <i>MoleculeFragments_File_PerformanceTest_13000.csv</i>.
 * path name for saving the folders with the performance test results.
-  If an empty/blank string is specified, the application throws an IllegalArgumentException. On the other hand,
-  if only a filename is specified, the result folder is created in the same directory as the Jar.
+  If an empty string is specified, the application throws an IllegalArgumentException. On the other hand,
+  if only a filename or a blank path is specified, the result folder is created in the same directory as the Jar.
 * integer number that specifies with how many molecules the generation of the fingerprints should start. 
   In each round, the number of molecules to be processed increases by + integer number.
 
-Example usage: <code>Example usage: java -jar  FragmentFingerprinter-fat-0.0.0.1.jar Fragments_File_PerformaceTest_13000.csv MoleculeFragments_File_PerformanceTest_13000.csv PerformanceTest_Result 1000</code>
+Example usage: <code>Example usage: java -jar  FragmentFingerprinter-fat-0.0.0.1.jar Fragments_File_PerformaceTest_13000.csv MoleculeFragments_File_PerformanceTest_13000.csv " " 1000</code>
 <br>The CMD application will then import the data sets and create bit and count fingerprints. The application will also create output files of the 
 measured runtimes and a file in which the generated fingerprints are stored line by line. So that each line 
 represents a fingerprint whose components are separated by commas.
@@ -67,25 +67,6 @@ This is a Gradle project. In order to use the source code for your own software,
 open it in a Gradle-supporting IDE (e.g. IntelliJ) as a Gradle project and execute the build.gradle file. 
 Gradle will then take care of installing all dependencies. A Java Development Kit (JDK) of version 17 or higher must also
 be pre-installed.
-
-## Example initialization and use of the FragmentFingerprinter
-<code>ArrayList<String> tmpKeyFragments = new ArrayList<>();
-<br>tmpKeyFragments.add("[H]OC");
-<br>tmpKeyFragments.add("CCCC");
-<br>tmpKeyFragments.add("c1ccc(cc1)C");
-<br>tmpKeyFragments.add("C");
-<br>tmpKeyFragments.add("c1ccc2c(c1)CCC3C2CCC4(C)CCCC34");
-<br>
-<br>ArrayList<String> tmpMoleculeFragments = new Arraylist<>();
-<br>tmpMoleculeFragments.add("CC");
-<br>tmpMoleculeFragments.add("C=C");
-<br>tmpMoleFragments.add("O=CC=C");
-<br>
-<br>FragmentFingerprinter tmpFragmentFingerprinter = new FragmentFingerprinter(tmpKeyFragments);
-<br>IBitFingerprinter tmpBitFingerprint = tmpFragmentFingerprinter.getBitFingerprint(tmpMoleculeFragments);
-<br>
-<br> tmpBitFingerprint.cardinality(); // returns 2: the number of positive bits.</code>
-      
 
 ## Dependencies
 **Needs to be pre-installed:**
