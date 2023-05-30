@@ -61,7 +61,7 @@ public class PerformanceTest {
     /**
      * Name of file for writing results
      */
-    private static final String RESULTS_FILE_NAME = "Results";
+    private static final String RESULTS_FILE_NAME = "FragmentFingerprintResults";
     /**
      * Name of CSV file with the results of the performance test of the bit fingerprints.
      */
@@ -217,8 +217,8 @@ public class PerformanceTest {
             this.workingPath = (new File(anArgs[2]).getAbsoluteFile().getAbsolutePath()) + File.separator;
         }
         LocalDateTime tmpDateTime = LocalDateTime.now();
-        String tmpOutputPath = this.workingPath + "Results" + File.separator;
-        String tmpProcessingTime = tmpDateTime.format(DateTimeFormatter.ofPattern("uuuu_MM_dd_HH_mm"));
+        String tmpOutputPath = this.workingPath + "FragmentFingerprintResults" + File.separator;
+        String tmpProcessingTime = tmpDateTime.format(DateTimeFormatter.ofPattern("uuuu_MM_dd_HH_mm_ss"));
         new File(tmpOutputPath).mkdirs();
         File tmpExceptionsLogFile = new File( tmpOutputPath
                 + PerformanceTest.EXCEPTIONS_LOG_FILE_NAME +"_" + tmpProcessingTime + ".txt");
@@ -288,6 +288,7 @@ public class PerformanceTest {
             this.countFingerprintPrintWriter.flush();
             this.exceptionsPrintWriter.flush();
             System.out.println("Application is finished");
+            System.out.println("The directory where the results are located: " + this.workingPath);
         } catch (Exception anException) {
             this.appendToLogfile(anException);
             anException.printStackTrace(System.err);
@@ -425,7 +426,8 @@ public class PerformanceTest {
                 tmpBitArray = tmpFragmentFingerprinter.getBitArray(tmpListOfMolecule);
                 this.bitFingerprintPrintWriter.println(tmpMoleculeNameOrID + "," + java.util.Arrays.toString(tmpBitArray));
             } catch (Exception anException) {
-                System.out.println(anException + "Bit fingerprint generation ERROR. There may be incorrect/invalid elements in the fragment list oder molecule list");
+                this.bitFingerprintPrintWriter.println(tmpMoleculeNameOrID + " ERROR. The fingerprint could not be created!");
+                System.out.println(anException + " Bit fingerprint generation ERROR. There may be incorrect/invalid elements in the fragment list oder molecule list");
                 this.exceptionsPrintWriter.println("Bit fingerprint generation ERROR. There may be incorrect/invalid elements in the fragment list oder molecule list");
                 this.appendToLogfile(anException);
             }
@@ -445,7 +447,7 @@ public class PerformanceTest {
                 } catch (Exception anException) {
                     this.exceptionsPrintWriter.println("Count fingerprint generation ERROR. There may be incorrect/invalid elements in the fragment list oder molecule list");
                     this.appendToLogfile(anException);
-                    System.out.println( anException + "Count fingerprint generation ERROR. There may be incorrect/invalid elements in the fragment list oder molecule list");
+                    System.out.println( anException + " Count fingerprint generation ERROR. There may be incorrect/invalid elements in the fragment list oder molecule list");
                 }
             }
             long tmpEndTime = System.currentTimeMillis();
@@ -462,7 +464,9 @@ public class PerformanceTest {
                 tmpCountArray = tmpFragmentFingerprinter.getCountArray(tmpListOfMolecule);
                 this.countFingerprintPrintWriter.println(tmpMoleculeNameOrID + "," + java.util.Arrays.toString(tmpCountArray));
             } catch (Exception anException) {
-                System.out.println(anException + "Count fingerprint generation ERROR. There may be incorrect/invalid elements in the fragment list oder molecule list");
+                System.out.println(tmpMoleculeNameOrID + "----molecule");
+                this.countFingerprintPrintWriter.println(tmpMoleculeNameOrID+ " ERROR. The fingerprint could not be created!");
+                System.out.println(anException + " Count fingerprint generation ERROR. There may be incorrect/invalid elements in the fragment list oder molecule list");
                 this.exceptionsPrintWriter.println("Count fingerprint generation ERROR. There may be incorrect/invalid elements in the fragment list oder molecule list");
                 this.appendToLogfile(anException);
             }

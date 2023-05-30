@@ -15,7 +15,7 @@ a growing number of input molecules. It requires four command line arguments:
 * path name for saving the folders with the performance test results.
     If an empty string is specified, the application throws an IllegalArgumentException. On the other hand,
     if only a filename or a blank path is specified, the result folder is created in the same directory as the Jar.
-* integer number (bin size). I.e how many molecules are to be processed (in addition) per iteration.
+* integer number (bin size). I.e. how many molecules are to be processed (in addition) per iteration.
 
 Example usage: java -jar FragmentFingerprinter-fat-0.0.0.1.jar Fragments_File_PerformanceTest_13000.csv MoleculeFragments_File_PerformanceTest_13000.csv " " 1000
 

@@ -62,6 +62,9 @@ The detailed structure of the input files can be found in the Javadoc.
 If the molecule name/ID is in the first column of the specified molecule file, the name/ID will be added to the
 result file when the fingerprints are generated, making it easier to assign the fingerprints to the molecules.
 
+## Example initialization and usage of the FragmentFingerprinter
+see in <a href="https://github.com/JonasSchaub/FragmentFingerprints/wiki">"wiki"</a>
+
 ## Installation
 This is a Gradle project. In order to use the source code for your own software, download or clone the repository and 
 open it in a Gradle-supporting IDE (e.g. IntelliJ) as a Gradle project and execute the build.gradle file. 

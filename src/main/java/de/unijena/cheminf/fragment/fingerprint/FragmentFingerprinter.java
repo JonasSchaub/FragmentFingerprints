@@ -294,6 +294,7 @@ public class FragmentFingerprinter implements IFragmentFingerprinter {
     }
     //
     /**
+     * UnsupportedOperationException. This method is not supported.
      * {@inheritDoc}
      * @throws UnsupportedOperationException
      */
