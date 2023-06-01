@@ -33,34 +33,8 @@ In total, 10 molecules with their corresponding fragments are stored in the file
 The folder <a href="https://github.com/JonasSchaub/FragmentFingerprints/tree/FragmentFingerprint/PerformanceTestCMDApplication">"PerformanceTestCMDApplication</a>
 contains the executable JAVA archive <i>FragmentFingerprinter-fat.jar</i>.
 It can be executed from the command-line (command: java -jar) to do a performance snapshot of fragment fingerprinter's scaling behaviour for
-a growing number of input molecules. It requires four command line arguments: 
-
-* file name of a text file (located in the same directory as the JAR) to read in the key fragments.
-  An example file for this can be found in the folder <a href="https://github.com/JonasSchaub/FragmentFingerprints/tree/FragmentFingerprint/PerformanceTestCMDApplication">"PerformanceTestCMDApplication"</a> 
-  under the name <i>Fragments_File_PerformanceTest_13000.csv</i>.
-* file name of a text file (located in the same directory as the JAR) to read in molecules more precisely their fragments.
-  An example file for this can be found in the folder <a href="https://github.com/JonasSchaub/FragmentFingerprints/tree/FragmentFingerprint/PerformanceTestCMDApplication">"PerformanceTestCMDApplication"</a>
-  under the name <i>MoleculeFragments_File_PerformanceTest_13000.csv</i>.
-* path name for saving the folders with the performance test results.
-  If an empty string is specified, the application throws an IllegalArgumentException. On the other hand,
-  if only a filename or a blank path is specified, the result folder is created in the same directory as the Jar.
-* integer number that specifies with how many molecules the generation of the fingerprints should start. 
-  In each round, the number of molecules to be processed increases by + integer number.
-
-Example usage: <code>Example usage: java -jar  FragmentFingerprinter-fat-0.0.0.1.jar Fragments_File_PerformaceTest_13000.csv MoleculeFragments_File_PerformanceTest_13000.csv " " 1000</code>
-<br>The CMD application will then import the data sets and create bit and count fingerprints. The application will also create output files of the 
-measured runtimes and a file in which the generated fingerprints are stored line by line. So that each line 
-represents a fingerprint whose components are separated by commas.
-
-The assignment between the generated fingerprints (see in result file BIT_FINGERPRINT... and COUNT_FINGERPRINT...) and the
-read-in molecules is established as follows: The molecule in the first
-row in the molecule file corresponds to the first fingerprint in the results files, (see in result file BIT_FINGERPRINT... and COUNT_FINGERPRINT...)
-and so on. Basically, the application assumes that the first column
-of each row in the molecule file starts with the molecule name/ID.
-Keeping the file formats of the input files is a prerequisite for the calculation of correct fingerprints.
-The detailed structure of the input files can be found in the Javadoc.
-If the molecule name/ID is in the first column of the specified molecule file, the name/ID will be added to the
-result file when the fingerprints are generated, making it easier to assign the fingerprints to the molecules.
+a growing number of input molecules.
+For more details see the file <a href="https://github.com/JonasSchaub/FragmentFingerprints/blob/FragmentFingerprint/PerformanceTestCMDApplication/Performance_test_instruction.txt">"Performance_test_instruction.txt"</a>
 
 ## Example initialization and usage of the FragmentFingerprinter
 see in <a href="https://github.com/JonasSchaub/FragmentFingerprints/wiki">"wiki"</a>

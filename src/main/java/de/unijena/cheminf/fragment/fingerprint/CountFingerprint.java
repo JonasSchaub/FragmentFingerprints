@@ -58,7 +58,7 @@ public class CountFingerprint implements ICountFingerprint {
     /**
      * Initial capacity value for maps
      */
-    private final int INITIAL_CAPACITY_VALUE = Math.round((4/3) + 1);
+    private final double INITIAL_CAPACITY_VALUE = 1.5;
     //</editor-fold>
     //
     //<editor-fold desc="private class variables" defaultstate="collapsed">
@@ -315,7 +315,7 @@ public class CountFingerprint implements ICountFingerprint {
      * @return HashMap<String,Integer>
      */
     private HashMap<String, Integer> buildUniqueSmilesToPositionMap() {
-        this.uniqueSmilesToPositionMap = new HashMap<>(this.predefinedFragmentSmiles.length*this.INITIAL_CAPACITY_VALUE, 0.75f);
+        this.uniqueSmilesToPositionMap = new HashMap<>((int) (this.predefinedFragmentSmiles.length*this.INITIAL_CAPACITY_VALUE), 0.75f);
         int tmpValuePosition = 0;
         for (String tmpKey : this.predefinedFragmentSmiles) {
             if(!this.uniqueSmilesToPositionMap.containsKey(tmpKey)) {

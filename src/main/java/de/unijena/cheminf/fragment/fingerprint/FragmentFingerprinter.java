@@ -70,7 +70,7 @@ public class FragmentFingerprinter implements IFragmentFingerprinter {
     /**
      * Initial capacity value for maps
      */
-    private final int INITIAL_CAPACITY_VALUE = Math.round((4/3) + 1);
+    private final double INITIAL_CAPACITY_VALUE = 1.5;
     //</editor-fold>
     //
     //<editor-fold desc="private static final class variables" defaultstate="collapsed">
@@ -157,7 +157,7 @@ public class FragmentFingerprinter implements IFragmentFingerprinter {
                 "aListOfUniqueSmiles (at least one list element) is null.",
                 "aListOfUniqueSmiles (at least one list element) is blank/empty.");
         BitSet tmpBitSet = new BitSet(this.uniqueSmilesToPositionMap.size());
-        Set<String> tmpUniqueSmilesSet = new HashSet<>(aListOfUniqueSmiles.size()*this.INITIAL_CAPACITY_VALUE);
+        Set<String> tmpUniqueSmilesSet = new HashSet<>((int) (aListOfUniqueSmiles.size()*this.INITIAL_CAPACITY_VALUE));
         tmpUniqueSmilesSet.addAll(aListOfUniqueSmiles);
         ArrayList<String> tmpUniqueSmilesList = new ArrayList<>(tmpUniqueSmilesSet);
         this.cacheListToGenerateBitFingerprint = (ArrayList<String>) tmpUniqueSmilesList.clone();
@@ -191,7 +191,7 @@ public class FragmentFingerprinter implements IFragmentFingerprinter {
      */
     @Override
     public CountFingerprint getCountFingerprint(Map<String, Integer> aUniqueSmilesToFrequencyMap) throws NullPointerException,IllegalArgumentException {
-        this.cacheRawCountMap = new HashMap<>(this.uniqueSmilesToPositionMap.size()*this.INITIAL_CAPACITY_VALUE, 0.75f);
+        this.cacheRawCountMap = new HashMap<>((int) (this.uniqueSmilesToPositionMap.size()*this.INITIAL_CAPACITY_VALUE), 0.75f);
         this.cacheListToGenerateCountFingerprint = new ArrayList<>(aUniqueSmilesToFrequencyMap.size());
         Objects.requireNonNull(aUniqueSmilesToFrequencyMap, "aUniqueSmilesToFrequencyMap (Map of string and integer instances) is null.");
         for (String tmpUniqueSmiles : aUniqueSmilesToFrequencyMap.keySet()) {
@@ -233,7 +233,7 @@ public class FragmentFingerprinter implements IFragmentFingerprinter {
      */
     @Override
     public ICountFingerprint getCountFingerprint(List<String> aUniqueSmilesList) throws NullPointerException, IllegalArgumentException {
-        HashMap<String, Integer> tmpUniqueSmilesToFrequencyCountMap = new HashMap<>(this.uniqueSmilesToPositionMap.size()*this.INITIAL_CAPACITY_VALUE, 0.75f);
+        HashMap<String, Integer> tmpUniqueSmilesToFrequencyCountMap = new HashMap<>((int) (this.uniqueSmilesToPositionMap.size()*this.INITIAL_CAPACITY_VALUE), 0.75f);
         Objects.requireNonNull(aUniqueSmilesList, "aUniqueSmilesToFrequencyList (list of string instances) is null.");
         for (String tmpSmiles : aUniqueSmilesList) {
             Objects.requireNonNull(tmpSmiles, "aUniqueSmilesToFrequencyList (at least one list element) is null.");
@@ -357,7 +357,7 @@ public class FragmentFingerprinter implements IFragmentFingerprinter {
         this.validityCheckOfParameterList(aListOfUniqueSmiles,"aListOfUniqueSmiles (list of string instances) is null.",
                 "aListOfUniqueSmiles (at least one list element) is null.",
                 "aListOfUniqueSmiles (at least one list element) is blank/empty.");
-        Set<String> tmpUniqueSmilesSet = new HashSet<>(aListOfUniqueSmiles.size()*this.INITIAL_CAPACITY_VALUE);
+        Set<String> tmpUniqueSmilesSet = new HashSet<>((int) (aListOfUniqueSmiles.size()*this.INITIAL_CAPACITY_VALUE));
         tmpUniqueSmilesSet.addAll(aListOfUniqueSmiles);
         List<String> tmpListWithoutPossibleDuplicates = new ArrayList<>(tmpUniqueSmilesSet);
         return this.createBitArray(tmpListWithoutPossibleDuplicates);
@@ -561,7 +561,7 @@ public class FragmentFingerprinter implements IFragmentFingerprinter {
      * @return HashMap<String,Integer>
      */
     private HashMap<String,Integer> buildUniqueSmilesToPositionMap() {
-        this.uniqueSmilesToPositionMap = new HashMap<>(this.fragmentArray.length*this.INITIAL_CAPACITY_VALUE, 0.75f);
+        this.uniqueSmilesToPositionMap = new HashMap<>((int) (this.fragmentArray.length*this.INITIAL_CAPACITY_VALUE), 0.75f);
         int tmpValuePosition = 0;
         for (String tmpKey : this.fragmentArray) {
             if (!this.uniqueSmilesToPositionMap.containsKey(tmpKey)) {

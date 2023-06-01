@@ -92,7 +92,7 @@ public class PerformanceTest {
     /**
      * Initial capacity of maps
      */
-    private final int INITIAL_CAPACITY_VALUE = Math.round((4/3) + 1);
+    private final double INITIAL_CAPACITY_VALUE = 1.5;
     /**
      * Separator for separating the lines in the input files.
      */
@@ -108,11 +108,11 @@ public class PerformanceTest {
      * The list comprises a collection of fragments from various molecules, each of which is also
      * stored in separate lists.
      */
-    private ArrayList<ArrayList<String>> listOfMoleculeFragmentsList = new ArrayList<>(this.INITIAL_CAPACITY_VALUE_NUMBER_OF_MOLECULES);
+    private ArrayList<ArrayList<String>> listOfMoleculeFragmentsList;// = new ArrayList<>(this.INITIAL_CAPACITY_VALUE_NUMBER_OF_MOLECULES);
     /**
      * The list includes all key fragments that are set during the initialization of the fingerprinter.
      */
-    private ArrayList<String> fragmentList = new ArrayList<>(this.INITIAL_CAPACITY_VALUE_NUMBER_OF_FRAGMENTS);
+    private ArrayList<String> fragmentList;
     /**
      * Stores the name/ID of the molecules from moleculeFile
      */
@@ -152,7 +152,7 @@ public class PerformanceTest {
     /**
      * The list contains a collection of fragments and their frequency stored as a HashMap.
      */
-    private ArrayList<HashMap<String, Integer>> moleculeFragmentList = new ArrayList<>(this.INITIAL_CAPACITY_VALUE_NUMBER_OF_MOLECULES);
+    private ArrayList<HashMap<String, Integer>> moleculeFragmentList;
     //</editor-fold>
     //
     //<editor-fold defaultstate="collapsed" desc="Constructor">
@@ -217,7 +217,7 @@ public class PerformanceTest {
             this.workingPath = (new File(anArgs[2]).getAbsoluteFile().getAbsolutePath()) + File.separator;
         }
         LocalDateTime tmpDateTime = LocalDateTime.now();
-        String tmpOutputPath = this.workingPath + "FragmentFingerprintResults" + File.separator;
+        String tmpOutputPath = this.workingPath + RESULTS_FILE_NAME + File.separator;
         String tmpProcessingTime = tmpDateTime.format(DateTimeFormatter.ofPattern("uuuu_MM_dd_HH_mm_ss"));
         new File(tmpOutputPath).mkdirs();
         File tmpExceptionsLogFile = new File( tmpOutputPath
@@ -265,6 +265,7 @@ public class PerformanceTest {
             File tmpCountArrayFingerprintResultFile = new File(tmpOutputPath + PerformanceTest.COUNT_FINGERPRINT_RESULT_FILE_NAME +"_" + tmpProcessingTime+ ".txt");
             FileWriter tmpCountArrayFingerprintResultWriter = new FileWriter(tmpCountArrayFingerprintResultFile, false);
             this.countFingerprintPrintWriter = new PrintWriter(tmpCountArrayFingerprintResultWriter);
+            this.listOfMoleculeFragmentsList = new ArrayList<>(this.INITIAL_CAPACITY_VALUE_NUMBER_OF_MOLECULES);
             // read in CSV files that contain fragments
             try {
                 this.importDataFromTextFile();
@@ -327,6 +328,7 @@ public class PerformanceTest {
             //Read CSV file (fragments file) to obtain fragments used to create fingerprints
             String tmpLine;
             this.fragmentList = new ArrayList<>(this.INITIAL_CAPACITY_VALUE_NUMBER_OF_FRAGMENTS);
+            this.moleculeFragmentList = new ArrayList<>(this.INITIAL_CAPACITY_VALUE_NUMBER_OF_MOLECULES);
             try {
                 while ((tmpLine = tmpFragmentSetReader.readLine()) != null) {
                     String[] tmpSmilesOfFragments = tmpLine.split(this.LINE_SEPARATOR_SEMICOLON);
@@ -357,7 +359,7 @@ public class PerformanceTest {
                 tmpMoleculeFragmentsAndFrequenciesList = tmpListOfMoleculesFragmentsAndFrequenciesList.get(i);
                 this.listOfMoleculeNames.add(tmpMoleculeFragmentsAndFrequenciesList.get(0));
                 List<String> tmpListWithoutNameAndMoleculeSmiles = tmpMoleculeFragmentsAndFrequenciesList.subList(2, tmpMoleculeFragmentsAndFrequenciesList.size());
-                HashMap<String, Integer> tmpMoleculeFragmentsMap = new HashMap<>(tmpListWithoutNameAndMoleculeSmiles.size()*INITIAL_CAPACITY_VALUE);
+                HashMap<String, Integer> tmpMoleculeFragmentsMap = new HashMap<>((int) (tmpListWithoutNameAndMoleculeSmiles.size()*this.INITIAL_CAPACITY_VALUE));
                 ArrayList<String> tmpDataToGenerateBitFingerprint = new ArrayList<>();
                 try {
                     for (int j = 0; j < tmpListWithoutNameAndMoleculeSmiles.size(); j++) {

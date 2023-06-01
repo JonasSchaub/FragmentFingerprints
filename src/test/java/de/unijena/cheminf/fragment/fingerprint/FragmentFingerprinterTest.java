@@ -65,7 +65,7 @@ public class FragmentFingerprinterTest {
     /**
      * Initial capacity value of maps.
      */
-    private static final int INITIAL_CAPACITY_VALUE_FOR_MAP = Math.round((4/3) + 1);
+    private static final double INITIAL_CAPACITY_VALUE_FOR_MAP = 1.5;
     //</editor-fold>
     //
     //<editor-fold desc="private static class variables" defaultstate="collapsed">
@@ -73,11 +73,11 @@ public class FragmentFingerprinterTest {
      * The list contains a collection of fragments and their frequencies that were read from a
      * CSV file and stored as a HashMap.
      */
-    private static ArrayList<HashMap<String, Integer>> moleculeFragmentList = new ArrayList<>(FragmentFingerprinterTest.INITIAL_CAPACITY_VALUE);
+    private static ArrayList<HashMap<String, Integer>> moleculeFragmentList;
     /**
      * The list includes all key fragments that are set during the initialization of the fingerprinter.
      */
-    private static ArrayList<String> fragmentList = new ArrayList<>(FragmentFingerprinterTest.INITIAL_CAPACITY_VALUE_FOR_FRAGMENT_LIST);
+    private static ArrayList<String> fragmentList;
     /**
      * fragmentFingerprinter
      */
@@ -115,7 +115,7 @@ public class FragmentFingerprinterTest {
      * fragments and the other text file contains the fragments associated with the molecules.
      * Structure of the text files can be seen in resources folder.
      *
-     * @BeforeAll ensures that the setUp method is only executed once.
+     * "at"BeforeAll ensures that the setUp method is only executed once.
      *
      * @throws Exception is thrown if anything goes wrong.
      */
@@ -129,6 +129,8 @@ public class FragmentFingerprinterTest {
         unique SMILES is displayed at the first position of each line. Only these unique
         SMILES from the file are stored in the list.
          */
+        FragmentFingerprinterTest.fragmentList = new ArrayList<>(FragmentFingerprinterTest.INITIAL_CAPACITY_VALUE_FOR_FRAGMENT_LIST);
+        FragmentFingerprinterTest.moleculeFragmentList = new ArrayList<>(FragmentFingerprinterTest.INITIAL_CAPACITY_VALUE);
         String tmpLine;
         String tmpSeparatorComma = ",";
         while ((tmpLine = tmpFragmentSetReader.readLine()) != null) {
@@ -150,15 +152,15 @@ public class FragmentFingerprinterTest {
         List<String> tmpNameAndMoleculeFragmentsAndFrequenciesList;
         FragmentFingerprinterTest.fragmentFingerprinter = new FragmentFingerprinter(FragmentFingerprinterTest.fragmentList);
         String tmpFingerprintOutputPath = (new File("").getAbsoluteFile().getAbsolutePath()) + File.separator;
-        new File(tmpFingerprintOutputPath + "Fingerprints").mkdirs();
-        File tmpFingerprintResultFile = new File(tmpFingerprintOutputPath + "Fingerprints" +File.separator+ FragmentFingerprinterTest.FINGERPRINTS_FILE_NAME  + ".txt");
+        new File(tmpFingerprintOutputPath + FINGERPRINTS_FILE_NAME).mkdirs();
+        File tmpFingerprintResultFile = new File(tmpFingerprintOutputPath + FINGERPRINTS_FILE_NAME +File.separator+ FragmentFingerprinterTest.FINGERPRINTS_FILE_NAME  + ".txt");
         FileWriter tmpFingerprintResultsFileWriter = new FileWriter(tmpFingerprintResultFile, false);
         PrintWriter tmpFingerprintResultPrintWriter = new PrintWriter(tmpFingerprintResultsFileWriter);
         int[] tmpBitArray;
         for (int i= 1; i < tmpListOfMoleculesFragmentsAndFrequenciesList.size(); i++) {
             tmpNameAndMoleculeFragmentsAndFrequenciesList = tmpListOfMoleculesFragmentsAndFrequenciesList.get(i);
             List<String> tmpListWithoutNameAndMoleculeSmiles = tmpNameAndMoleculeFragmentsAndFrequenciesList.subList(2, tmpNameAndMoleculeFragmentsAndFrequenciesList.size());
-            HashMap<String, Integer> tmpMoleculeFragmentsMap = new HashMap<>(tmpListWithoutNameAndMoleculeSmiles.size()*FragmentFingerprinterTest.INITIAL_CAPACITY_VALUE_FOR_MAP);
+            HashMap<String, Integer> tmpMoleculeFragmentsMap = new HashMap<>((int) (tmpListWithoutNameAndMoleculeSmiles.size()*FragmentFingerprinterTest.INITIAL_CAPACITY_VALUE_FOR_MAP));
             FragmentFingerprinterTest.dataForGeneratingBitFingerprint = new ArrayList<>(FragmentFingerprinterTest.INITIAL_CAPACITY_VALUE);
             for (int j = 0; j < tmpListWithoutNameAndMoleculeSmiles.size(); j++) {
                 if (j % 2 == 0) { // magic number to store the fragment SMILES and their frequencies from the file into a HashMap

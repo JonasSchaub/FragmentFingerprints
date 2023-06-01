@@ -90,10 +90,3 @@ task fatJar(type: Jar) {
 artifacts {
     archives fatJar
 }
-
-
-
-
-
-
-
