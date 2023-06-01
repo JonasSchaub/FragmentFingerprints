@@ -109,12 +109,16 @@ public class ExampleUsageTest {
     @Test
     public void chemicalExampleUsageTest() throws Exception {
         InputStream tmpInputStream = ExampleUsageTest.class.getResourceAsStream("coconut_naphthalene_substructure_search_result.sdf");
-        //note for the tutorial: make it InputStream tmpInputStream = new FileInputStream("\\path\\to\\coconut_naphthalene_substructure_search_result.sdf");
+        //note: for the tutorial, make it InputStream tmpInputStream = new FileInputStream("\\path\\to\\coconut_naphthalene_substructure_search_result.sdf");
         IteratingSDFReader tmpSDFReader = new IteratingSDFReader(tmpInputStream, SilentChemObjectBuilder.getInstance());
         //This fragmentation scheme simply breaks single non-ring bonds.
         ExhaustiveFragmenter tmpFragmenter = new ExhaustiveFragmenter();
         //Default would be 6 which is too high for the short side chains in the input molecules
         tmpFragmenter.setMinimumFragmentSize(1);
+        //ExhaustiveFragmenter has a convenience method .getFragments() that returns the generated fragments already as
+        // unique SMILES strings, but to be explicit here, the fragments are retrieved as atom containers and unique
+        // SMILES strings created in a second step. Also note that any other string-based molecular structure representation
+        // like InChI could be used instead, but it should be canonical.
         SmilesGenerator tmpSmiGen = new SmilesGenerator(SmiFlavor.Unique);
         HashMap<String, Integer> tmpFrequenciesMap = new HashMap<>(50, 0.75f);
         while (tmpSDFReader.hasNext()) {
