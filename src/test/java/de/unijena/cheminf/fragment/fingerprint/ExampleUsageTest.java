@@ -36,6 +36,7 @@ import org.openscience.cdk.smiles.SmilesGenerator;
 import org.openscience.cdk.smiles.SmilesParser;
 
 import java.io.FileInputStream;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -107,11 +108,9 @@ public class ExampleUsageTest {
      */
     @Test
     public void chemicalExampleUsageTest() throws Exception {
-        //Note: make it "path\\to\\coconut_naphthalene_substructure_search_result.sdf" in the example code (I don't want to use the import from test resources here)
-        IteratingSDFReader tmpSDFReader = new IteratingSDFReader(new FileInputStream(
-                "D:\\Project_Fragment_Fingerprints\\FragmentFingerprints_git\\src\\test\\resources\\de\\unijena\\cheminf\\" +
-                        "fragment\\fingerprint\\coconut_naphthalene_substructure_search_result.sdf"),
-                SilentChemObjectBuilder.getInstance());
+        InputStream tmpInputStream = ExampleUsageTest.class.getResourceAsStream("coconut_naphthalene_substructure_search_result.sdf");
+        //note for the tutorial: make it InputStream tmpInputStream = new FileInputStream("\\path\\to\\coconut_naphthalene_substructure_search_result.sdf");
+        IteratingSDFReader tmpSDFReader = new IteratingSDFReader(tmpInputStream, SilentChemObjectBuilder.getInstance());
         //This fragmentation scheme simply breaks single non-ring bonds.
         ExhaustiveFragmenter tmpFragmenter = new ExhaustiveFragmenter();
         //Default would be 6 which is too high for the short side chains in the input molecules
