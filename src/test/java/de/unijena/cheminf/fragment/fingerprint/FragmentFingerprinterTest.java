@@ -59,6 +59,10 @@ import java.util.List;
 public class FragmentFingerprinterTest {
     //<editor-fold desc="private static final class variables" defaultstate="collapsed">
     /**
+     * Name of folder for writing fingerprints results.
+     */
+    private static final String OUTPUT_FOLDER_NAME = "FragmentFingerprinterTest_Output";
+    /**
      * Name of file for writing fingerprints results.
      */
     private static final String FINGERPRINTS_FILE_NAME = "Fingerprints";
@@ -172,8 +176,8 @@ public class FragmentFingerprinterTest {
         List<String> tmpNameAndMoleculeFragmentsAndFrequenciesList;
         FragmentFingerprinterTest.fragmentFingerprinter = new FragmentFingerprinter(FragmentFingerprinterTest.fragmentList);
         String tmpFingerprintOutputPath = (new File("").getAbsoluteFile().getAbsolutePath()) + File.separator;
-        new File(tmpFingerprintOutputPath + FINGERPRINTS_FILE_NAME).mkdirs();
-        File tmpFingerprintResultFile = new File(tmpFingerprintOutputPath + FINGERPRINTS_FILE_NAME +File.separator+ FragmentFingerprinterTest.FINGERPRINTS_FILE_NAME  + ".txt");
+        new File(tmpFingerprintOutputPath + FragmentFingerprinterTest.OUTPUT_FOLDER_NAME).mkdirs();
+        File tmpFingerprintResultFile = new File(FragmentFingerprinterTest.OUTPUT_FOLDER_NAME + File.separator + FragmentFingerprinterTest.FINGERPRINTS_FILE_NAME  + ".txt");
         FileWriter tmpFingerprintResultsFileWriter = new FileWriter(tmpFingerprintResultFile, false);
         PrintWriter tmpFingerprintResultPrintWriter = new PrintWriter(tmpFingerprintResultsFileWriter);
         int[] tmpBitArray;

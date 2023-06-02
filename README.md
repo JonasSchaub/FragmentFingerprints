@@ -30,7 +30,7 @@ named "MoleculeList.txt" contains fragments/substructures of molecules.
 In total, 10 molecules with their corresponding fragments are stored in the file.
 
 ### Performance Test CMD Application
-The folder <a href="https://github.com/JonasSchaub/FragmentFingerprints/tree/FragmentFingerprint/PerformanceTestCMDApplication">"PerformanceTestCMDApplication</a>
+The folder <a href="https://github.com/JonasSchaub/FragmentFingerprints/tree/FragmentFingerprint/PerformanceTestCMDApplication">"PerformanceTestCMDApplication"</a>
 contains the executable JAVA archive <i>FragmentFingerprinter-fat.jar</i>.
 It can be executed from the command-line (command: java -jar) to do a performance snapshot of fragment fingerprinter's scaling behaviour for
 a growing number of input molecules.

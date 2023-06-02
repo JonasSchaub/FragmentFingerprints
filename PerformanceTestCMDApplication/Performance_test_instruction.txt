@@ -2,7 +2,7 @@
 PERFORMANCE TEST CMD APPLICATION
 ---------------------------------
 The folder "PerformanceTestCMDApplication"
-contains the executable JAVA archive FragmentFingerprinter-fat-0.0.0.1.jar.
+contains the executable JAVA archive FragmentFingerprinter-fat-1.0.0.0.jar.
 It can be executed from the command line (command: java -jar) to do a performance snapshot of fragment fingerprinter's scaling behaviour for
 a growing number of input molecules. It requires four command line arguments: 
 
@@ -17,7 +17,7 @@ a growing number of input molecules. It requires four command line arguments:
     if only a filename or a blank path is specified, the result folder is created in the same directory as the Jar.
 * integer number (bin size). I.e. how many molecules are to be processed (in addition) per iteration.
 
-Example usage: java -jar FragmentFingerprinter-fat-0.0.0.1.jar Fragments_File_PerformanceTest_13000.csv MoleculeFragments_File_PerformanceTest_13000.csv " " 1000
+Example usage: java -jar FragmentFingerprinter-fat-1.0.0.0.jar Fragments_File_PerformanceTest_13000.csv MoleculeFragments_File_PerformanceTest_13000.csv " " 1000
 
 The CMD application will then import the data sets and create bit and count fingerprints. The application will also create output files of the
 measured runtimes and a file in which the generated fingerprints are stored line by line. So that each line 

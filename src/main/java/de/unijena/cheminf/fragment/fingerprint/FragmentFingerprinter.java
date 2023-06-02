@@ -296,7 +296,8 @@ public class FragmentFingerprinter implements IFragmentFingerprinter {
     /**
      * UnsupportedOperationException. This method is not supported.
      * {@inheritDoc}
-     * @throws UnsupportedOperationException
+     *
+     * @throws UnsupportedOperationException method is not supported
      */
     @Override
     public Map<String, Integer> getRawFingerprint(IAtomContainer container) throws CDKException {

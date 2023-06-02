@@ -41,3 +41,6 @@ gradle-app.setting
 
 # PerformanceTestCMDApplication/FragmentFingerprintResults
 FragmentFingerprintResults
+
+# Output folder for test methods
+FragmentFingerprinterTest_Output

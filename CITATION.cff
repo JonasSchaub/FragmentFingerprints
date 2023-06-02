@@ -1,6 +1,6 @@
 cff-version: 1.2.0
-title: Fragment Fingerprints
-version: 0.0.0.1
+title: FragmentFingerprinter
+version: 1.0.0.0
 message: "If you use this software, please cite it as below."
 type: software
 authors:
@@ -19,5 +19,6 @@ authors:
   - family-names: "Zielesny"
     given-names: "Achim"    
     orcid: "https://orcid.org/0000-0003-0722-4229"
+date-released: 2023-06-02
 url: "https://github.com/JonasSchaub/FragmentFingerprints"
 license: MIT

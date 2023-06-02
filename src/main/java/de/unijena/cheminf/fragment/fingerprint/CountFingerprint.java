@@ -187,8 +187,10 @@ public class CountFingerprint implements ICountFingerprint {
     }
     //
     /**
+     * UnsupportedOperationException. This method is not supported.
      * {@inheritDoc}
-     * @throws UnsupportedOperationException
+     *
+     * @throws UnsupportedOperationException method is not supported
      */
     @Override
     public void merge(ICountFingerprint fp) {
