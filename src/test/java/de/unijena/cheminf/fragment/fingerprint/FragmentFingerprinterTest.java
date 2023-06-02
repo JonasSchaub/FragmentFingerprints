@@ -30,11 +30,19 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.openscience.cdk.fingerprint.IBitFingerprint;
 import org.openscience.cdk.fingerprint.ICountFingerprint;
+import org.openscience.cdk.fragment.ExhaustiveFragmenter;
+import org.openscience.cdk.interfaces.IAtomContainer;
+import org.openscience.cdk.io.iterator.IteratingSDFReader;
+import org.openscience.cdk.silent.SilentChemObjectBuilder;
+import org.openscience.cdk.smiles.SmiFlavor;
+import org.openscience.cdk.smiles.SmilesGenerator;
+import org.openscience.cdk.smiles.SmilesParser;
 
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
+import java.io.InputStream;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -79,17 +87,29 @@ public class FragmentFingerprinterTest {
      */
     private static ArrayList<String> fragmentList;
     /**
-     * fragmentFingerprinter
+     * fragment fingerprinter
      */
     private static FragmentFingerprinter fragmentFingerprinter;
+    /**
+     * fragment fingerprinter
+     */
+    private static FragmentFingerprinter naphthaleneFingerprinter;
     /**
      * Bit fingerprint
      */
     private static IBitFingerprint bitFingerprintTest;
     /**
+     * Bit fingerprint of naphthalene derivate.
+     */
+    private static IBitFingerprint cNP0437667BitFP;
+    /**
      * Count fingerprint
      */
     private static CountFingerprint countFingerprintTest;
+    /**
+     * Fragments of Naphthalene dervivate.
+     */
+    private static List<String> cNP0437667Fragments;
     /**
      * List contains molecule fragments without duplicates
      */
@@ -212,6 +232,62 @@ public class FragmentFingerprinterTest {
         FragmentFingerprinterTest.countListOfUniqueSmiles.add("C");
         FragmentFingerprinterTest.countListOfUniqueSmiles.add("CCC");
         FragmentFingerprinterTest.countListOfUniqueSmiles.add("[H]OC");
+        /*
+         * In the following: Creation of a test for chemical use of the fragment fingerprinter.
+         *
+         * In the following, a molecular structure data set is imported that contains 100 natural products with a
+         * naphthalene substructure taken from the COCONUT natural products database. These are fragmented using the CDK
+         * ExhaustiveFragmenter functionality that breaks single non-ring bonds in input molecules to generate fragments.
+         * The resulting fragments are collected together with their fraquencies as unique SMILES representations.
+         * Fragments that occur more than two times are then used to initialise the fragment fingerprinter. At the end,
+         * the "naphthalene-derivatives exhaustive fragmenter fingerprint" is generated for 3-hydroxy-2-naphthoic acid.
+         */
+        InputStream tmpInputStream = ExampleUsageTest.class.getResourceAsStream("coconut_naphthalene_substructure_search_result.sdf");
+        //note: for the tutorial, make it InputStream tmpInputStream = new FileInputStream("\\path\\to\\coconut_naphthalene_substructure_search_result.sdf");
+        IteratingSDFReader tmpSDFReader = new IteratingSDFReader(tmpInputStream, SilentChemObjectBuilder.getInstance());
+        //This fragmentation scheme simply breaks single non-ring bonds.
+        ExhaustiveFragmenter tmpFragmenter = new ExhaustiveFragmenter();
+        //Default would be 6 which is too high for the short side chains in the input molecules
+        tmpFragmenter.setMinimumFragmentSize(1);
+        //ExhaustiveFragmenter has a convenience method .getFragments() that returns the generated fragments already as
+        // unique SMILES strings, but to be explicit here, the fragments are retrieved as atom containers and unique
+        // SMILES strings created in a second step. Also note that any other string-based molecular structure representation
+        // like InChI could be used instead, but it should be canonical.
+        SmilesGenerator tmpSmiGen = new SmilesGenerator(SmiFlavor.Unique);
+        HashMap<String, Integer> tmpFrequenciesMap = new HashMap<>(50, 0.75f);
+        while (tmpSDFReader.hasNext()) {
+            IAtomContainer tmpMolecule = tmpSDFReader.next();
+            tmpFragmenter.generateFragments(tmpMolecule);
+            IAtomContainer[] tmpFragments = tmpFragmenter.getFragmentsAsContainers();
+            for (IAtomContainer tmpFragment : tmpFragments) {
+                String tmpSmilesCode = tmpSmiGen.create(tmpFragment);
+                if (tmpFrequenciesMap.containsKey(tmpSmilesCode)) {
+                    tmpFrequenciesMap.put(tmpSmilesCode, tmpFrequenciesMap.get(tmpSmilesCode) + 1);
+                } else {
+                    tmpFrequenciesMap.put(tmpSmilesCode, 1);
+                }
+            }
+        }
+        //Collecting fragments that appear at least 2 times
+        List<String> tmpFragmentsList = new ArrayList<>(28);
+        for (String tmpFragment : tmpFrequenciesMap.keySet()) {
+            if (tmpFrequenciesMap.get(tmpFragment) > 2) {
+                tmpFragmentsList.add(tmpFragment);
+            }
+        }
+        // Initialising fingerprinter
+        FragmentFingerprinterTest.naphthaleneFingerprinter = new FragmentFingerprinter(tmpFragmentsList);
+        //Parsing 3-hydroxy-2-naphthoic acid, fragmenting it, and creating its fingerprint
+        String tmpCNP0437667SmilesString = "O=C(O)C1=CC=2C=CC=CC2C=C1O"; //3-hydroxy-2-naphthoic acid
+        SmilesParser tmpSmiPar = new SmilesParser(SilentChemObjectBuilder.getInstance());
+        tmpFragmenter.generateFragments(tmpSmiPar.parseSmiles(tmpCNP0437667SmilesString));
+        IAtomContainer[] tmpFragments = tmpFragmenter.getFragmentsAsContainers();
+        FragmentFingerprinterTest.cNP0437667Fragments = new ArrayList(10);
+        for (IAtomContainer tmpFragment : tmpFragments) {
+            FragmentFingerprinterTest.cNP0437667Fragments.add(tmpSmiGen.create(tmpFragment));
+        }
+        // create bit fingerprint
+        FragmentFingerprinterTest.cNP0437667BitFP = FragmentFingerprinterTest.naphthaleneFingerprinter.getBitFingerprint(FragmentFingerprinterTest.cNP0437667Fragments);
     }
     //</editor-fold>
     //
@@ -685,6 +761,46 @@ public class FragmentFingerprinterTest {
         tmpTestCountArray[22] = 1;
         int[] tmpAlkaloidCountArray = FragmentFingerprinterTest.fragmentFingerprinter.getCountArray(FragmentFingerprinterTest.moleculeFragmentList.get(8));
         Assertions.assertArrayEquals(tmpTestCountArray, tmpAlkaloidCountArray);
+    }
+    //</editor-fold>
+    //
+    //<editor-fold desc="Test bit and count fingerprint of naphthalene fingerprint" defaultstate="collapsed">
+    //
+    /**
+     * Tests the size of the naphthalene fingerprint
+     */
+    @Test
+    public void getNaphthaleneFingerprintSize() {
+        int tmpNaphthaleneFingerprintSizeTest = 7;
+        int tmpNaphthaleneFingerprintSize = FragmentFingerprinterTest.naphthaleneFingerprinter.getSize();
+        Assertions.assertEquals(tmpNaphthaleneFingerprintSizeTest, tmpNaphthaleneFingerprintSize);
+    }
+    //
+    /**
+     * Tests the number of positive bits in the naphthalene fingerprint.
+     */
+    @Test
+    public void getNumberOfPositiveBitsInNaphthaleneFingerprint() {
+        int tmpNumberOfPositiveBitsTest = 2;
+        int tmpNumberOfPositiveBits = FragmentFingerprinterTest.cNP0437667BitFP.cardinality();
+        Assertions.assertEquals(tmpNumberOfPositiveBitsTest, tmpNumberOfPositiveBits);
+    }
+    //
+    /**
+     * Tests the bit fingerprint of the naphthalene derivate
+     */
+    @Test
+    public void getNaphthaleneBitFingerprint() {
+        int[] tmpBitFingerprintTest = new int[7];
+        tmpBitFingerprintTest[0] = 0;
+        tmpBitFingerprintTest[1] = 1;
+        tmpBitFingerprintTest[2] = 0;
+        tmpBitFingerprintTest[3] = 0;
+        tmpBitFingerprintTest[4] = 1;
+        tmpBitFingerprintTest[5] = 0;
+        tmpBitFingerprintTest[6] = 0;
+        int[] tmpBitFingerprint = FragmentFingerprinterTest.naphthaleneFingerprinter.getBitArray(FragmentFingerprinterTest.cNP0437667Fragments);
+        Assertions.assertArrayEquals(tmpBitFingerprintTest, tmpBitFingerprint);
     }
     //</editor-fold>
 }
