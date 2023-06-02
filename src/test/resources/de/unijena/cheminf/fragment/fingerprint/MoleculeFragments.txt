@@ -1,0 +1,11 @@
+Molecule Name;SmilesOfStructure;SmilesOfFragments and frequency
+Valdiazen;[O-][N+](=NO)C(CO)C(C)C;*[N](=NO[H])O[H];1;[H]OC;1;CCC(C)C;1
+Naphthomycin D;O=C1NC=2C(=O)C(=O)C3=C(C=C(C(O)=C3C(=O)C(=CC(C)C(O)C(C=CC(O)CC=C(C(=O)CC(O)C(C=CC=CC=C1C)C)C)C)C)C)C2O;*C(=O)C(=O)C(=CO[H])N(*)C(=O)C=CC=CC=C;1;[H]Oc;1;*C(=O)C=C;2;[H]OC;3;C=C;1;c1ccc(cc1)C;1;CCCCC;1;CC;1;CCCC;1;C;3
+Nona-2,6-dienal;O=CC=CCCC=CCC;O=CC=C;1;C=C;1;CC;2
+Istanbulin A;O=C1OC2(O)C(=C1C)CC3(C)C(C(=O)CCC3C)C2;[H]OC1OC(=O)C=C1;1;*C(*)=O;1;C;1;CCC(C)C(C)(C)CC;1
+Estradiol;OC1=CC=C2C(=C1)CCC3C2CCC4(C)C(O)CCC34;[H]Oc;1;[H]OC;1;c1ccc2c(c1)CCC3C2CCC4(C)CCCC34;1
+Flower Of Paradise;O=C1C=C(O)C(=O)C=2C=CC=CC12;*C(=O)C=C(O[H])C(*)=O;1;c1ccccc1;1
+Curcumin;O=C(C=CC1=CC=C(O)C(OC)=C1)CC(=O)C=CC2=CC=C(O)C(OC)=C2;*C(=O)C=C;2;[H]Oc;2;*O*;2;c1ccccc1;2;C;3
+Robinetidinol(4Alpha-6)Catechin;OC1=CC=C2C(OC(C3=CC(O)=C(O)C(O)=C3)C(O)C2C4=C(O)C=C5OC(C6=CC=C(O)C(O)=C6)C(O)CC5=C4O)=C1;[H]Oc;8;*O*;2;[H]OC;2;c1ccc(cc1)CCCc2cccc(c2)C(c3ccccc3)CCc4ccccc4;1
+Chinese Bittersweet Alkaloid I;O=C(OC)C1NC(OCC1)C2=CC=CN2;*OC(*)=O;1;*OCN(*)*;1;*n(*)*;1;C;1;CCC;1;cccc;1
+Variamycin;O=C1C2=C(O)C3=C(O)C(=C(OC4OC(C)C(O)C(OC5OC(C)C(O)C(O)C5)C4)C=C3C=C2CC(C(OC)C(=O)C(O)C(O)C)C1OC6OC(C)C(O)C(OC7OC(C)C(O)C(OC8OC(C)C(OC)C(O)C8)C7)C6)C;*C(*)=O;2;[H]Oc;2;*OCO*;5;[H]OC;8;*O*;2;c1cc(cc2ccc(cc12)CC(C)C)C;1;CCCCC;5;C;2;CCC;1

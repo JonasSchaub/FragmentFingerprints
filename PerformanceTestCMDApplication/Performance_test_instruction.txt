@@ -1,0 +1,34 @@
+---------------------------------
+PERFORMANCE TEST CMD APPLICATION
+---------------------------------
+The folder "PerformanceTestCMDApplication"
+contains the executable JAVA archive FragmentFingerprinter-fat-0.0.0.1.jar.
+It can be executed from the command line (command: java -jar) to do a performance snapshot of fragment fingerprinter's scaling behaviour for
+a growing number of input molecules. It requires four command line arguments: 
+
+* file name of a text file (located in the same directory as the JAR) to read in the key fragments.
+  An example file for this can be found in the folder "PerformanceTestCMDApplication"
+  under the name Fragments_File_PerformanceTest_13000.csv
+* file name of a text file (located in the same directory as the JAR) to read in molecules or, more precisely, their fragments.
+  An example file for this can be found in the folder "PerformanceTestCMDApplication"
+  under the name MoleculeFragments_File_PerformanceTest_13000.csv
+* path name for saving the folders with the performance test results.
+    If an empty string is specified, the application throws an IllegalArgumentException. On the other hand,
+    if only a filename or a blank path is specified, the result folder is created in the same directory as the Jar.
+* integer number (bin size). I.e. how many molecules are to be processed (in addition) per iteration.
+
+Example usage: java -jar FragmentFingerprinter-fat-0.0.0.1.jar Fragments_File_PerformanceTest_13000.csv MoleculeFragments_File_PerformanceTest_13000.csv " " 1000
+
+The CMD application will then import the data sets and create bit and count fingerprints. The application will also create output files of the
+measured runtimes and a file in which the generated fingerprints are stored line by line. So that each line 
+represents a fingerprint whose components are separated by commas.
+
+The assignment between the generated fingerprints (see in BIT_FINGERPRINT... and COUNT_FINGERPRINT...) and the
+read-in molecules is established as follows: The molecule in the first
+row in the molecule file corresponds to the first fingerprint in the results files, (see in BIT_FINGERPRINT... and COUNT_FINGERPRINT...)
+and so on. Basically, the application assumes that the first column
+of each row in the molecule file starts with the molecule name/ID.
+Keeping the file formats of the input files is a prerequisite for the calculation of correct fingerprints.
+The detailed structure of the input files can be found in the Javadoc.
+If the molecule name/ID is in the first column of the specified molecule file, the name/ID will be added to the
+result file when the fingerprints are generated, making it easier to assign the fingerprints to the molecules.

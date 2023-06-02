@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2022 Betuel Sevindik, Felix Baensch, Jonas Schaub, Christoph Steinbeck, and Achim Zielesny
+ * Copyright (c) 2023 Betuel Sevindik, Felix Baensch, Jonas Schaub, Christoph Steinbeck, and Achim Zielesny
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -27,6 +27,10 @@ plugins {
     id 'application'
 }
 
+application {
+    mainClassName = 'de.unijena.cheminf.fragment.fingerprint.performanceTest.Main'
+}
+
 group 'de.unijena.cheminf.fragment.fingerprint'
 version '0.0.0.1'
 
@@ -43,9 +47,46 @@ repositories {
 }
 
 def cdkVersion = '2.8'
-
 dependencies {
     implementation group: 'org.jetbrains', name : 'annotations', version: '23.0.0'
-    testImplementation group: 'junit', name: 'junit', version: '4.13'
+    testImplementation(platform('org.junit:junit-bom:5.9.1'))
+    testImplementation('org.junit.jupiter:junit-jupiter')
     implementation group: 'org.openscience.cdk', name: 'cdk-bundle', version: cdkVersion
+}
+mainClassName = 'de.unijena.cheminf.fragment.fingerprint.performanceTest.Main'
+applicationName = 'FragmentFingerprint'
+
+tasks.withType(Test).configureEach {
+    useJUnitPlatform()
+
+    forkEvery = 1
+
+    testLogging {
+        showStandardStreams = true
+    }
+}
+//Needed to make the created jar archives executable
+jar {
+    manifest {
+        attributes 'Main-Class': mainClassName
+    }
+}
+
+//Creates a jar archive that includes all dependencies of the project, i.e. that  FragmentFingerprinter can be started by executing this jar
+task fatJar(type: Jar) {
+    manifest {
+        attributes 'Implementation-Title': 'Fragmentfingerprint Fat Jar File',
+                'Implementation-Version': archiveVersion,
+                'Main-Class': mainClassName
+        duplicatesStrategy = DuplicatesStrategy.INCLUDE
+    }
+    archiveAppendix = 'fat'
+    from {
+        configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }
+    }
+    with jar
+}
+//Archives artifacts executed with build
+artifacts {
+    archives fatJar
 }
