@@ -41,7 +41,7 @@ In total, 10 molecules with their corresponding fragments are stored in the file
 
 ### Performance Test CMD Application
 The folder <a href="https://github.com/JonasSchaub/FragmentFingerprints/tree/FragmentFingerprint/PerformanceTestCMDApplication">"PerformanceTestCMDApplication"</a>
-contains the executable JAVA archive <i>FragmentFingerprinter-fat.jar</i>.
+contains the executable JAVA archive <i>FragmentFingerprints-fat.jar</i>.
 It can be executed from the command-line (command: java -jar) to do a performance snapshot of fragment fingerprinter's scaling behaviour for
 a growing number of input molecules.
 For more details see the file <a href="https://github.com/JonasSchaub/FragmentFingerprints/blob/FragmentFingerprint/PerformanceTestCMDApplication/Performance_test_instruction.txt">"Performance_test_instruction.txt"</a>
