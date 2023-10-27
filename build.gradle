@@ -74,7 +74,7 @@ dependencies {
     implementation group: 'org.openscience.cdk', name: 'cdk-bundle', version: cdkVersion
 }
 mainClassName = 'de.unijena.cheminf.fragment.fingerprint.performanceTest.Main'
-applicationName = 'FragmentFingerprint'
+applicationName = 'FragmentFingerprints'
 
 tasks.withType(Test).configureEach {
     useJUnitPlatform()
@@ -92,10 +92,10 @@ jar {
     }
 }
 
-//Creates a jar archive that includes all dependencies of the project, i.e. that  FragmentFingerprinter can be started by executing this jar
+//Creates a jar archive that includes all dependencies of the project, i.e. that  FragmentFingerprints can be started by executing this jar
 task fatJar(type: Jar) {
     manifest {
-        attributes 'Implementation-Title': 'Fragmentfingerprint Fat Jar File',
+        attributes 'Implementation-Title': 'Fragmentfingerprints Fat Jar File',
                 'Implementation-Version': archiveVersion,
                 'Main-Class': mainClassName
         duplicatesStrategy = DuplicatesStrategy.INCLUDE
