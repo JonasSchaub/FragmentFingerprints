@@ -50,8 +50,16 @@ For more details see the file <a href="https://github.com/JonasSchaub/FragmentFi
 see in <a href="https://github.com/JonasSchaub/FragmentFingerprints/wiki">"wiki"</a>
 
 ## Installation
-This is a Gradle project. In order to use the source code for your own software, download or clone the repository and 
-open it in a Gradle-supporting IDE (e.g. IntelliJ) as a Gradle project and execute the build.gradle file. 
+FragmentFingerprints is hosted as a package/artifact on the sonatype maven central repository. See the
+<a href="https://central.sonatype.com/artifact/io.github.jonasschaub/FragmentFingerprints/">artifact page</a> for installation
+guidelines using build tools like maven or gradle.
+<br>
+To install FragmentFingerprints via its JAR archive, you can get it from the
+<a href="https://github.com/JonasSchaub/FragmentFingerprints/releases">releases</a>. Note that other dependencies
+will need to be installed via JAR archives as well this way.
+<br>
+In order to open the project locally, e.g. to extend it, download or clone the repository and
+open it in a Gradle-supporting IDE (e.g. IntelliJ) as a Gradle project and execute the build.gradle file.
 Gradle will then take care of installing all dependencies. A Java Development Kit (JDK) of version 17 or higher must also
 be pre-installed.
 
@@ -78,5 +86,3 @@ be pre-installed.
 * [May JW and Steinbeck C. Efficient ring perception for the Chemistry Development Kit. J. Cheminform. 2014; 6:3.](https://dx.doi.org/10.1186%2F1758-2946-6-3)
 * [Willighagen EL, Mayfield JW, Alvarsson J, Berg A, Carlsson L, Jeliazkova N, Kuhn S, Pluska T, Rojas-Chertó M, Spjuth O, Torrance G, Evelo CT, Guha R, Steinbeck C, The Chemistry Development Kit (CDK) v2.0: atom typing, depiction, molecular formulas, and substructure searching. J Cheminform. 2017; 9:33.](https://doi.org/10.1186/s13321-017-0220-4)
 * [Groovy Cheminformatics with the Chemistry Development Kit](https://github.com/egonw/cdkbook)
-
-
