@@ -25,6 +25,7 @@
 package de.unijena.cheminf.fragment.fingerprint.performanceTest;
 
 import de.unijena.cheminf.fragment.fingerprint.FragmentFingerprinter;
+
 import org.openscience.cdk.fingerprint.IBitFingerprint;
 import org.openscience.cdk.fingerprint.ICountFingerprint;
 

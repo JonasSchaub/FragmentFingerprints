@@ -27,6 +27,7 @@ package de.unijena.cheminf.fragment.fingerprint;
 import org.openscience.cdk.fingerprint.IBitFingerprint;
 import org.openscience.cdk.fingerprint.ICountFingerprint;
 import org.openscience.cdk.fingerprint.IFingerprinter;
+
 import java.util.List;
 import java.util.Map;
 
@@ -101,4 +102,3 @@ public interface IFragmentFingerprinter extends IFingerprinter {
     ICountFingerprint getCountFingerprint(List<String> aUniqueSmilesList);
     // </editor-fold>
 }
-
