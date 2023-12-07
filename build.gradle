@@ -66,7 +66,7 @@ repositories {
     }
 }
 
-def cdkVersion = '2.8'
+def cdkVersion = '2.9'
 dependencies {
     implementation group: 'org.jetbrains', name : 'annotations', version: '23.0.0'
     testImplementation(platform('org.junit:junit-bom:5.9.1'))

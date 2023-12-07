@@ -71,7 +71,7 @@ be pre-installed.
   * [Gradle Build Tool](https://gradle.org)
 
 **Managed by Gradle:**
-* Chemistry Development Kit (CDK) version 2.8
+* Chemistry Development Kit (CDK) version 2.9
   * [Chemistry Development Kit on GitHub](https://cdk.github.io/)
   * License: GNU Lesser General Public License 2.1
 * JUnit Jupiter version 5.9.1
