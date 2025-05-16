@@ -614,6 +614,113 @@ public class FragmentFingerprinterTest {
         String tmpBitDefinitionForGivenBitInVariamycinFingerprint = FragmentFingerprinterTest.fragmentFingerprinter.getBitDefinition(27);
         Assertions.assertEquals(tmpBitDefinitionForGivenBitTest, tmpBitDefinitionForGivenBitInVariamycinFingerprint);
     }
+    //
+    /**
+     * Tests the method getBitFloatArray(List<String>).
+     *
+     * Test molecule Variamycin
+     */
+    @Test
+    public void getBitFloatArrayInputListTest() {
+        float[] tmpTestArray = new float[28];
+        tmpTestArray[3] = 1.0f;
+        tmpTestArray[5] = 1.0f;
+        tmpTestArray[9] = 1.0f;
+        tmpTestArray[14] = 1.0f;
+        tmpTestArray[16] = 1.0f;
+        tmpTestArray[17] = 1.0f;
+        tmpTestArray[18] = 1.0f;
+        tmpTestArray[26] = 1.0f;
+        tmpTestArray[27] = 1.0f;
+        float[] tmpVariamycinBitFloatArray = FragmentFingerprinterTest.fragmentFingerprinter.getBitFloatArray(FragmentFingerprinterTest.countListOfUniqueSmiles);
+        Assertions.assertArrayEquals(tmpTestArray, tmpVariamycinBitFloatArray);
+    }
+    /**
+     * Tests the method getBitFloatArray(Map<String,Integer>)
+     *
+     * Test molecule: Variamycin
+     */
+    @Test
+    public void getBitFloatArrayInputMapTest() {
+        float[] tmpTestArray = new float[28];
+        tmpTestArray[3] = 1.0f;
+        tmpTestArray[5] = 1.0f;
+        tmpTestArray[9] = 1.0f;
+        tmpTestArray[14] = 1.0f;
+        tmpTestArray[16] = 1.0f;
+        tmpTestArray[17] = 1.0f;
+        tmpTestArray[18] = 1.0f;
+        tmpTestArray[26] = 1.0f;
+        tmpTestArray[27] = 1.0f;
+        float[] tmpVariamycinBitFloatArray = FragmentFingerprinterTest.fragmentFingerprinter.getBitFloatArray(FragmentFingerprinterTest.moleculeFragmentList.get(FragmentFingerprinterTest.moleculeFragmentList.size() - 1));
+        Assertions.assertArrayEquals(tmpTestArray, tmpVariamycinBitFloatArray);
+    }
+    /**
+    * Tests the method getCountFloatArray(List<String>).
+    *
+    * Test molecule Variamycin
+    */
+    @Test
+    public void getCountFloatArrayInputListTest() {
+        float[] tmpTestCountArray = new float[FragmentFingerprinterTest.fragmentFingerprinter.getSize()];
+        tmpTestCountArray[3] = 1.0f;
+        tmpTestCountArray[5] = 2.0f;
+        tmpTestCountArray[9] = 1.0f;
+        tmpTestCountArray[14] = 5.0f;
+        tmpTestCountArray[16] = 2.0f;
+        tmpTestCountArray[17] = 8.0f;
+        tmpTestCountArray[18] = 2.0f;
+        tmpTestCountArray[26] = 5.0f;
+        tmpTestCountArray[27] = 2.0f;
+        float[] tmpVariamycinCountArray = FragmentFingerprinterTest.fragmentFingerprinter.getCountFloatArray(FragmentFingerprinterTest.countListOfUniqueSmiles);
+        Assertions.assertArrayEquals(tmpTestCountArray, tmpVariamycinCountArray);
+    }
+    /**
+     * Tests the method getCountFloatArray(Map<String, Integer>).
+     *
+     * Test molecule Variamycin
+     */
+    @Test
+    public void getCountFloatArrayInputMapTest() {
+        float[] tmpTestCountArray = new float[FragmentFingerprinterTest.fragmentFingerprinter.getSize()];
+        tmpTestCountArray[3] = 1.0f;
+        tmpTestCountArray[5] = 2.0f;
+        tmpTestCountArray[9] = 1.0f;
+        tmpTestCountArray[14] = 5.0f;
+        tmpTestCountArray[16] = 2.0f;
+        tmpTestCountArray[17] = 8.0f;
+        tmpTestCountArray[18] = 2.0f;
+        tmpTestCountArray[26] = 5.0f;
+        tmpTestCountArray[27] = 2.0f;
+        float[] tmpVariamycinCountArray = FragmentFingerprinterTest.fragmentFingerprinter.getCountFloatArray(FragmentFingerprinterTest.moleculeFragmentList.get(FragmentFingerprinterTest.moleculeFragmentList.size() - 1));
+        Assertions.assertArrayEquals(tmpTestCountArray, tmpVariamycinCountArray);
+    }
+
+    /**
+     * No real test case yet!
+     */
+    @Test
+    public void getFragmentsComponentsFloatMatrix() {
+        float[] tmpNumberOfComponents = new float[10];
+        tmpNumberOfComponents[0] = 0.1f;
+        tmpNumberOfComponents[1] = 1.0f;
+        tmpNumberOfComponents[2] = 2.0f;
+        tmpNumberOfComponents[3] = 3.0f;
+        tmpNumberOfComponents[4] = 4.0f;
+        tmpNumberOfComponents[5] = 5.0f;
+        tmpNumberOfComponents[6] = 6.0f;
+        tmpNumberOfComponents[7] = 7.0f;
+        tmpNumberOfComponents[8] = 8.0f;
+        tmpNumberOfComponents[9] = 9.0f;
+        //System.out.println(" ");
+        float[][] tmpDataMatrix = FragmentFingerprinterTest.fragmentFingerprinter.getFragmentsComponentsFloatMatrix(FragmentFingerprinterTest.countListOfUniqueSmiles,
+                tmpNumberOfComponents);
+        /*
+        for (float[] tmpRow: tmpDataMatrix) {
+            System.out.println(Arrays.toString(tmpRow));
+        }
+        */
+    }
     //</editor-fold>
     //
     //<editor-fold desc="Test count arrays of all molecules" defaultstate="collapsed">
