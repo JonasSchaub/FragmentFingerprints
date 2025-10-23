@@ -462,7 +462,7 @@ public class FragmentFingerprinter implements IFragmentFingerprinter {
      * @param aUniqueSmilesToFrequencyMap  map usually represents a molecule by representing the fragments of
      * the molecule by unique SMILES in the key set and indicating their frequency in the value set. In principle,
      * however,such a map can be applied to any set of fragments.
-     * @return int[] bit array
+     * @return float[] bit array
      * @throws NullPointerException is thrown if the map aUniqueSmilesToFrequencyMap is
      * null or contains keys or values that are null respectively.
      * @throws IllegalArgumentException is thrown if the map aUniqueSmilesToFrequencyMap
@@ -709,7 +709,7 @@ public class FragmentFingerprinter implements IFragmentFingerprinter {
      */
     private float[][] createFragmentsComponentsFloatMatrix(List<String> aListOfUniqueSmiles, float[] aNumberOfComponents) {
         //for understanding: each Molecule of aListOfUniqueSmiles gets an array of it's FingerprintComponents and DescriptorComponents
-        //numberOfComponents = numberOfFingerprintComponents + numberOfDescriptorComponents
+        //numberOfComponents = numberOfFingerprintComponents (=BitArray) + numberOfDescriptorComponents
         //float[column size][row size]
         float[][] tmpDataMatrix = new float[aListOfUniqueSmiles.size()][aNumberOfComponents.length];
         for (int i = 0; i < aListOfUniqueSmiles.size(); i++) {

@@ -24,6 +24,7 @@
 
 package de.unijena.cheminf.fragment.fingerprint;
 
+import org.apache.commons.lang3.ArrayUtils;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -701,25 +702,30 @@ public class FragmentFingerprinterTest {
      */
     @Test
     public void getFragmentsComponentsFloatMatrix() {
-        float[] tmpNumberOfComponents = new float[10];
-        tmpNumberOfComponents[0] = 0.1f;
-        tmpNumberOfComponents[1] = 1.0f;
-        tmpNumberOfComponents[2] = 2.0f;
-        tmpNumberOfComponents[3] = 3.0f;
-        tmpNumberOfComponents[4] = 4.0f;
-        tmpNumberOfComponents[5] = 5.0f;
-        tmpNumberOfComponents[6] = 6.0f;
-        tmpNumberOfComponents[7] = 7.0f;
-        tmpNumberOfComponents[8] = 8.0f;
-        tmpNumberOfComponents[9] = 9.0f;
-        //System.out.println(" ");
-        float[][] tmpDataMatrix = FragmentFingerprinterTest.fragmentFingerprinter.getFragmentsComponentsFloatMatrix(FragmentFingerprinterTest.countListOfUniqueSmiles,
-                tmpNumberOfComponents);
-        /*
+        List<String> tmpUniqueSmilesList = new ArrayList<>(3);
+        tmpUniqueSmilesList.add("C");
+        tmpUniqueSmilesList.add("c1ccccc1");
+        tmpUniqueSmilesList.add("CCC");
+        FragmentFingerprinter tmpFFp = new FragmentFingerprinter(tmpUniqueSmilesList);
+        float[] tmpBitFloatArray = tmpFFp.getCountFloatArray(tmpUniqueSmilesList);
+        float[] tmpDescriptorComponents = new float[10];
+        tmpDescriptorComponents[0] = 0.1f;
+        tmpDescriptorComponents[1] = 1.0f;
+        tmpDescriptorComponents[2] = 2.0f;
+        tmpDescriptorComponents[3] = 3.0f;
+        tmpDescriptorComponents[4] = 4.0f;
+        tmpDescriptorComponents[5] = 5.0f;
+        tmpDescriptorComponents[6] = 6.0f;
+        tmpDescriptorComponents[7] = 7.0f;
+        tmpDescriptorComponents[8] = 8.0f;
+        tmpDescriptorComponents[9] = 9.0f;
+        float[] tmpAllComponentsArray = ArrayUtils.addAll(tmpBitFloatArray, tmpDescriptorComponents);
+        float[][] tmpDataMatrix = tmpFFp.getFragmentsComponentsFloatMatrix(
+                tmpUniqueSmilesList,
+                tmpAllComponentsArray);
         for (float[] tmpRow: tmpDataMatrix) {
             System.out.println(Arrays.toString(tmpRow));
         }
-        */
     }
     //</editor-fold>
     //
