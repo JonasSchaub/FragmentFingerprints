@@ -701,13 +701,17 @@ public class FragmentFingerprinterTest {
      * No real test case yet!
      */
     @Test
-    public void getFragmentsComponentsFloatMatrix() {
+    public void generateFragmentsComponentsFloatMatrixTest() {
         List<String> tmpUniqueSmilesList = new ArrayList<>(3);
         tmpUniqueSmilesList.add("C");
         tmpUniqueSmilesList.add("c1ccccc1");
         tmpUniqueSmilesList.add("CCC");
+        List<String> tmpFragmentsList = new ArrayList<>(3);
+        tmpUniqueSmilesList.add("C");
+        tmpUniqueSmilesList.add("c1ccccc1");
+        tmpUniqueSmilesList.add("CCC");
         FragmentFingerprinter tmpFFp = new FragmentFingerprinter(tmpUniqueSmilesList);
-        float[] tmpBitFloatArray = tmpFFp.getCountFloatArray(tmpUniqueSmilesList);
+        float[] tmpBitFloatArray = tmpFFp.getBitFloatArray(tmpUniqueSmilesList);
         float[] tmpDescriptorComponents = new float[10];
         tmpDescriptorComponents[0] = 0.1f;
         tmpDescriptorComponents[1] = 1.0f;
@@ -720,12 +724,26 @@ public class FragmentFingerprinterTest {
         tmpDescriptorComponents[8] = 8.0f;
         tmpDescriptorComponents[9] = 9.0f;
         float[] tmpAllComponentsArray = ArrayUtils.addAll(tmpBitFloatArray, tmpDescriptorComponents);
-        float[][] tmpDataMatrix = tmpFFp.getFragmentsComponentsFloatMatrix(
-                tmpUniqueSmilesList,
-                tmpAllComponentsArray);
+        HashMap<String, List<String>> tmpOriginToFragmentsMap = new HashMap<>();
+        float[][] tmpDataMatrix = new float[0][0];
+//        tmpDataMatrix = tmpFFp.generateFragmentsComponentsFloatMatrix(
+//                tmpUniqueSmilesList,
+//                tmpFragmentsList,
+//                tmpAllComponentsArray,
+//                true);
         for (float[] tmpRow: tmpDataMatrix) {
             System.out.println(Arrays.toString(tmpRow));
         }
+    }
+    @Test
+    public void createFloatBitArrayTest() {
+        List<String> tmpFragmentsList = new ArrayList<>(3);
+        tmpFragmentsList.add("C");
+        tmpFragmentsList.add("c1ccccc1");
+        tmpFragmentsList.add("CCC");
+        FragmentFingerprinter tmpFFp = new FragmentFingerprinter(tmpFragmentsList);
+        float[] tmpFloatArray = tmpFFp.getBitFloatArray(tmpFragmentsList);
+        System.out.println(Arrays.toString(tmpFloatArray));
     }
     //</editor-fold>
     //
