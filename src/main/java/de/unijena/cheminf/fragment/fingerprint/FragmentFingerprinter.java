@@ -603,31 +603,53 @@ public class FragmentFingerprinter implements IFragmentFingerprinter {
             //for bit array needed:
             // unique smiles of fragments (without duplicates)
 
-            //hash set is used to deduplicate
+            //hash set is used to deduplicate, contains ALL (unique) fragments
             //the "* 5" here is completely arbitrary as no estimation for the size of fragments list can be made pre-iteration
+            //ToDo: should responsibility for size lie with user? -> parameter of method?
             Set<String> tmpDeduplFragmentsSmilesSet = new HashSet<>(anOriginToFragmentsMap.size() * 5, 0.75f);
             for (Map.Entry<String, List<String>> tmpEntry : anOriginToFragmentsMap.entrySet()) {
                 tmpDeduplFragmentsSmilesSet.addAll(tmpEntry.getValue());
             }
             Map<String, Integer> tmpFragmentsPositionMap = new HashMap<>((int) (tmpDeduplFragmentsSmilesSet.size() * 1.5f), 0.75f);
-            //write set to map with position int
+            int i = 0;
+            for (String tmpFragmentSmiles : tmpDeduplFragmentsSmilesSet) {
+                tmpFragmentsPositionMap.put(tmpFragmentSmiles, i++);
+            }
+            //Bit array (not frequency!)
+            BitSetFingerprint[] tmpBitSetArray = new BitSetFingerprint[anOriginToFragmentsMap.size()];
+            //see to do below for info on floats
+            //[columns][rows]
+            float[][] tmpFloatMatrix = new float[anOriginToFragmentsMap.size()][tmpDeduplFragmentsSmilesSet.size()];
+            int tmpCurrentRowIndex = 0;
+            //
+            int j = 0;
             for (Map.Entry<String, List<String>> tmpEntry : anOriginToFragmentsMap.entrySet()) {
                 String tmpOriginSmiles = tmpEntry.getKey();
-                List<String> tmpFragmentsList = tmpEntry.getValue();
+                //set with fragments smiles of only ONE original molecule
+                Set<String> tmpDeduplSet = new HashSet<>((int) (tmpEntry.getValue().size() * 1.5f), 0.75f);
+                tmpDeduplSet.addAll(tmpEntry.getValue());
+                //ToDo: Bit set and -Fingerprint exchangeable with float implementation?
                 BitSet tmpBitSet = new BitSet(tmpDeduplFragmentsSmilesSet.size());
-
-
+                //
+                float[] tmpFragmentsFloatBitArray = new float[tmpDeduplFragmentsSmilesSet.size()];
+                //
+                for (String tmpFragmentSmiles : tmpDeduplSet) {
+                    if (tmpFragmentsPositionMap.containsKey(tmpFragmentSmiles)) {
+                        tmpBitSet.set(tmpFragmentsPositionMap.get(tmpFragmentSmiles), true);
+                        //
+                        tmpFragmentsFloatBitArray[tmpFragmentsPositionMap.get(tmpFragmentSmiles)] = 1.0f;
+                        //
+                    }
+                }
+                BitSetFingerprint tmpBitSetFingerprint = new BitSetFingerprint(tmpBitSet);
+                tmpBitSetArray[j++] = tmpBitSetFingerprint;
+                //
+                //set tmpFragmentsFloatBitArray as row of tmpFloatMatrix
+                //seems no other way than to iterate through whole matrix and add row
+                //row index can be kept track off though, so bit quicker: no whole iteration needed -> "jump" to needed row
             }
-            String[] tmpFragmentsArray = new String[0];
-            HashMap tmpSmilesToPositionMap = this.buildUniqueSmilesToPositionMap(tmpFragmentsArray);
-//            for (String tmpOriginSmiles : anOriginMoleculeUniqueSmilesList) {
-//                //mach bitset(liste fragmente von origin)
-//                //bit set -> fingerprint gedöns -> bit set float array
-//                BitSetFingerprint tmpBSFingerprint = getBitFingerprint(, tmpSmilesToPositionMap);
-//
-//            }
-
-
+            //result: array with BitSetFingerprints where position in array corresponds to starter molecule
+            // but it's bit sets, not float arrays...
         }
         //tmp list
         List<String> tmpList = new ArrayList<>();
