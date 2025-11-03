@@ -185,9 +185,9 @@ public class FragmentFingerprinter implements IFragmentFingerprinter {
         }
         return new BitSetFingerprint(tmpBitSet);
     }
-    //aFragmentsUniqueSmilesList contains fragments of ONE molecule
-    //ToDo: implicit "float bit fingerprint" -> good idea?
+
     public float[] getFloatBitFingerprint(
+            //aFragmentsUniqueSmilesList contains fragments of ONE molecule
             List<String> aFragmentsUniqueSmilesList,
             Map<String, Integer> aSmilesToPositionMap,
             float[] aPreInitFloatArray)
@@ -196,7 +196,6 @@ public class FragmentFingerprinter implements IFragmentFingerprinter {
                 "aFragmentsUniqueSmilesList (at least one list element) is null.",
                 "aFragmentsUniqueSmilesList (at least one list element) is blank/empty.");
         Set<String> tmpUniqueSmilesSet = new HashSet<>((int) (aFragmentsUniqueSmilesList.size() * 1.5f));
-        //ToDo: check what happens memory-wise here with list and set (possible "duplicates")
         tmpUniqueSmilesSet.addAll(aFragmentsUniqueSmilesList);
         for (String tmpSmiles : tmpUniqueSmilesSet) {
             if (aSmilesToPositionMap.containsKey(tmpSmiles)) {
@@ -683,13 +682,27 @@ public class FragmentFingerprinter implements IFragmentFingerprinter {
         //return this.createFragmentsComponentsFloatMatrix(tmpList, aNumberOfAdditionalComponents);
         return null;
     }
+    @Deprecated
     public float[][] getFragmentsComponentsFloatMatrix(
             ArrayList<List<String>> aFragmentsUniqueSmilesListsArrayList,
             int aColumnLength,
             int aRowLength,
             boolean anUseBitArrayStatement
     ) {
+
         return this.createFragmentsComponentsFloatMatrix(aFragmentsUniqueSmilesListsArrayList, aColumnLength, aRowLength, anUseBitArrayStatement);
+    }
+
+    public float[][] getFragmentsComponentsFloatMatrix(
+            List<List<String>> aFragmentsUniqueSmilesListsArrayList,
+            float[][] aFloatDataMatrix,
+            boolean anUseBitArrayStatement
+    ) {
+        return this.fillFragmentsComponentsFloatMatrix(
+                (ArrayList<List<String>>) aFragmentsUniqueSmilesListsArrayList,
+                aFloatDataMatrix,
+                anUseBitArrayStatement
+        );
     }
     // </editor-fold>
     //
@@ -837,9 +850,6 @@ public class FragmentFingerprinter implements IFragmentFingerprinter {
      * @return float[][] matrix with fingerprints, and if wanted, more space for additional fingerprint components.
      */
     private float[][] createFragmentsComponentsFloatMatrix(
-            //what is what?!?!?! OR: What is my input?
-            // fragments of ONE molecule, or ALL mols (indirectly, think List<List<String>>) and their fragments?
-            // for now implemented with ArrayList of String Lists
             ArrayList<List<String>> aFragmentsUniqueSmilesLists,
             int aColumnLength,
             int aRowLength,
@@ -847,7 +857,7 @@ public class FragmentFingerprinter implements IFragmentFingerprinter {
     ) {
         //float[column size][row size]
         float[][] tmpDataMatrix = new float[aColumnLength][aRowLength];
-        float[] tmpFloatFingerprint = new float[this.uniqueSmilesToPositionMap.size()];
+        float[] tmpFloatFingerprint = new float[this.fragmentsForBitSetArray.length];
 
         //for(each molecule's fragments) {
         // create fingerprint
@@ -857,6 +867,7 @@ public class FragmentFingerprinter implements IFragmentFingerprinter {
         //but for-i makes sense, could essentially lead to only one iteration through matrix for generating fingerprint and putting it in matrix
         for (int i = 0; i < aColumnLength; i++) {
             //ToDo: allows possibly to parallelize matrix generation over mols (think stack.push and .pop with index where to save result (which row it is))
+            //more like fingerprint generation with an overlooking matrix generation
             if (anUseBitArrayStatement) {
                 tmpFloatFingerprint = this.getFloatBitFingerprint(aFragmentsUniqueSmilesLists.get(i), this.uniqueSmilesToPositionMap, tmpFloatFingerprint);
             } else {
@@ -864,21 +875,23 @@ public class FragmentFingerprinter implements IFragmentFingerprinter {
             }
             tmpDataMatrix[i] = tmpFloatFingerprint;
         }
-        //
-//        //create bit array of input mols by comparing with bit set fingerprint
-//        this.createFloatBitArray(aFragmentsUniqueSmilesList, this.cacheBitSetFingerprint);
-//        for (int i = 0; i < aFragmentsUniqueSmilesList.size(); i++) {
-//            for (int j = 0; j < aRowLength; j++) {
-//                //tmpDataMatrix[i][j] = aNumberOfComponents[j];
-//                //write bit or count set into matrix
-//                if (anUseBitArrayStatement) {
-//                    //write bit set fingerprint value into matrix
-//                    //if (bit set value () == true)
-//
-//                }
-//            }
-//        }
         return tmpDataMatrix;
+    }
+
+    private float[][] fillFragmentsComponentsFloatMatrix(
+            ArrayList<List<String>> aFragmentsUniqueSmilesListsArrayList,
+            float[][] aFloatDataMatrix,
+            boolean anUseBitArrayStatement
+    ) {
+        //float[column size][row size]
+        for (int i = 0; i < aFloatDataMatrix.length; i++) {
+            if (anUseBitArrayStatement) {
+                aFloatDataMatrix[i] = this.getFloatBitFingerprint(aFragmentsUniqueSmilesListsArrayList.get(i), this.uniqueSmilesToPositionMap, aFloatDataMatrix[i]);
+            } else {
+                aFloatDataMatrix[i] = this.getFloatCountFingerprint(aFragmentsUniqueSmilesListsArrayList.get(i), this.uniqueSmilesToPositionMap, aFloatDataMatrix[i]);
+            }
+        }
+        return aFloatDataMatrix;
     }
     //
     /**
