@@ -24,7 +24,6 @@
 
 package de.unijena.cheminf.fragment.fingerprint;
 
-import org.apache.commons.lang3.ArrayUtils;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -698,42 +697,46 @@ public class FragmentFingerprinterTest {
     }
 
     /**
-     * No real test case yet!
+     * The fragments for the bit fingerprint were generated via fragmentation analysis of 1000 picked molecules from the
+     * COCONUT database. The fragments represent the 10 most often occurring fragments.
      */
     @Test
     public void generateFragmentsComponentsFloatMatrixTest() {
-        List<String> tmpUniqueSmilesList = new ArrayList<>(3);
-        tmpUniqueSmilesList.add("C");
-        tmpUniqueSmilesList.add("c1ccccc1");
-        tmpUniqueSmilesList.add("CCC");
-        List<String> tmpFragmentsList = new ArrayList<>(3);
-        tmpUniqueSmilesList.add("C");
-        tmpUniqueSmilesList.add("c1ccccc1");
-        tmpUniqueSmilesList.add("CCC");
-        FragmentFingerprinter tmpFFp = new FragmentFingerprinter(tmpUniqueSmilesList);
-        float[] tmpBitFloatArray = tmpFFp.getBitFloatArray(tmpUniqueSmilesList);
-        float[] tmpDescriptorComponents = new float[10];
-        tmpDescriptorComponents[0] = 0.1f;
-        tmpDescriptorComponents[1] = 1.0f;
-        tmpDescriptorComponents[2] = 2.0f;
-        tmpDescriptorComponents[3] = 3.0f;
-        tmpDescriptorComponents[4] = 4.0f;
-        tmpDescriptorComponents[5] = 5.0f;
-        tmpDescriptorComponents[6] = 6.0f;
-        tmpDescriptorComponents[7] = 7.0f;
-        tmpDescriptorComponents[8] = 8.0f;
-        tmpDescriptorComponents[9] = 9.0f;
-        float[] tmpAllComponentsArray = ArrayUtils.addAll(tmpBitFloatArray, tmpDescriptorComponents);
-        HashMap<String, List<String>> tmpOriginToFragmentsMap = new HashMap<>();
-        float[][] tmpDataMatrix = new float[0][0];
-//        tmpDataMatrix = tmpFFp.generateFragmentsComponentsFloatMatrix(
-//                tmpUniqueSmilesList,
-//                tmpFragmentsList,
-//                tmpAllComponentsArray,
-//                true);
-        for (float[] tmpRow: tmpDataMatrix) {
-            System.out.println(Arrays.toString(tmpRow));
+        List<String> tmpBitSetFragmentsList = new ArrayList<>(10);
+        tmpBitSetFragmentsList.add("C");
+        tmpBitSetFragmentsList.add("CC");
+        tmpBitSetFragmentsList.add("[H]OC");
+        tmpBitSetFragmentsList.add("*n(*)*");
+        tmpBitSetFragmentsList.add("*O*");
+        tmpBitSetFragmentsList.add("CCC");
+        tmpBitSetFragmentsList.add("C=C");
+        tmpBitSetFragmentsList.add("c");
+        tmpBitSetFragmentsList.add("*Cl");
+        tmpBitSetFragmentsList.add("CCCC");
+        FragmentFingerprinter tmpFFp = new FragmentFingerprinter(tmpBitSetFragmentsList);
+        //fragments of structure "2-(6-hydroxy-6,9-dihydro-1H-purin-9-yl)-5-(hydroxymethyl)oxolane-3,4-diol"
+        List<String> tmpStructureFragmentsList = new ArrayList<>(10);
+        tmpStructureFragmentsList.add("[H]OC");
+        tmpStructureFragmentsList.add("[H]OC");
+        tmpStructureFragmentsList.add("[H]OC");
+        tmpStructureFragmentsList.add("*O*");
+        tmpStructureFragmentsList.add("*N=CN(*)CO[H]");
+        tmpStructureFragmentsList.add("*n(*)*");
+        tmpStructureFragmentsList.add("*n(*)*");
+        tmpStructureFragmentsList.add("CCCCC");
+        tmpStructureFragmentsList.add("c");
+        tmpStructureFragmentsList.add("cc");
+        List<List<String>> tmpListsList = new ArrayList<>(2);
+        tmpListsList.add(tmpStructureFragmentsList);
+        tmpListsList.add(new ArrayList<>());
+        //[row count][column count]
+        float[][] tmpFloatMatrix = new float[2][12];
+        tmpFFp.getFragmentsComponentsFloatMatrix(tmpListsList, tmpFloatMatrix, true);
+        for (int i = 0; i < tmpFloatMatrix.length; i++) {
+            //float[] is not an object but float[][] is??
+            //System.out.println(Arrays.deepToString(tmpFloatMatrix[i]));
         }
+        System.out.println(Arrays.deepToString(tmpFloatMatrix));
     }
     @Test
     public void createFloatBitArrayTest() {

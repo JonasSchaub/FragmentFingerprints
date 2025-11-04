@@ -192,9 +192,10 @@ public class FragmentFingerprinter implements IFragmentFingerprinter {
             Map<String, Integer> aSmilesToPositionMap,
             float[] aPreInitFloatArray)
     {
-        this.validityCheckOfParameterList(aFragmentsUniqueSmilesList,"aFragmentsUniqueSmilesList (list of string instances) is null.",
-                "aFragmentsUniqueSmilesList (at least one list element) is null.",
-                "aFragmentsUniqueSmilesList (at least one list element) is blank/empty.");
+        //ToDo: validity check necessary at this point? especially when partially "empty" arrays are passed through?
+//        this.validityCheckOfParameterList(aFragmentsUniqueSmilesList,"aFragmentsUniqueSmilesList (list of string instances) is null.",
+//                "aFragmentsUniqueSmilesList (at least one list element) is null.",
+//                "aFragmentsUniqueSmilesList (at least one list element) is blank/empty.");
         Set<String> tmpUniqueSmilesSet = new HashSet<>((int) (aFragmentsUniqueSmilesList.size() * 1.5f));
         tmpUniqueSmilesSet.addAll(aFragmentsUniqueSmilesList);
         for (String tmpSmiles : tmpUniqueSmilesSet) {
@@ -617,6 +618,7 @@ public class FragmentFingerprinter implements IFragmentFingerprinter {
      * @param anUseBitArrayStatement whether the bit or count array should be used
      * @return float[][] matrix
      */
+    @Deprecated
     public float[][] generateFragmentsComponentsFloatMatrix(
             //only count necessary
             HashMap<String, List<String>> anOriginToFragmentsMap,
@@ -883,7 +885,7 @@ public class FragmentFingerprinter implements IFragmentFingerprinter {
             float[][] aFloatDataMatrix,
             boolean anUseBitArrayStatement
     ) {
-        //float[column size][row size]
+        //float[row count][column count]
         for (int i = 0; i < aFloatDataMatrix.length; i++) {
             if (anUseBitArrayStatement) {
                 aFloatDataMatrix[i] = this.getFloatBitFingerprint(aFragmentsUniqueSmilesListsArrayList.get(i), this.uniqueSmilesToPositionMap, aFloatDataMatrix[i]);
