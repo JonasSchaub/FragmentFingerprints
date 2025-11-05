@@ -168,6 +168,16 @@ public class FragmentFingerprinter implements IFragmentFingerprinter {
         return this.cacheBitSetFingerprint;
     }
 
+    /**
+     * Public method for creating a bit set fingerprint.
+     * For this, a given list of SMILES is compared with the pre-defined fragments (master vector of fragments for fingerprint definition).
+     * On the basis of the given SMILES to position map, each SMILES is checked whether the defined fingerprint includes the fragment.
+     * If the defined fingerprint contains the fragment, it's respective position inside the bit set is set to 'true'.
+     *
+     * @param aListOfUniqueSmiles to be checked against the pre-defined fingerprint
+     * @param aSmilesToPositionMap containing mappings of pre-defined fingerprint SMILES to their position inside the bit set
+     * @return BitSetFingerprint of the given SMILES
+     */
     //ToDo: implicitly with method below -> setFingerprint() necessary
     public BitSetFingerprint getBitFingerprint(List<String> aListOfUniqueSmiles, Map<String, Integer> aSmilesToPositionMap) {
         this.validityCheckOfParameterList(aListOfUniqueSmiles,"aListOfUniqueSmiles (list of string instances) is null.",
@@ -185,7 +195,17 @@ public class FragmentFingerprinter implements IFragmentFingerprinter {
         }
         return new BitSetFingerprint(tmpBitSet);
     }
-
+    /**
+     * Public method for creating a float "bit set fingerprint" in form of a float[] array.
+     * For this, a given list of SMILES is compared with the pre-defined fragments (master vector of fragments for fingerprint definition).
+     * On the basis of the given SMILES to position map, each SMILES is checked whether the defined fingerprint includes the fragment.
+     * If the defined fingerprint contains the fragment, it's respective position inside the array is set to '1.0f'.
+     *
+     * @param aFragmentsUniqueSmilesList to be checked against the pre-defined fingerprint
+     * @param aSmilesToPositionMap containing mappings of pre-defined fingerprint SMILES to their position inside the bit set
+     * @param aPreInitFloatArray pre-initialized float[] array with size of pre-defined fragment fingerprint
+     * @return pre-initialized float[] array (comparable to a bit set data structure) of the given SMILES
+     */
     public float[] getFloatBitFingerprint(
             //aFragmentsUniqueSmilesList contains fragments of ONE molecule
             List<String> aFragmentsUniqueSmilesList,
@@ -193,6 +213,7 @@ public class FragmentFingerprinter implements IFragmentFingerprinter {
             float[] aPreInitFloatArray)
     {
         //ToDo: validity check necessary at this point? especially when partially "empty" arrays are passed through?
+        //unnecessary as float cannot be null, but other validity check?
 //        this.validityCheckOfParameterList(aFragmentsUniqueSmilesList,"aFragmentsUniqueSmilesList (list of string instances) is null.",
 //                "aFragmentsUniqueSmilesList (at least one list element) is null.",
 //                "aFragmentsUniqueSmilesList (at least one list element) is blank/empty.");
@@ -206,6 +227,21 @@ public class FragmentFingerprinter implements IFragmentFingerprinter {
         return aPreInitFloatArray;
     }
 
+    /**
+     * Public method for generating a float count fingerprint in form of a float[] array.
+     * This fingerprint projects the frequency (-> count) of occurrence of the pre-defined fingerprint fragments within
+     * the given SMILES.
+     * <p>
+     *     For example: The pre-defined fragment fingerprint contains the SMILES for methane as "C", for an ether substructure
+     *     as "*O*", and for a hydroxide group as "[H]OC". The given SMILES list contains only three "C" fragments. Then,
+     *     the generated fingerprint would look like the following: [3.0f, 0.0f, 0.0f]
+     * </p>
+     *
+     * @param aFragmentsUniqueSmilesList of fragment SMILES to be compared to the pre-defined fingerprint
+     * @param aSmilesToPositionMap mapping pre-defined fingerprint fragments to their position inside the fingerprint
+     * @param aPreInitFloatArray pre-initialized float[] in which the fingerprint is to be stored
+     * @return float[] array filled with float values representing the generated fingerprint
+     */
     public float[] getFloatCountFingerprint(
             List<String> aFragmentsUniqueSmilesList,
             Map<String, Integer> aSmilesToPositionMap,
@@ -608,6 +644,7 @@ public class FragmentFingerprinter implements IFragmentFingerprinter {
                 "aListOfUniqueSmiles (at least one list element) is blank/empty.");
         return this.createCountFloatArray(aListOfUniqueSmiles);
     }
+
     /**
      * Public method to get a float[][] matrix containing the fingerprints for the given SMILES in regards to the
      * pre-defined fragment fingerprint.
@@ -625,6 +662,7 @@ public class FragmentFingerprinter implements IFragmentFingerprinter {
             float[][] aFloatDataMatrix,
             boolean anUseBitArrayStatement
     ) {
+        //ToDo: unnecessary method call? when no overloaded methods are planned
         return this.fillFragmentsComponentsFloatMatrix(
                 (ArrayList<List<String>>) aFragmentsUniqueSmilesListsArrayList,
                 aFloatDataMatrix,
@@ -766,45 +804,13 @@ public class FragmentFingerprinter implements IFragmentFingerprinter {
     }
 
     /**
-     * Generates a float matrix with dimensions set by the number of molecules in form of Strings given by aFragmentsUniqueSmilesList
-     * and a float array with the number of fingerprints and molecule descriptors with their respective values
-     * (m. all components = fingerprint components (= Bit Array) + descriptor components).
+     * Private method to fill a given float[][] matrix with fingerprints of the SMILES from the given list of fragment lists.
      *
-     * @param aFragmentsUniqueSmilesLists is a list of lists that store fragments in the form of unique SMILES, for a number of starter molecules.
-     * @param aColumnLength defines the column length of the generated matrix (how many rows there should be).
-     * @param aRowLength defines the row length of the generated matrix (how many columns there should be).
-     * @param anUseBitArrayStatement defines usage of bit array or count array for fingerprint generation.
-     * @return float[][] matrix with fingerprints, and if wanted, more space for additional fingerprint components.
+     * @param aFragmentsUniqueSmilesListsArrayList containing fragment lists for the entirety of generated fragments
+     * @param aFloatDataMatrix pre-initialized float[][] matrix, to be filled with fingerprints
+     * @param anUseBitArrayStatement whether "bit set" or "count/frequency" should be used for the fingerprint generation
+     * @return float[][] matrix with the generated fingerprints
      */
-    private float[][] createFragmentsComponentsFloatMatrix(
-            ArrayList<List<String>> aFragmentsUniqueSmilesLists,
-            int aColumnLength,
-            int aRowLength,
-            boolean anUseBitArrayStatement
-    ) {
-        //float[column size][row size]
-        float[][] tmpDataMatrix = new float[aColumnLength][aRowLength];
-        float[] tmpFloatFingerprint = new float[this.fragmentsForBitSetArray.length];
-
-        //for(each molecule's fragments) {
-        // create fingerprint
-        // add fingerprint to matrix
-        // }
-        //makes no sense right now... no idea what input gets through here
-        //but for-i makes sense, could essentially lead to only one iteration through matrix for generating fingerprint and putting it in matrix
-        for (int i = 0; i < aColumnLength; i++) {
-            //ToDo: allows possibly to parallelize matrix generation over mols (think stack.push and .pop with index where to save result (which row it is))
-            //more like fingerprint generation with an overlooking matrix generation
-            if (anUseBitArrayStatement) {
-                tmpFloatFingerprint = this.getFloatBitFingerprint(aFragmentsUniqueSmilesLists.get(i), this.uniqueSmilesToPositionMap, tmpFloatFingerprint);
-            } else {
-                tmpFloatFingerprint = this.getFloatCountFingerprint(aFragmentsUniqueSmilesLists.get(i), this.uniqueSmilesToPositionMap, tmpFloatFingerprint);
-            }
-            tmpDataMatrix[i] = tmpFloatFingerprint;
-        }
-        return tmpDataMatrix;
-    }
-
     private float[][] fillFragmentsComponentsFloatMatrix(
             ArrayList<List<String>> aFragmentsUniqueSmilesListsArrayList,
             float[][] aFloatDataMatrix,

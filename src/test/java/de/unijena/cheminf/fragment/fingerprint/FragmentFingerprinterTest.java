@@ -733,10 +733,8 @@ public class FragmentFingerprinterTest {
         float[][] tmpFloatMatrix = new float[2][12];
         tmpFFp.getFragmentsComponentsFloatMatrix(tmpListsList, tmpFloatMatrix, true);
         for (int i = 0; i < tmpFloatMatrix.length; i++) {
-            //float[] is not an object but float[][] is??
-            //System.out.println(Arrays.deepToString(tmpFloatMatrix[i]));
+            System.out.println(Arrays.toString(tmpFloatMatrix[i]));
         }
-        System.out.println(Arrays.deepToString(tmpFloatMatrix));
     }
     @Test
     public void createFloatBitArrayTest() {
