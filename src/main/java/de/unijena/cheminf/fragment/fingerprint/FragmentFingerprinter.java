@@ -609,92 +609,17 @@ public class FragmentFingerprinter implements IFragmentFingerprinter {
         return this.createCountFloatArray(aListOfUniqueSmiles);
     }
     /**
-     * Returns the float matrix for the specified list of molecules.
-     * A list of fragments must be given to generate the fingerprints.
-     * Additional components for the fingerprint may be specified (added to the generated fingerprint array). These must
-     * be in the same order as the given list of starter molecules!
+     * Public method to get a float[][] matrix containing the fingerprints for the given SMILES in regards to the
+     * pre-defined fragment fingerprint.
+     * It shall be noted that each List in the given List (List of Lists) represents ONE molecule's fragments.
+     * Therefor, the whole list represents the entirety of fragments.
+     * Further, a setting whether to use "bit set" or "count/frequency of fragment" is available.
      *
-     * @param aNumberOfAdditionalComponents is an array of floats, containing the values of the generated fingerprints and descriptor values.
-     * @param anUseBitArrayStatement whether the bit or count array should be used
-     * @return float[][] matrix
+     * @param aFragmentsUniqueSmilesListsArrayList with Lists of SMILES to compare with the defined fingerprint
+     * @param aFloatDataMatrix to be filled with the float fingerprints of the given fragments
+     * @param anUseBitArrayStatement setting whether "bit set" or "count/frequency" should be used for the matrix
+     * @return float[][] matrix, filled with float values from the generated bit set or count/frequency set
      */
-    @Deprecated
-    public float[][] generateFragmentsComponentsFloatMatrix(
-            //only count necessary
-            HashMap<String, List<String>> anOriginToFragmentsMap,
-            //count of descriptor additional columns
-            float[] aNumberOfAdditionalComponents,
-            boolean anUseBitArrayStatement
-    ) {
-        if (anUseBitArrayStatement) {
-            //for matrix needed:
-            // Smiles of mols = anOriginMoleculeUniqueSmilesList
-            // bit array for each mol
-            //for bit array needed:
-            // unique smiles of fragments (without duplicates)
-
-            //hash set is used to deduplicate, contains ALL (unique) fragments
-            //the "* 5" here is completely arbitrary as no estimation for the size of fragments list can be made pre-iteration
-            //ToDo: should responsibility for size lie with user? -> parameter of method?
-            Set<String> tmpDeduplFragmentsSmilesSet = new HashSet<>(anOriginToFragmentsMap.size() * 5, 0.75f);
-            for (Map.Entry<String, List<String>> tmpEntry : anOriginToFragmentsMap.entrySet()) {
-                tmpDeduplFragmentsSmilesSet.addAll(tmpEntry.getValue());
-            }
-            Map<String, Integer> tmpFragmentsPositionMap = new HashMap<>((int) (tmpDeduplFragmentsSmilesSet.size() * 1.5f), 0.75f);
-            int i = 0;
-            for (String tmpFragmentSmiles : tmpDeduplFragmentsSmilesSet) {
-                tmpFragmentsPositionMap.put(tmpFragmentSmiles, i++);
-            }
-            //Bit array (not frequency!)
-            BitSetFingerprint[] tmpBitSetArray = new BitSetFingerprint[anOriginToFragmentsMap.size()];
-            //see to do below for info on floats
-            //[columns][rows]
-            float[][] tmpFloatMatrix = new float[anOriginToFragmentsMap.size()][tmpDeduplFragmentsSmilesSet.size()];
-            int tmpCurrentRowIndex = 0;
-            //
-            int j = 0;
-            for (Map.Entry<String, List<String>> tmpEntry : anOriginToFragmentsMap.entrySet()) {
-                String tmpOriginSmiles = tmpEntry.getKey();
-                //set with fragments smiles of only ONE original molecule
-                Set<String> tmpDeduplSet = new HashSet<>((int) (tmpEntry.getValue().size() * 1.5f), 0.75f);
-                tmpDeduplSet.addAll(tmpEntry.getValue());
-                //ToDo: Bit set and -Fingerprint exchangeable with float implementation?
-                BitSet tmpBitSet = new BitSet(tmpDeduplFragmentsSmilesSet.size());
-                //
-                float[] tmpFragmentsFloatBitArray = new float[tmpDeduplFragmentsSmilesSet.size()];
-                //
-                for (String tmpFragmentSmiles : tmpDeduplSet) {
-                    if (tmpFragmentsPositionMap.containsKey(tmpFragmentSmiles)) {
-                        tmpBitSet.set(tmpFragmentsPositionMap.get(tmpFragmentSmiles), true);
-                        //
-                        tmpFragmentsFloatBitArray[tmpFragmentsPositionMap.get(tmpFragmentSmiles)] = 1.0f;
-                        //
-                    }
-                }
-                BitSetFingerprint tmpBitSetFingerprint = new BitSetFingerprint(tmpBitSet);
-                tmpBitSetArray[j++] = tmpBitSetFingerprint;
-                //
-                //set tmpFragmentsFloatBitArray as row of tmpFloatMatrix
-                //seems no other way than to iterate through whole matrix and add row
-                //row index can be kept track off though, so bit quicker: no whole iteration needed -> "jump" to needed row
-            }
-            //result: array with BitSetFingerprints where position in array corresponds to starter molecule
-            // but it's bit sets, not float arrays...
-        }
-        //return this.createFragmentsComponentsFloatMatrix(tmpList, aNumberOfAdditionalComponents);
-        return null;
-    }
-    @Deprecated
-    public float[][] getFragmentsComponentsFloatMatrix(
-            ArrayList<List<String>> aFragmentsUniqueSmilesListsArrayList,
-            int aColumnLength,
-            int aRowLength,
-            boolean anUseBitArrayStatement
-    ) {
-
-        return this.createFragmentsComponentsFloatMatrix(aFragmentsUniqueSmilesListsArrayList, aColumnLength, aRowLength, anUseBitArrayStatement);
-    }
-
     public float[][] getFragmentsComponentsFloatMatrix(
             List<List<String>> aFragmentsUniqueSmilesListsArrayList,
             float[][] aFloatDataMatrix,
@@ -936,25 +861,12 @@ public class FragmentFingerprinter implements IFragmentFingerprinter {
     }
     //
     /**
-     * The key fragments defined during initialization are stored in a map.
-     * The map maps the key fragments to their positions in the fingerprint.
+     * Private method to map a given array of fingerprint SMILES Strings to their respective positions in the fingerprint.
+     * The returned HashMap includes the given SMILES as keys and the fingerprint position as values.
      *
-     * @return HashMap<String,Integer>
+     * @param aFragmentsArray with SMILES to build a map of
+     * @return HashMap with SMILES Strings as keys and fingerprint position as value
      */
-    @Deprecated
-    private HashMap<String,Integer> buildUniqueSmilesToPositionMap() {
-        this.uniqueSmilesToPositionMap = new HashMap<>((int) (this.fragmentsForBitSetArray.length * 1.5f), 0.75f);
-        int tmpValuePosition = 0;
-        for (String tmpKey : this.fragmentsForBitSetArray) {
-            if (!this.uniqueSmilesToPositionMap.containsKey(tmpKey)) {
-                this.uniqueSmilesToPositionMap.put(tmpKey, tmpValuePosition);
-                tmpValuePosition++;
-            } else {
-                continue;
-            }
-        }
-        return this.uniqueSmilesToPositionMap;
-    }
     private HashMap<String, Integer> buildUniqueSmilesToPositionMap(String[] aFragmentsArray) {
         HashMap<String, Integer> tmpUniqueSmileToPositionMap = new HashMap<>((int) (
                 aFragmentsArray.length * 1.5f),
