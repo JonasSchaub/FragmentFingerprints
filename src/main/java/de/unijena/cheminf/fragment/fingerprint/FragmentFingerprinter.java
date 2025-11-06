@@ -212,11 +212,6 @@ public class FragmentFingerprinter implements IFragmentFingerprinter {
             Map<String, Integer> aSmilesToPositionMap,
             float[] aPreInitFloatArray)
     {
-        //ToDo: validity check necessary at this point? especially when partially "empty" arrays are passed through?
-        //unnecessary as float cannot be null, but other validity check?
-//        this.validityCheckOfParameterList(aFragmentsUniqueSmilesList,"aFragmentsUniqueSmilesList (list of string instances) is null.",
-//                "aFragmentsUniqueSmilesList (at least one list element) is null.",
-//                "aFragmentsUniqueSmilesList (at least one list element) is blank/empty.");
         Set<String> tmpUniqueSmilesSet = new HashSet<>((int) (aFragmentsUniqueSmilesList.size() * 1.5f));
         tmpUniqueSmilesSet.addAll(aFragmentsUniqueSmilesList);
         for (String tmpSmiles : tmpUniqueSmilesSet) {
@@ -537,113 +532,6 @@ public class FragmentFingerprinter implements IFragmentFingerprinter {
                 "aListOfUniqueSmiles (at least one list element) is blank/empty.");
         return this.createCountArray(aListOfUniqueSmiles);
     }
-    //
-    /**
-     * Returns bit array for the specified map. The map represents a molecule based on its fragments, which are
-     * represented by unique SMILES in the key set and whose frequencies are mapped in the value set.
-     * But the map can also contain arbitrary fragment sets. This method is a convenience method and
-     * the given frequencies are not used.
-     * And the  method is only available for bit fingerprints based on unique SMILES comparisons.
-     * @see #getBitArray(List)
-     *
-     * @param aUniqueSmilesToFrequencyMap  map usually represents a molecule by representing the fragments of
-     * the molecule by unique SMILES in the key set and indicating their frequency in the value set. In principle,
-     * however,such a map can be applied to any set of fragments.
-     * @return float[] bit array
-     * @throws NullPointerException is thrown if the map aUniqueSmilesToFrequencyMap is
-     * null or contains keys or values that are null respectively.
-     * @throws IllegalArgumentException is thrown if the map aUniqueSmilesToFrequencyMap
-     * contains keys or values that are blank/empty, respectively.
-     */
-    public float[] getBitFloatArray(Map<String, Integer> aUniqueSmilesToFrequencyMap) throws NullPointerException, IllegalArgumentException {
-        Objects.requireNonNull(aUniqueSmilesToFrequencyMap, "aUniqueSmilesToFrequencyMap (Map of string and integer instances) is null.");
-        List<String> tmpListOfUniqueSmiles = new ArrayList<>(aUniqueSmilesToFrequencyMap.size());
-        for(String tmpUniqueSmiles : aUniqueSmilesToFrequencyMap.keySet()) {
-            if(tmpUniqueSmiles == null || aUniqueSmilesToFrequencyMap.get(tmpUniqueSmiles) == null) {
-                throw new NullPointerException("aUniqueSmilesToFrequencyMap (Map of string and integer instances) contains " +
-                        "instances that are null.");
-            }
-            if(tmpUniqueSmiles.isBlank() || tmpUniqueSmiles.isEmpty()) {
-                throw new IllegalArgumentException("aUniqueSmilesToFrequencyMap (Map of strings an integer instances) contains strings that are blank/empty.");
-            }
-            tmpListOfUniqueSmiles.add(tmpUniqueSmiles);
-        }
-        return this.createFloatBitArray(tmpListOfUniqueSmiles, this.cacheBitSetFingerprint);
-    }
-    /**
-     * Returns bit array for specified list.
-     * The size of the array corresponds to the number of predefined (key) fragments passed during initialization.
-     * However, the size may differ if there are duplicates in the specified predefined fragments, as they
-     * will be ignored/removed.
-     * This method is only available for bit fingerprints based on unique SMILES comparisons.
-     *
-     * @param aListOfUniqueSmiles is a list that stores molecule fragments or arbitrary fragments
-     * in the form of unique SMILES.
-     * @return float[] bit array
-     * @throws NullPointerException is thrown if the list aListOfUniqueSmiles is null.
-     * @throws IllegalArgumentException is thrown if the list aListOfUniqueSmiles contains blank/empty strings.
-     */
-    public float[] getBitFloatArray(List<String> aListOfUniqueSmiles) throws NullPointerException, IllegalArgumentException {
-        this.validityCheckOfParameterList(aListOfUniqueSmiles,"aListOfUniqueSmiles (list of string instances) is null.",
-                "aListOfUniqueSmiles (at least one list element) is null.",
-                "aListOfUniqueSmiles (at least one list element) is blank/empty.");
-        Set<String> tmpUniqueSmilesSet = new HashSet<>((int) (aListOfUniqueSmiles.size() * 1.5f));
-        tmpUniqueSmilesSet.addAll(aListOfUniqueSmiles);
-        List<String> tmpListWithoutPossibleDuplicates = new ArrayList<>(tmpUniqueSmilesSet);
-        return this.createFloatBitArray(tmpListWithoutPossibleDuplicates, this.cacheBitSetFingerprint);
-    }
-    /**
-     * Returns a CountArray, which is created based on the given parameter. The map represents a molecule based on its
-     * fragments, which are represented by unique SMILES in the key set and whose frequencies are mapped in
-     * the value set. But the map can also contain arbitrary fragment sets.
-     * The size of the array corresponds to the number of predefined (key) fragments passed during initialization.
-     * However, the size may differ if there are duplicates in the specified predefined fragments, as they
-     * will be ignored/removed.
-     * This method is only available for count fingerprints based on unique SMILES comparisons.
-     *
-     * @param aUniqueSmilesToFrequencyMap map usually represents a molecule by representing the fragments of
-     * the molecule by unique SMILES in the key set and indicating their frequency in the value set. In principle,
-     * however,such a map can be applied to any set of fragments.
-     * @return int[] count array
-     * @throws NullPointerException is thrown if the map aUniqueSmilesToFrequencyMap is
-     * null or contains keys or values that are null respectively.
-     * @throws IllegalArgumentException is thrown if the map aUniqueSmilesToFrequencyMap
-     * contains keys or values that are blank/empty, respectively.
-     */
-    public float[] getCountFloatArray(Map<String, Integer> aUniqueSmilesToFrequencyMap) throws NullPointerException, IllegalArgumentException {
-        Objects.requireNonNull(aUniqueSmilesToFrequencyMap, "aUniqueSmilesToFrequencyMap (Map of string and integer instances) is null.");
-        List<String> tmpListOfUniqueSmiles = new ArrayList<>(aUniqueSmilesToFrequencyMap.size());
-        for(String tmpUniqueSmiles : aUniqueSmilesToFrequencyMap.keySet()) {
-            if(tmpUniqueSmiles == null || aUniqueSmilesToFrequencyMap.get(tmpUniqueSmiles) == null) {
-                throw new NullPointerException("aUniqueSmilesToFrequencyMap (Map of string and integer instances) contains " +
-                        "instances that are null.");
-            }
-            if(tmpUniqueSmiles.isBlank() || tmpUniqueSmiles.isEmpty()) {
-                throw new IllegalArgumentException("aUniqueSmilesToFrequencyMap (Map of strings an integer instances) contains strings that are blank/empty.");
-            }
-            for(int i = 1; i<=aUniqueSmilesToFrequencyMap.get(tmpUniqueSmiles); i++) {
-                tmpListOfUniqueSmiles.add(tmpUniqueSmiles);
-            }
-        }
-        return this.createCountFloatArray(tmpListOfUniqueSmiles);
-    }
-    /**
-     * Returns the count array for the specified list.
-     * This method is only available for count fingerprints based on unique SMILES comparisons.
-     * @see #getCountArray(Map)
-     *
-     * @param aListOfUniqueSmiles is a list that stores molecule fragments or arbitrary fragments
-     * in the form of unique SMILES.
-     * @return float[] count array
-     * @throws NullPointerException is thrown if the list aListOfUniqueSmiles is null.
-     * @throws IllegalArgumentException is thrown if the list aListOfUniqueSmiles contains blank/empty strings.
-     */
-    public float[] getCountFloatArray(List<String> aListOfUniqueSmiles) throws NullPointerException, IllegalArgumentException {
-        this.validityCheckOfParameterList(aListOfUniqueSmiles, "aListOfUniqueSmiles (list of string instances) is null.",
-                "aListOfUniqueSmiles (at least one list element) is null.",
-                "aListOfUniqueSmiles (at least one list element) is blank/empty.");
-        return this.createCountFloatArray(aListOfUniqueSmiles);
-    }
 
     /**
      * Public method to get a float[][] matrix containing the fingerprints for the given SMILES in regards to the
@@ -662,12 +550,15 @@ public class FragmentFingerprinter implements IFragmentFingerprinter {
             float[][] aFloatDataMatrix,
             boolean anUseBitArrayStatement
     ) {
-        //ToDo: unnecessary method call? when no overloaded methods are planned
-        return this.fillFragmentsComponentsFloatMatrix(
-                (ArrayList<List<String>>) aFragmentsUniqueSmilesListsArrayList,
-                aFloatDataMatrix,
-                anUseBitArrayStatement
-        );
+        //float[row count][column count]
+        for (int i = 0; i < aFloatDataMatrix.length; i++) {
+            if (anUseBitArrayStatement) {
+                aFloatDataMatrix[i] = this.getFloatBitFingerprint(aFragmentsUniqueSmilesListsArrayList.get(i), this.uniqueSmilesToPositionMap, aFloatDataMatrix[i]);
+            } else {
+                aFloatDataMatrix[i] = this.getFloatCountFingerprint(aFragmentsUniqueSmilesListsArrayList.get(i), this.uniqueSmilesToPositionMap, aFloatDataMatrix[i]);
+            }
+        }
+        return aFloatDataMatrix;
     }
     // </editor-fold>
     //
@@ -733,98 +624,6 @@ public class FragmentFingerprinter implements IFragmentFingerprinter {
             }
         }
         return tmpBitArray;
-    }
-    //
-
-    /**
-     * Generates count array (float values) for the specified list (molecule).
-     * Among other things, already generated results are used to generate the array.
-     * For example, if a count fingerprint has already been generated for the given list of unique SMILES or for
-     * the given molecule, the result of the count fingerprint is expanded into an array. Otherwise,
-     * the count fingerprint is generated first and then the count array.
-     *
-     * @param aListOfUniqueSmiles is a list that stores fragments in the form of unique SMILES.
-     * @return float[] count array
-     */
-    private float[] createCountFloatArray(List<String> aListOfUniqueSmiles) {
-        float[] tmpCountFloatArray = new float[this.uniqueSmilesToPositionMap.size()];
-        if (this.cacheRawCountMap != null && this.cacheListToGenerateCountFingerprint.size() == aListOfUniqueSmiles.size()) {
-            Collections.sort(aListOfUniqueSmiles);
-            Collections.sort(this.cacheListToGenerateCountFingerprint);
-            if (aListOfUniqueSmiles.equals(this.cacheListToGenerateCountFingerprint)) {
-                for (int tmpPositivePositions: this.cacheRawCountMap.keySet()) {
-                    //create float variant of cacheRawCountMap
-                    tmpCountFloatArray[tmpPositivePositions] = this.cacheRawCountMap.get(tmpPositivePositions);
-                }
-            }
-        } else {
-            this.cacheRawCountMap = null;
-            this.cacheListToGenerateCountFingerprint = null;
-            this.getCountFingerprint(aListOfUniqueSmiles);
-            for (int tmpPositivePositions: this.cacheRawCountMap.keySet()) {
-                //same float variant applies here for cacheRawCountMap
-                tmpCountFloatArray[tmpPositivePositions] = this.cacheRawCountMap.get(tmpPositivePositions);
-            }
-        }
-        return tmpCountFloatArray;
-    }
-    //
-
-    /**
-     * Generates bit array (float values) for the specified list (molecule).
-     * Among other things, already generated results are used to generate the array.
-     * For example, if a bit fingerprint has already been generated for the given list of unique SMILES or for
-     * the given molecule, the result of the bit fingerprint is expanded into an array. Otherwise,
-     * the bit fingerprint is generated first and then the bit array.
-     *
-     * @param aListOfUniqueSmiles is a list that stores fragments in the form of unique SMILES.
-     * @return float[] bit array
-     */
-    private float[] createFloatBitArray(List<String> aListOfUniqueSmiles, BitSetFingerprint aBitSetFingerprint) {
-        float[] tmpFloatBitArray = new float[this.uniqueSmilesToPositionMap.size()];
-        if(aBitSetFingerprint != null) {
-            System.out.println(aBitSetFingerprint);
-            //Collections.sort(aListOfUniqueSmiles);
-            //Collections.sort(this.cacheListToGenerateBitFingerprint);
-            //if (aListOfUniqueSmiles.equals(this.cacheListToGenerateBitFingerprint)) {
-                for (int tmpPositivePositions : aBitSetFingerprint.getSetbits()) {
-                    tmpFloatBitArray[tmpPositivePositions] = 1.0f;
-                }
-            //}
-        }
-//        else {
-//            this.cacheBitFingerprint = null;
-//            this.cacheListToGenerateBitFingerprint = null;
-//            this.getBitFingerprint(aListOfUniqueSmiles);
-//            for (int tmpPositivePositions: this.cacheBitFingerprint.getSetbits()) {
-//                tmpFloatBitArray[tmpPositivePositions] = 1.0f;
-//            }
-//        }
-        return tmpFloatBitArray;
-    }
-
-    /**
-     * Private method to fill a given float[][] matrix with fingerprints of the SMILES from the given list of fragment lists.
-     *
-     * @param aFragmentsUniqueSmilesListsArrayList containing fragment lists for the entirety of generated fragments
-     * @param aFloatDataMatrix pre-initialized float[][] matrix, to be filled with fingerprints
-     * @param anUseBitArrayStatement whether "bit set" or "count/frequency" should be used for the fingerprint generation
-     * @return float[][] matrix with the generated fingerprints
-     */
-    private float[][] fillFragmentsComponentsFloatMatrix(
-            ArrayList<List<String>> aFragmentsUniqueSmilesListsArrayList,
-            float[][] aFloatDataMatrix,
-            boolean anUseBitArrayStatement
-    ) {
-        //float[row count][column count]
-        for (int i = 0; i < aFloatDataMatrix.length; i++) {
-            if (anUseBitArrayStatement) {
-                aFloatDataMatrix[i] = this.getFloatBitFingerprint(aFragmentsUniqueSmilesListsArrayList.get(i), this.uniqueSmilesToPositionMap, aFloatDataMatrix[i]);
-            } else {
-                aFloatDataMatrix[i] = this.getFloatCountFingerprint(aFragmentsUniqueSmilesListsArrayList.get(i), this.uniqueSmilesToPositionMap, aFloatDataMatrix[i]);
-            }
-        }
-        return aFloatDataMatrix;
     }
     //
     /**

@@ -615,86 +615,6 @@ public class FragmentFingerprinterTest {
         Assertions.assertEquals(tmpBitDefinitionForGivenBitTest, tmpBitDefinitionForGivenBitInVariamycinFingerprint);
     }
     //
-    /**
-     * Tests the method getBitFloatArray(List<String>).
-     *
-     * Test molecule Variamycin
-     */
-    @Test
-    public void getBitFloatArrayInputListTest() {
-        float[] tmpTestArray = new float[28];
-        tmpTestArray[3] = 1.0f;
-        tmpTestArray[5] = 1.0f;
-        tmpTestArray[9] = 1.0f;
-        tmpTestArray[14] = 1.0f;
-        tmpTestArray[16] = 1.0f;
-        tmpTestArray[17] = 1.0f;
-        tmpTestArray[18] = 1.0f;
-        tmpTestArray[26] = 1.0f;
-        tmpTestArray[27] = 1.0f;
-        float[] tmpVariamycinBitFloatArray = FragmentFingerprinterTest.fragmentFingerprinter.getBitFloatArray(FragmentFingerprinterTest.countListOfUniqueSmiles);
-        Assertions.assertArrayEquals(tmpTestArray, tmpVariamycinBitFloatArray);
-    }
-    /**
-     * Tests the method getBitFloatArray(Map<String,Integer>)
-     *
-     * Test molecule: Variamycin
-     */
-    @Test
-    public void getBitFloatArrayInputMapTest() {
-        float[] tmpTestArray = new float[28];
-        tmpTestArray[3] = 1.0f;
-        tmpTestArray[5] = 1.0f;
-        tmpTestArray[9] = 1.0f;
-        tmpTestArray[14] = 1.0f;
-        tmpTestArray[16] = 1.0f;
-        tmpTestArray[17] = 1.0f;
-        tmpTestArray[18] = 1.0f;
-        tmpTestArray[26] = 1.0f;
-        tmpTestArray[27] = 1.0f;
-        float[] tmpVariamycinBitFloatArray = FragmentFingerprinterTest.fragmentFingerprinter.getBitFloatArray(FragmentFingerprinterTest.moleculeFragmentList.get(FragmentFingerprinterTest.moleculeFragmentList.size() - 1));
-        Assertions.assertArrayEquals(tmpTestArray, tmpVariamycinBitFloatArray);
-    }
-    /**
-    * Tests the method getCountFloatArray(List<String>).
-    *
-    * Test molecule Variamycin
-    */
-    @Test
-    public void getCountFloatArrayInputListTest() {
-        float[] tmpTestCountArray = new float[FragmentFingerprinterTest.fragmentFingerprinter.getSize()];
-        tmpTestCountArray[3] = 1.0f;
-        tmpTestCountArray[5] = 2.0f;
-        tmpTestCountArray[9] = 1.0f;
-        tmpTestCountArray[14] = 5.0f;
-        tmpTestCountArray[16] = 2.0f;
-        tmpTestCountArray[17] = 8.0f;
-        tmpTestCountArray[18] = 2.0f;
-        tmpTestCountArray[26] = 5.0f;
-        tmpTestCountArray[27] = 2.0f;
-        float[] tmpVariamycinCountArray = FragmentFingerprinterTest.fragmentFingerprinter.getCountFloatArray(FragmentFingerprinterTest.countListOfUniqueSmiles);
-        Assertions.assertArrayEquals(tmpTestCountArray, tmpVariamycinCountArray);
-    }
-    /**
-     * Tests the method getCountFloatArray(Map<String, Integer>).
-     *
-     * Test molecule Variamycin
-     */
-    @Test
-    public void getCountFloatArrayInputMapTest() {
-        float[] tmpTestCountArray = new float[FragmentFingerprinterTest.fragmentFingerprinter.getSize()];
-        tmpTestCountArray[3] = 1.0f;
-        tmpTestCountArray[5] = 2.0f;
-        tmpTestCountArray[9] = 1.0f;
-        tmpTestCountArray[14] = 5.0f;
-        tmpTestCountArray[16] = 2.0f;
-        tmpTestCountArray[17] = 8.0f;
-        tmpTestCountArray[18] = 2.0f;
-        tmpTestCountArray[26] = 5.0f;
-        tmpTestCountArray[27] = 2.0f;
-        float[] tmpVariamycinCountArray = FragmentFingerprinterTest.fragmentFingerprinter.getCountFloatArray(FragmentFingerprinterTest.moleculeFragmentList.get(FragmentFingerprinterTest.moleculeFragmentList.size() - 1));
-        Assertions.assertArrayEquals(tmpTestCountArray, tmpVariamycinCountArray);
-    }
 
     /**
      * The fragments for the bit fingerprint were generated via fragmentation analysis of 1000 picked molecules from the
@@ -735,16 +655,6 @@ public class FragmentFingerprinterTest {
         for (int i = 0; i < tmpFloatMatrix.length; i++) {
             System.out.println(Arrays.toString(tmpFloatMatrix[i]));
         }
-    }
-    @Test
-    public void createFloatBitArrayTest() {
-        List<String> tmpFragmentsList = new ArrayList<>(3);
-        tmpFragmentsList.add("C");
-        tmpFragmentsList.add("c1ccccc1");
-        tmpFragmentsList.add("CCC");
-        FragmentFingerprinter tmpFFp = new FragmentFingerprinter(tmpFragmentsList);
-        float[] tmpFloatArray = tmpFFp.getBitFloatArray(tmpFragmentsList);
-        System.out.println(Arrays.toString(tmpFloatArray));
     }
     //</editor-fold>
     //
