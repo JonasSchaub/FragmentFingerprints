@@ -615,10 +615,10 @@ public class FragmentFingerprinterTest {
         Assertions.assertEquals(tmpBitDefinitionForGivenBitTest, tmpBitDefinitionForGivenBitInVariamycinFingerprint);
     }
     //
-
     /**
+     * Test for correct float matrix generation and general matrix handling.
      * The fragments for the bit fingerprint were generated via fragmentation analysis of 1000 picked molecules from the
-     * COCONUT database. The fragments represent the 10 most often occurring fragments.
+     * COCONUT database. The fragments represent the 10 most frequently occurring fragments.
      */
     @Test
     public void generateFragmentsComponentsFloatMatrixTest() {
@@ -651,10 +651,27 @@ public class FragmentFingerprinterTest {
         tmpListsList.add(new ArrayList<>());
         //[row count][column count]
         float[][] tmpFloatMatrix = new float[2][12];
+        //visualization that fragment fingerprinter does not change overshoot matrix cells (fingerprint array length < column count)
+        tmpFloatMatrix[0][10] = 33.0f;
+        tmpFloatMatrix[0][11] = 33.0f;
+        tmpFloatMatrix[1][10] = 33.0f;
+        tmpFloatMatrix[1][11] = 33.0f;
         tmpFFp.getFragmentsComponentsFloatMatrix(tmpListsList, tmpFloatMatrix, true);
-        for (int i = 0; i < tmpFloatMatrix.length; i++) {
-            System.out.println(Arrays.toString(tmpFloatMatrix[i]));
-        }
+        //manual matrix inspection:
+//        for (int i = 0; i < tmpFloatMatrix.length; i++) {
+//            System.out.println(Arrays.toString(tmpFloatMatrix[i]));
+//        }
+        //correct fingerprint was generated and put in matrix:
+        Assertions.assertEquals(1.0f, tmpFloatMatrix[0][2]);
+        Assertions.assertEquals(1.0f, tmpFloatMatrix[0][3]);
+        Assertions.assertEquals(1.0f, tmpFloatMatrix[0][4]);
+        Assertions.assertEquals(1.0f, tmpFloatMatrix[0][7]);
+        //overshoot matrix cells were not changed by fragment fingerprinter:
+        Assertions.assertEquals(33.0f, tmpFloatMatrix[0][10]);
+        Assertions.assertEquals(33.0f, tmpFloatMatrix[0][11]);
+        //even if no fingerprint was generated and filled into matrix:
+        Assertions.assertEquals(33.0f, tmpFloatMatrix[1][10]);
+        Assertions.assertEquals(33.0f, tmpFloatMatrix[1][11]);
     }
     //</editor-fold>
     //

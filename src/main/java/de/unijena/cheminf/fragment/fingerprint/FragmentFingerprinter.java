@@ -50,7 +50,7 @@ import java.util.Set;
  * which inherits the IFingerprinter (CDK), which allows the class to compute fingerprints in 2 ways.
  * The first way to calculate a bit or count fingerprint is to perform a substructure comparison with all
  * predefined fragments for a given IAtomContainer. The fingerprint created by the substructure search is based on
- * the CDK class SubtructureFingerprinter. The predefined fragment SMILES are interpreted as SMARTS patterns by the
+ * the CDK class SubstructureFingerprinter. The predefined fragment SMILES are interpreted as SMARTS patterns by the
  * SubstructureFingerprinter class. The second way to calculate fingerprints is by comparing
  * given fragments, which are in the form of unique SMILES, with the predefined fragments.
  * The second possibility is thus based on a pure comparison of strings. It is important to note that the two
@@ -67,6 +67,11 @@ public class FragmentFingerprinter implements IFragmentFingerprinter {
      * must be included when initializing this class.
      */
     private final String[] fragmentsForBitSetArray;
+    /**
+     * The fragmentArray is converted into a HashMap to speed up the matching of the unique SMILES.
+     * The Map maps the unique SMILES of the predefined fragments to the position they have in the array.
+     */
+    private final HashMap<String, Integer> uniqueSmilesToPositionMap;
     //</editor-fold>
     //
     //<editor-fold desc="private static final class variables" defaultstate="collapsed">
@@ -77,11 +82,6 @@ public class FragmentFingerprinter implements IFragmentFingerprinter {
     //</editor-fold>
     //
     //<editor-fold desc="private class variables" defaultstate="collapsed">
-    /**
-     * The fragmentArray is converted into a HashMap to speed up the matching of the unique SMILES.
-     * The Map maps the unique SMILES of the predefined fragments to the position they have in the array.
-     */
-    private HashMap<String, Integer> uniqueSmilesToPositionMap;
     /**
      * Bit fingerprint for storing the calculated fragment bit fingerprint.
      */
@@ -121,7 +121,6 @@ public class FragmentFingerprinter implements IFragmentFingerprinter {
      * @throws NullPointerException is thrown if the list aFragmentForBitSetList is null.
      * @throws IllegalArgumentException is thrown if the list contains blank strings.
      */
-    //ToDo: class variables are not good here
     public FragmentFingerprinter(List<String> aFragmentForBitSetList) throws NullPointerException, IllegalArgumentException {
         // Check whether aFragmentForBitSetList is null or whether there are elements (strings) in the list that are empty.
         this.validityCheckOfParameterList(aFragmentForBitSetList,"aFragmentForBitSetList (list of string instances) is null.",
@@ -149,6 +148,8 @@ public class FragmentFingerprinter implements IFragmentFingerprinter {
      * @throws IllegalArgumentException is thrown if the list aListOfUniqueSmiles contains blank/empty strings.
      */
     @Override
+    //ToDo: rework: remove class variable dependency
+    //rework is below
     public IBitFingerprint getBitFingerprint(List<String> aListOfUniqueSmiles) throws NullPointerException, IllegalArgumentException {
         this.validityCheckOfParameterList(aListOfUniqueSmiles,"aListOfUniqueSmiles (list of string instances) is null.",
                 "aListOfUniqueSmiles (at least one list element) is null.",
@@ -167,7 +168,7 @@ public class FragmentFingerprinter implements IFragmentFingerprinter {
         this.cacheBitSetFingerprint = new BitSetFingerprint(tmpBitSet);
         return this.cacheBitSetFingerprint;
     }
-
+    //
     /**
      * Public method for creating a bit set fingerprint.
      * For this, a given list of SMILES is compared with the pre-defined fragments (master vector of fragments for fingerprint definition).
@@ -178,7 +179,8 @@ public class FragmentFingerprinter implements IFragmentFingerprinter {
      * @param aSmilesToPositionMap containing mappings of pre-defined fingerprint SMILES to their position inside the bit set
      * @return BitSetFingerprint of the given SMILES
      */
-    //ToDo: implicitly with method below -> setFingerprint() necessary
+    //possible rework of Betül's getBitFingerprint
+    //I would do all other reworks in similar ways
     public BitSetFingerprint getBitFingerprint(List<String> aListOfUniqueSmiles, Map<String, Integer> aSmilesToPositionMap) {
         this.validityCheckOfParameterList(aListOfUniqueSmiles,"aListOfUniqueSmiles (list of string instances) is null.",
                 "aListOfUniqueSmiles (at least one list element) is null.",
@@ -195,6 +197,7 @@ public class FragmentFingerprinter implements IFragmentFingerprinter {
         }
         return new BitSetFingerprint(tmpBitSet);
     }
+    //
     /**
      * Public method for creating a float "bit set fingerprint" in form of a float[] array.
      * For this, a given list of SMILES is compared with the pre-defined fragments (master vector of fragments for fingerprint definition).
@@ -221,7 +224,7 @@ public class FragmentFingerprinter implements IFragmentFingerprinter {
         }
         return aPreInitFloatArray;
     }
-
+    //
     /**
      * Public method for generating a float count fingerprint in form of a float[] array.
      * This fingerprint projects the frequency (-> count) of occurrence of the pre-defined fingerprint fragments within
@@ -242,9 +245,6 @@ public class FragmentFingerprinter implements IFragmentFingerprinter {
             Map<String, Integer> aSmilesToPositionMap,
             float[] aPreInitFloatArray)
     {
-        this.validityCheckOfParameterList(aFragmentsUniqueSmilesList,"aListOfFragmentsUniqueSmiles (list of string instances) is null.",
-                "aListOfFragmentsUniqueSmiles (at least one list element) is null.",
-                "aListOfFragmentsUniqueSmiles (at least one list element) is blank/empty.");
         for (String tmpSmiles : aFragmentsUniqueSmilesList) {
             if (aSmilesToPositionMap.containsKey(tmpSmiles)) {
                 aPreInitFloatArray[aSmilesToPositionMap.get(tmpSmiles)]++;
@@ -272,6 +272,7 @@ public class FragmentFingerprinter implements IFragmentFingerprinter {
      * contains keys or values that are blank/empty, respectively.
      */
     @Override
+    //ToDo: rework: remove class variable dependency
     public CountFingerprint getCountFingerprint(Map<String, Integer> aUniqueSmilesToFrequencyMap) throws NullPointerException,IllegalArgumentException {
         this.cacheRawCountMap = new HashMap<>((int) (this.uniqueSmilesToPositionMap.size() * 1.5f), 0.75f);
         this.cacheListToGenerateCountFingerprint = new ArrayList<>(aUniqueSmilesToFrequencyMap.size());
@@ -532,7 +533,7 @@ public class FragmentFingerprinter implements IFragmentFingerprinter {
                 "aListOfUniqueSmiles (at least one list element) is blank/empty.");
         return this.createCountArray(aListOfUniqueSmiles);
     }
-
+    //
     /**
      * Public method to get a float[][] matrix containing the fingerprints for the given SMILES in regards to the
      * pre-defined fragment fingerprint.
@@ -575,6 +576,8 @@ public class FragmentFingerprinter implements IFragmentFingerprinter {
      */
     private int[] createCountArray(List<String> aListOfUniqueSmiles) {
         int[] tmpCountArray = new int[this.uniqueSmilesToPositionMap.size()];
+        //ToDo: I don't see the usefulness of checking if a fingerprint has been generated for the given list
+        //in what way would the list be used to generate fingerprints two separate times?
         if(this.cacheRawCountMap != null && this.cacheListToGenerateCountFingerprint.size() == aListOfUniqueSmiles.size()) {
             Collections.sort(aListOfUniqueSmiles);
             Collections.sort(this.cacheListToGenerateCountFingerprint);
@@ -606,6 +609,8 @@ public class FragmentFingerprinter implements IFragmentFingerprinter {
      */
     private int[] createBitArray(List<String> aListOfUniqueSmiles) {
         int[] tmpBitArray = new int[this.uniqueSmilesToPositionMap.size()];
+        //ToDo: I don't see the usefulness of checking if a fingerprint has been generated for the given list
+        //in what way would the list be used to generate fingerprints two separate times?
         if(this.cacheBitSetFingerprint != null && this.cacheListToGenerateBitFingerprint.size() == aListOfUniqueSmiles.size()) {
             Collections.sort(aListOfUniqueSmiles);
             Collections.sort(this.cacheListToGenerateBitFingerprint);
@@ -679,6 +684,7 @@ public class FragmentFingerprinter implements IFragmentFingerprinter {
         );
         int tmpValuePosition = 0;
         for (String tmpKey : aFragmentsArray) {
+            //ToDo: possible with computeIfAbsent?
             if (!tmpUniqueSmileToPositionMap.containsKey(tmpKey)) {
                 tmpUniqueSmileToPositionMap.put(tmpKey, tmpValuePosition);
                 tmpValuePosition++;
