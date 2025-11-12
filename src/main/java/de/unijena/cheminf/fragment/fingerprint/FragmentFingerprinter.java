@@ -105,6 +105,12 @@ public class FragmentFingerprinter implements IFragmentFingerprinter {
      * specified map.
      */
     private List<String> cacheListToGenerateCountFingerprint;
+    //setting booleans
+    /**
+     * Private boolean for setting 'Use Cache Fingerprint'. This setting determines whether a cached
+     */
+    private boolean useCacheFingerprintSetting = false;
+
     //</editor-fold>
     //
     // <editor-fold defaultstate="collapsed" desc="Constructor">
@@ -148,25 +154,25 @@ public class FragmentFingerprinter implements IFragmentFingerprinter {
      * @throws IllegalArgumentException is thrown if the list aListOfUniqueSmiles contains blank/empty strings.
      */
     @Override
-    //ToDo: rework: remove class variable dependency
-    //rework is below
     public IBitFingerprint getBitFingerprint(List<String> aListOfUniqueSmiles) throws NullPointerException, IllegalArgumentException {
-        this.validityCheckOfParameterList(aListOfUniqueSmiles,"aListOfUniqueSmiles (list of string instances) is null.",
-                "aListOfUniqueSmiles (at least one list element) is null.",
-                "aListOfUniqueSmiles (at least one list element) is blank/empty.");
-        BitSet tmpBitSet = new BitSet(this.uniqueSmilesToPositionMap.size());
-        Set<String> tmpUniqueSmilesSet = new HashSet<>((int) (aListOfUniqueSmiles.size() * 1.5f));
-        tmpUniqueSmilesSet.addAll(aListOfUniqueSmiles);
-        ArrayList<String> tmpUniqueSmilesList = new ArrayList<>(tmpUniqueSmilesSet);
-        this.cacheListToGenerateBitFingerprint = (ArrayList<String>) tmpUniqueSmilesList.clone();
-        for(String tmpUniqueSmilesWithoutDuplicates : tmpUniqueSmilesList) {
-            if (this.uniqueSmilesToPositionMap.containsKey(tmpUniqueSmilesWithoutDuplicates)) {
-                int tmpPosition = uniqueSmilesToPositionMap.get(tmpUniqueSmilesWithoutDuplicates);
-                tmpBitSet.set(tmpPosition, true);
-            }
-        }
-        this.cacheBitSetFingerprint = new BitSetFingerprint(tmpBitSet);
-        return this.cacheBitSetFingerprint;
+        //old implementation, solution is overloaded newer method to not brake legacy code
+//        this.validityCheckOfParameterList(aListOfUniqueSmiles,"aListOfUniqueSmiles (list of string instances) is null.",
+//                "aListOfUniqueSmiles (at least one list element) is null.",
+//                "aListOfUniqueSmiles (at least one list element) is blank/empty.");
+//        BitSet tmpBitSet = new BitSet(this.uniqueSmilesToPositionMap.size());
+//        Set<String> tmpUniqueSmilesSet = new HashSet<>((int) (aListOfUniqueSmiles.size() * 1.5f));
+//        tmpUniqueSmilesSet.addAll(aListOfUniqueSmiles);
+//        ArrayList<String> tmpUniqueSmilesList = new ArrayList<>(tmpUniqueSmilesSet);
+//        this.cacheListToGenerateBitFingerprint = (ArrayList<String>) tmpUniqueSmilesList.clone();
+//        for(String tmpUniqueSmilesWithoutDuplicates : tmpUniqueSmilesList) {
+//            if (this.uniqueSmilesToPositionMap.containsKey(tmpUniqueSmilesWithoutDuplicates)) {
+//                int tmpPosition = uniqueSmilesToPositionMap.get(tmpUniqueSmilesWithoutDuplicates);
+//                tmpBitSet.set(tmpPosition, true);
+//            }
+//        }
+//        this.cacheBitSetFingerprint = new BitSetFingerprint(tmpBitSet);
+//        return this.cacheBitSetFingerprint;
+        return this.getBitFingerprint(aListOfUniqueSmiles, this.uniqueSmilesToPositionMap);
     }
     //
     /**
@@ -195,9 +201,15 @@ public class FragmentFingerprinter implements IFragmentFingerprinter {
                 tmpBitSet.set(tmpPosition, true);
             }
         }
-        return new BitSetFingerprint(tmpBitSet);
+        if (this.useCacheFingerprintSetting) {
+            this.cacheBitSetFingerprint = new BitSetFingerprint(tmpBitSet);
+            return this.cacheBitSetFingerprint;
+        } else {
+            return new BitSetFingerprint(tmpBitSet);
+        }
     }
     //
+    //<editor-fold desc="Public Methods - float variants">
     /**
      * Public method for creating a float "bit set fingerprint" in form of a float[] array.
      * For this, a given list of SMILES is compared with the pre-defined fragments (master vector of fragments for fingerprint definition).
@@ -205,16 +217,15 @@ public class FragmentFingerprinter implements IFragmentFingerprinter {
      * If the defined fingerprint contains the fragment, it's respective position inside the array is set to '1.0f'.
      *
      * @param aFragmentsUniqueSmilesList to be checked against the pre-defined fingerprint
-     * @param aSmilesToPositionMap containing mappings of pre-defined fingerprint SMILES to their position inside the bit set
-     * @param aPreInitFloatArray pre-initialized float[] array with size of pre-defined fragment fingerprint
+     * @param aSmilesToPositionMap       containing mappings of pre-defined fingerprint SMILES to their position inside the bit set
+     * @param aPreInitFloatArray         pre-initialized float[] array with size of pre-defined fragment fingerprint
      * @return pre-initialized float[] array (comparable to a bit set data structure) of the given SMILES
      */
     public float[] getFloatBitFingerprint(
             //aFragmentsUniqueSmilesList contains fragments of ONE molecule
             List<String> aFragmentsUniqueSmilesList,
             Map<String, Integer> aSmilesToPositionMap,
-            float[] aPreInitFloatArray)
-    {
+            float[] aPreInitFloatArray) {
         Set<String> tmpUniqueSmilesSet = new HashSet<>((int) (aFragmentsUniqueSmilesList.size() * 1.5f));
         tmpUniqueSmilesSet.addAll(aFragmentsUniqueSmilesList);
         for (String tmpSmiles : tmpUniqueSmilesSet) {
@@ -230,21 +241,20 @@ public class FragmentFingerprinter implements IFragmentFingerprinter {
      * This fingerprint projects the frequency (-> count) of occurrence of the pre-defined fingerprint fragments within
      * the given SMILES.
      * <p>
-     *     For example: The pre-defined fragment fingerprint contains the SMILES for methane as "C", for an ether substructure
-     *     as "*O*", and for a hydroxide group as "[H]OC". The given SMILES list contains only three "C" fragments. Then,
-     *     the generated fingerprint would look like the following: [3.0f, 0.0f, 0.0f]
+     * For example: The pre-defined fragment fingerprint contains the SMILES for methane as "C", for an ether substructure
+     * as "*O*", and for a hydroxide group as "[H]OC". The given SMILES list contains only three "C" fragments. Then,
+     * the generated fingerprint would look like the following: [3.0f, 0.0f, 0.0f]
      * </p>
      *
      * @param aFragmentsUniqueSmilesList of fragment SMILES to be compared to the pre-defined fingerprint
-     * @param aSmilesToPositionMap mapping pre-defined fingerprint fragments to their position inside the fingerprint
-     * @param aPreInitFloatArray pre-initialized float[] in which the fingerprint is to be stored
+     * @param aSmilesToPositionMap       mapping pre-defined fingerprint fragments to their position inside the fingerprint
+     * @param aPreInitFloatArray         pre-initialized float[] in which the fingerprint is to be stored
      * @return float[] array filled with float values representing the generated fingerprint
      */
     public float[] getFloatCountFingerprint(
             List<String> aFragmentsUniqueSmilesList,
             Map<String, Integer> aSmilesToPositionMap,
-            float[] aPreInitFloatArray)
-    {
+            float[] aPreInitFloatArray) {
         for (String tmpSmiles : aFragmentsUniqueSmilesList) {
             if (aSmilesToPositionMap.containsKey(tmpSmiles)) {
                 aPreInitFloatArray[aSmilesToPositionMap.get(tmpSmiles)]++;
@@ -252,6 +262,35 @@ public class FragmentFingerprinter implements IFragmentFingerprinter {
         }
         return aPreInitFloatArray;
     }
+    //
+    /**
+     * Public method to get a float[][] matrix containing the fingerprints for the given SMILES in regards to the
+     * pre-defined fragment fingerprint.
+     * It shall be noted that each List in the given List (List of Lists) represents ONE molecule's fragments.
+     * Therefor, the whole list represents the entirety of fragments.
+     * Further, a setting whether to use "bit set" or "count/frequency of fragment" is available.
+     *
+     * @param aFragmentsUniqueSmilesListsArrayList with Lists of SMILES to compare with the defined fingerprint
+     * @param aFloatDataMatrix to be filled with the float fingerprints of the given fragments
+     * @param anUseBitArrayStatement setting whether "bit set" or "count/frequency" should be used for the matrix
+     * @return float[][] matrix, filled with float values from the generated bit set or count/frequency set
+     */
+    public float[][] getFragmentsComponentsFloatMatrix(
+            List<List<String>> aFragmentsUniqueSmilesListsArrayList,
+            float[][] aFloatDataMatrix,
+            boolean anUseBitArrayStatement
+    ) {
+        //float[row count][column count]
+        for (int i = 0; i < aFloatDataMatrix.length; i++) {
+            if (anUseBitArrayStatement) {
+                aFloatDataMatrix[i] = this.getFloatBitFingerprint(aFragmentsUniqueSmilesListsArrayList.get(i), this.uniqueSmilesToPositionMap, aFloatDataMatrix[i]);
+            } else {
+                aFloatDataMatrix[i] = this.getFloatCountFingerprint(aFragmentsUniqueSmilesListsArrayList.get(i), this.uniqueSmilesToPositionMap, aFloatDataMatrix[i]);
+            }
+        }
+        return aFloatDataMatrix;
+    }
+    //</editor-fold>
     //
     /**
      * Generates count fingerprint for a molecule based on its fragments represented by unique SMILES strings
@@ -406,6 +445,16 @@ public class FragmentFingerprinter implements IFragmentFingerprinter {
     // </editor-fold>
     //
     // <editor-fold defaultstate="collapsed" desc="Public methods">
+    //
+    /**
+     * Set method for 'Use Cache Fingerprint' setting.
+     *
+     * @param aSettingValue boolean setting value
+     */
+    public void setUseCacheFingerprintSetting(boolean aSettingValue) {
+        this.useCacheFingerprintSetting = aSettingValue;
+    }
+    //
     /**
      * Returns the bit definitions i.e. which  bit stands for which fragment SMILES.
      * Important, the number of possible bit definitions may differ from the number of key
@@ -444,6 +493,11 @@ public class FragmentFingerprinter implements IFragmentFingerprinter {
         Set<String> tmpUniqueSmilesSet = new HashSet<>((int) (aListOfUniqueSmiles.size() * 1.5f));
         tmpUniqueSmilesSet.addAll(aListOfUniqueSmiles);
         List<String> tmpListWithoutPossibleDuplicates = new ArrayList<>(tmpUniqueSmilesSet);
+        //wouldn't this be a shorter implementation?
+//        int[] tmpArray = this.getBitFingerprint(aListOfUniqueSmiles, this.uniqueSmilesToPositionMap)
+//                .asBitSet().stream().toArray();
+//        return tmpArray;
+        //
         return this.createBitArray(tmpListWithoutPossibleDuplicates);
     }
     //
@@ -533,34 +587,6 @@ public class FragmentFingerprinter implements IFragmentFingerprinter {
                 "aListOfUniqueSmiles (at least one list element) is blank/empty.");
         return this.createCountArray(aListOfUniqueSmiles);
     }
-    //
-    /**
-     * Public method to get a float[][] matrix containing the fingerprints for the given SMILES in regards to the
-     * pre-defined fragment fingerprint.
-     * It shall be noted that each List in the given List (List of Lists) represents ONE molecule's fragments.
-     * Therefor, the whole list represents the entirety of fragments.
-     * Further, a setting whether to use "bit set" or "count/frequency of fragment" is available.
-     *
-     * @param aFragmentsUniqueSmilesListsArrayList with Lists of SMILES to compare with the defined fingerprint
-     * @param aFloatDataMatrix to be filled with the float fingerprints of the given fragments
-     * @param anUseBitArrayStatement setting whether "bit set" or "count/frequency" should be used for the matrix
-     * @return float[][] matrix, filled with float values from the generated bit set or count/frequency set
-     */
-    public float[][] getFragmentsComponentsFloatMatrix(
-            List<List<String>> aFragmentsUniqueSmilesListsArrayList,
-            float[][] aFloatDataMatrix,
-            boolean anUseBitArrayStatement
-    ) {
-        //float[row count][column count]
-        for (int i = 0; i < aFloatDataMatrix.length; i++) {
-            if (anUseBitArrayStatement) {
-                aFloatDataMatrix[i] = this.getFloatBitFingerprint(aFragmentsUniqueSmilesListsArrayList.get(i), this.uniqueSmilesToPositionMap, aFloatDataMatrix[i]);
-            } else {
-                aFloatDataMatrix[i] = this.getFloatCountFingerprint(aFragmentsUniqueSmilesListsArrayList.get(i), this.uniqueSmilesToPositionMap, aFloatDataMatrix[i]);
-            }
-        }
-        return aFloatDataMatrix;
-    }
     // </editor-fold>
     //
     // <editor-fold defaultstate="collapsed" desc="Private methods">
@@ -608,24 +634,33 @@ public class FragmentFingerprinter implements IFragmentFingerprinter {
      * @return int[] bit array
      */
     private int[] createBitArray(List<String> aListOfUniqueSmiles) {
-        int[] tmpBitArray = new int[this.uniqueSmilesToPositionMap.size()];
-        //ToDo: I don't see the usefulness of checking if a fingerprint has been generated for the given list
-        //in what way would the list be used to generate fingerprints two separate times?
-        if(this.cacheBitSetFingerprint != null && this.cacheListToGenerateBitFingerprint.size() == aListOfUniqueSmiles.size()) {
-            Collections.sort(aListOfUniqueSmiles);
-            Collections.sort(this.cacheListToGenerateBitFingerprint);
-            if(aListOfUniqueSmiles.equals(this.cacheListToGenerateBitFingerprint)) {
+        //80% of hashmap size is sufficient for array size, see load factor
+        int[] tmpBitArray = new int[(int) (this.uniqueSmilesToPositionMap.size() * 0.8f)];
+        //ToDo: rework method to remove class variable dependency
+        //isnt this whole method a redundant duplicate of the fingerprint routine?
+        if(this.useCacheFingerprintSetting) {
+            if (this.cacheBitSetFingerprint != null && this.cacheListToGenerateBitFingerprint.size() == aListOfUniqueSmiles.size()) {
+                Collections.sort(aListOfUniqueSmiles);
+                Collections.sort(this.cacheListToGenerateBitFingerprint);
+                if (aListOfUniqueSmiles.equals(this.cacheListToGenerateBitFingerprint)) {
+                    for (int tmpPositivePositions : this.cacheBitSetFingerprint.getSetbits()) {
+                        tmpBitArray[tmpPositivePositions] = 1;
+                    }
+                    //return tmpBitArray;
+                }
+            } else {
+                this.cacheBitSetFingerprint = null;
+                this.cacheListToGenerateBitFingerprint = null;
+                this.getBitFingerprint(aListOfUniqueSmiles);
                 for (int tmpPositivePositions : this.cacheBitSetFingerprint.getSetbits()) {
                     tmpBitArray[tmpPositivePositions] = 1;
                 }
-                //return tmpBitArray;
             }
-        } else {
-            this.cacheBitSetFingerprint = null;
-            this.cacheListToGenerateBitFingerprint = null;
-            this.getBitFingerprint(aListOfUniqueSmiles);
-            for (int tmpPositivePositions : this.cacheBitSetFingerprint.getSetbits()) {
-                tmpBitArray[tmpPositivePositions] = 1;
+        }
+        //this whole method setup seems strange to me, redundant "circles" of method calling (create bitset -> to array -> ...)
+        else {
+            for (int tmpPosition : this.getBitFingerprint(aListOfUniqueSmiles).getSetbits()) {
+                tmpBitArray[tmpPosition] = 1;
             }
         }
         return tmpBitArray;
