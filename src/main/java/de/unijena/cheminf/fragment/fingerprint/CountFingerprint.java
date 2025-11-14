@@ -41,6 +41,7 @@ import java.util.Objects;
  * @author Betuel Sevindik
  * @version 1.0.0.0
  */
+//ToDo: Cleanup needed.
 public class CountFingerprint implements ICountFingerprint {
     //<editor-fold desc="private final class variables" defaultstate="collapsed">
     /**

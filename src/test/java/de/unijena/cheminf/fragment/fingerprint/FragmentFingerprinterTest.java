@@ -143,6 +143,7 @@ public class FragmentFingerprinterTest {
      * @throws Exception is thrown if anything goes wrong.
      */
     @BeforeAll
+    //ToDo: is a large setUp() necessary?
     public static void setUp() throws Exception {
         BufferedReader tmpFragmentSetReader;
         BufferedReader tmpMoleculeFragmentsReader;
