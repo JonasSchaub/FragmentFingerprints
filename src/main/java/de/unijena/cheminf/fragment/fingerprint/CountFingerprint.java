@@ -27,6 +27,7 @@ package de.unijena.cheminf.fragment.fingerprint;
 import org.openscience.cdk.fingerprint.ICountFingerprint;
 
 import java.util.HashMap;
+import java.util.Map;
 import java.util.Objects;
 
 /**
@@ -298,6 +299,15 @@ public class CountFingerprint implements ICountFingerprint {
             }
         }
         return new CountFingerprint(this.predefinedFragmentSmiles,tmpRawMap);
+    }
+    //
+    /**
+     * Public getter for internal map of smiles fingerprint position to corresponding frequency.
+     *
+     * @return Mapping of smiles fingerprint position to frequency
+     */
+    public Map<Integer, Integer> getSmilesPositionToFrequencyMap() {
+        return this.uniqueSmilesPositionToFrequencyCountRawMap;
     }
     //</editor-fold>
     //
