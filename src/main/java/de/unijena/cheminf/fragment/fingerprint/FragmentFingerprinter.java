@@ -35,6 +35,7 @@ import java.util.ArrayList;
 import java.util.BitSet;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -65,7 +66,7 @@ public class FragmentFingerprinter implements IFragmentFingerprinter {
      * on which the fingerprints are then created. This set of fragment/unique SMILES
      * must be included when initializing this class.
      */
-    private final String[] fragmentsForBitSetArray;
+    private final String[] fragmentFingerprintMasterVectorArray;
     /**
      * The fragmentArray is converted into a HashMap to speed up the matching of the unique SMILES.
      * The Map maps the unique SMILES of the predefined fragments to the position they have in the array.
@@ -91,9 +92,10 @@ public class FragmentFingerprinter implements IFragmentFingerprinter {
     private CountFingerprint cacheCountFingerprint;
     //setting booleans
     /**
-     * Private boolean for setting 'Use Cache Fingerprint'. This setting determines whether a cached
+     * Private boolean for setting 'Use Cache Fingerprint'. This setting determines whether an already created, cached
+     * fingerprint should be used in internal calculations when a second fingerprint calculation is started.
      */
-    private boolean useCacheFingerprintSetting = false;
+    private boolean cacheFingerprintSetting = false;
     //</editor-fold>
     //
     // <editor-fold defaultstate="collapsed" desc="Constructor">
@@ -106,17 +108,17 @@ public class FragmentFingerprinter implements IFragmentFingerprinter {
      * key fragments present, as duplicates are removed. This means that duplicate fragment SMILES strings in the input
      * list are ignored and are not part of the fingerprint multiple times.
      *
-     * @param aFragmentForBitSetList is the ist in which the predefined fragments are stored.
-     * @throws NullPointerException is thrown if the list aFragmentForBitSetList is null.
+     * @param aFragmentsForMasterVectorList is the ist in which the predefined fragments are stored.
+     * @throws NullPointerException is thrown if the list aFragmentsForMasterVectorList is null.
      * @throws IllegalArgumentException is thrown if the list contains blank strings.
      */
-    public FragmentFingerprinter(List<String> aFragmentForBitSetList) throws NullPointerException, IllegalArgumentException {
-        // Check whether aFragmentForBitSetList is null or whether there are elements (strings) in the list that are empty.
-        this.validityCheckOfParameterList(aFragmentForBitSetList,"aFragmentForBitSetList (list of string instances) is null.",
-                "aFragmentForBitSetList (at least one list element) is null.",
-                "aFragmentForBitSetList (at least one list element) is blank/empty.");
-        this.fragmentsForBitSetArray = aFragmentForBitSetList.toArray(new String[aFragmentForBitSetList.size()]);
-        this.uniqueSmilesToPositionMap = this.buildUniqueSmilesToPositionMap(this.fragmentsForBitSetArray);
+    public FragmentFingerprinter(List<String> aFragmentsForMasterVectorList) throws NullPointerException, IllegalArgumentException {
+        // Check whether aFragmentsForMasterVectorList is null or whether there are elements (strings) in the list that are empty.
+        this.validityCheckOfParameterList(aFragmentsForMasterVectorList,"aFragmentsForMasterVectorList (list of string instances) is null.",
+                "aFragmentsForMasterVectorList (at least one list element) is null.",
+                "aFragmentsForMasterVectorList (at least one list element) is blank/empty.");
+        this.fragmentFingerprintMasterVectorArray = aFragmentsForMasterVectorList.toArray(new String[aFragmentsForMasterVectorList.size()]);
+        this.uniqueSmilesToPositionMap = this.buildUniqueSmilesToPositionMap(this.fragmentFingerprintMasterVectorArray);
     }
     // </editor-fold>
     //
@@ -138,37 +140,35 @@ public class FragmentFingerprinter implements IFragmentFingerprinter {
      */
     @Override
     public IBitFingerprint getBitFingerprint(List<String> aListOfUniqueSmiles) throws NullPointerException, IllegalArgumentException {
-        //overloaded newer method to not brake legacy code
-        return this.getBitFingerprint(aListOfUniqueSmiles, this.uniqueSmilesToPositionMap);
-    }
-    //
-    /**
-     * Public method for creating a bit set fingerprint.
-     * For this, a given list of SMILES is compared with the pre-defined fragments (master vector of fragments for fingerprint definition).
-     * On the basis of the given SMILES to position map, each SMILES is checked whether the defined fingerprint includes the fragment.
-     * If the defined fingerprint contains the fragment, it's respective position inside the bit set is set to 'true'.
-     *
-     * @param aListOfUniqueSmiles to be checked against the pre-defined fingerprint
-     * @param aSmilesToPositionMap containing mappings of pre-defined fingerprint SMILES to their position inside the bit set
-     * @return BitSetFingerprint of the given SMILES
-     */
-    //possible rework of Betül's getBitFingerprint
-    //I would do all other reworks in similar ways
-    public BitSetFingerprint getBitFingerprint(List<String> aListOfUniqueSmiles, Map<String, Integer> aSmilesToPositionMap) {
         this.validityCheckOfParameterList(aListOfUniqueSmiles,"Given list of string instances is null.",
                 "Given list includes at least one null element.",
                 "Given list includes at least one blank/empty element.");
-        BitSet tmpBitSet = new BitSet(aSmilesToPositionMap.size());
-        Set<String> tmpUniqueSmilesSet = new HashSet<>((int) (aListOfUniqueSmiles.size() * 1.5f));
-        //hash set is used to deduplicate
-        tmpUniqueSmilesSet.addAll(aListOfUniqueSmiles);
-        for (String tmpSmiles : tmpUniqueSmilesSet) {
-            if (aSmilesToPositionMap.containsKey(tmpSmiles)) {
-                int tmpPosition = aSmilesToPositionMap.get(tmpSmiles);
+        if (this.cacheFingerprintSetting && this.cacheBitSetFingerprint != null) {
+            return this.cacheBitSetFingerprint;
+        }
+        BitSet tmpBitSet = new BitSet(this.uniqueSmilesToPositionMap.size());
+        //iterates through given list with the list's iterator
+        for (Iterator<String> tmpIterator = aListOfUniqueSmiles.iterator(); tmpIterator.hasNext();) {
+            String tmpCurrentSmiles = tmpIterator.next();
+            int tmpCurrentPosition = aListOfUniqueSmiles.indexOf(tmpCurrentSmiles);
+            boolean tmpCurrentSmilesHasDuplicates = false;
+            //skips already seen list elements by starting at current smiles position + 1 (next element in list)
+            for (int tmpPositionToCompare = tmpCurrentPosition + 1; tmpPositionToCompare < aListOfUniqueSmiles.size(); tmpPositionToCompare++) {
+                //removes current string from iterator if another string with the same value (= smiles) exists in iterator
+                //if a string only occurs once, nothing is removed from iterator and iterator continues to next string
+                if (aListOfUniqueSmiles.get(tmpPositionToCompare).equals(tmpCurrentSmiles)) {
+                    tmpIterator.remove();
+                    tmpCurrentSmilesHasDuplicates = true;
+                    break;
+                }
+            }
+            //if current smiles has no duplicates, set bit set position true
+            if (!tmpCurrentSmilesHasDuplicates && this.uniqueSmilesToPositionMap.containsKey(tmpCurrentSmiles)) {
+                int tmpPosition = this.uniqueSmilesToPositionMap.get(tmpCurrentSmiles);
                 tmpBitSet.set(tmpPosition, true);
             }
         }
-        if (this.useCacheFingerprintSetting) {
+        if (this.cacheFingerprintSetting) {
             this.cacheBitSetFingerprint = new BitSetFingerprint(tmpBitSet);
             return this.cacheBitSetFingerprint;
         } else {
@@ -185,7 +185,7 @@ public class FragmentFingerprinter implements IFragmentFingerprinter {
      *
      * @param aFragmentsUniqueSmilesList to be checked against the pre-defined fingerprint
      * @param aSmilesToPositionMap       containing mappings of pre-defined fingerprint SMILES to their position inside the bit set
-     * @param aPreInitFloatArray         pre-initialized float[] array with size of pre-defined fragment fingerprint
+     * @param aPreInitFloatArray         pre-initialized float[] array with size of pre-defined fragment fingerprint and additional space for descriptive float components
      * @return pre-initialized float[] array (comparable to a bit set data structure) of the given SMILES
      */
     public float[] getFloatBitFingerprint(
@@ -293,7 +293,7 @@ public class FragmentFingerprinter implements IFragmentFingerprinter {
                 tmpPositionToFrequencyMap.put(this.uniqueSmilesToPositionMap.get(tmpEntry.getKey()), tmpEntry.getValue());
             }
         }
-        return new CountFingerprint(this.fragmentsForBitSetArray, tmpPositionToFrequencyMap);
+        return new CountFingerprint(this.fragmentFingerprintMasterVectorArray, tmpPositionToFrequencyMap);
     }
     //
     /**
@@ -410,8 +410,8 @@ public class FragmentFingerprinter implements IFragmentFingerprinter {
      *
      * @param aSettingValue boolean setting value
      */
-    public void setUseCacheFingerprintSetting(boolean aSettingValue) {
-        this.useCacheFingerprintSetting = aSettingValue;
+    public void setCacheFingerprintSetting(boolean aSettingValue) {
+        this.cacheFingerprintSetting = aSettingValue;
     }
     //
     /**
@@ -449,12 +449,9 @@ public class FragmentFingerprinter implements IFragmentFingerprinter {
         this.validityCheckOfParameterList(aListOfUniqueSmiles,"aListOfUniqueSmiles (list of string instances) is null.",
                 "aListOfUniqueSmiles (at least one list element) is null.",
                 "aListOfUniqueSmiles (at least one list element) is blank/empty.");
-        Set<String> tmpUniqueSmilesSet = new HashSet<>((int) (aListOfUniqueSmiles.size() * 1.5f));
-        tmpUniqueSmilesSet.addAll(aListOfUniqueSmiles);
-        List<String> tmpListWithoutPossibleDuplicates = new ArrayList<>(tmpUniqueSmilesSet);
         //converts BitSetFingerprint to BitArray
-        int[] tmpReturnArray = new int[this.fragmentsForBitSetArray.length];
-        int[] tmpFingerprintArray = this.getBitFingerprint(tmpListWithoutPossibleDuplicates, this.uniqueSmilesToPositionMap).getSetbits();
+        int[] tmpReturnArray = new int[this.fragmentFingerprintMasterVectorArray.length];
+        int[] tmpFingerprintArray = this.getBitFingerprint(aListOfUniqueSmiles).getSetbits();
         for (int i : tmpFingerprintArray) {
             tmpReturnArray[i] = 1;
         }
@@ -491,8 +488,8 @@ public class FragmentFingerprinter implements IFragmentFingerprinter {
             tmpListOfUniqueSmiles.add(tmpEntry.getKey());
         }
         //converts BitSetFingerprint to BitArray
-        int[] tmpReturnArray = new int[this.fragmentsForBitSetArray.length];
-        int[] tmpFingerprintArray = this.getBitFingerprint(tmpListOfUniqueSmiles, this.uniqueSmilesToPositionMap).getSetbits();
+        int[] tmpReturnArray = new int[this.fragmentFingerprintMasterVectorArray.length];
+        int[] tmpFingerprintArray = this.getBitFingerprint(tmpListOfUniqueSmiles).getSetbits();
         for (int i : tmpFingerprintArray) {
             tmpReturnArray[i] = 1;
         }
@@ -567,7 +564,7 @@ public class FragmentFingerprinter implements IFragmentFingerprinter {
     private int[] createCountArray(List<String> aListOfUniqueSmiles) {
         int[] tmpCountArray = new int[this.uniqueSmilesToPositionMap.size()];
         CountFingerprint tmpCountFingerprint;
-        if (this.useCacheFingerprintSetting) {
+        if (this.cacheFingerprintSetting) {
             if (this.cacheCountFingerprint == null) {
                 this.cacheCountFingerprint = this.getCountFingerprint(aListOfUniqueSmiles);
 
