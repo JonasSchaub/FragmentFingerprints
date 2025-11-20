@@ -203,7 +203,7 @@ public class FragmentFingerprinterTest {
         }
         tmpFingerprintResultPrintWriter.close();
         // Objects necessary for the test are created (used only in @Test)
-        FragmentFingerprinterTest.countFingerprintTest = FragmentFingerprinterTest.fragmentFingerprinter.getCountFingerprint(FragmentFingerprinterTest.moleculeFragmentList.get(FragmentFingerprinterTest.moleculeFragmentList.size() - 1));
+        FragmentFingerprinterTest.countFingerprintTest = (CountFingerprint) FragmentFingerprinterTest.fragmentFingerprinter.getCountFingerprint(FragmentFingerprinterTest.moleculeFragmentList.get(FragmentFingerprinterTest.moleculeFragmentList.size() - 1));
         FragmentFingerprinterTest.bitFingerprintTest = FragmentFingerprinterTest.fragmentFingerprinter.getBitFingerprint(FragmentFingerprinterTest.dataForGeneratingBitFingerprint);
 
         // Variamycin fragments
