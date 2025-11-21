@@ -67,14 +67,14 @@ be pre-installed.
 **Needs to be pre-installed:**
 * Java Development Kit (JDK) version 17
   * [Adoptium OpenJDK](https://adoptium.net) (as one possible source of the JDK)
-* Gradle version 7.3
+* Gradle version 9.2.0
   * [Gradle Build Tool](https://gradle.org)
 
 **Managed by Gradle:**
 * Chemistry Development Kit (CDK) version 2.9
   * [Chemistry Development Kit on GitHub](https://cdk.github.io/)
   * License: GNU Lesser General Public License 2.1
-* JUnit Jupiter version 5.9.1
+* JUnit Jupiter version 6.0.1
   * [JUnit ](https://junit.org/junit5/)
   * License: Eclipse Public License - v 2.0
 

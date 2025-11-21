@@ -31,15 +31,15 @@ plugins {
     id("com.diffplug.spotless") version "6.19.0"
     id 'org.gradle.maven-publish'
     id 'signing'
-    id("org.sonarqube") version "4.3.1.3277"
+    id "org.sonarqube" version "7.1.0.6387"
 }
 
 application {
-    mainClassName = 'de.unijena.cheminf.fragment.fingerprint.performanceTest.Main'
+    mainClass = 'de.unijena.cheminf.fragment.fingerprint.performanceTest.Main'
 }
 
+
 group = 'io.github.jonasschaub'
-archivesBaseName = 'FragmentFingerprints'
 //see also version for publishing below! And do not forget to update CITATION.cff version as well!!!
 version = '1.1.0.0'
 
@@ -70,12 +70,10 @@ repositories {
 def cdkVersion = '2.9'
 dependencies {
     implementation group: 'org.jetbrains', name : 'annotations', version: '23.0.0'
-    testImplementation(platform('org.junit:junit-bom:5.9.1'))
-    testImplementation('org.junit.jupiter:junit-jupiter')
+    testImplementation("org.junit.jupiter:junit-jupiter:6.0.1")
+    testRuntimeOnly("org.junit.platform:junit-platform-launcher")
     implementation group: 'org.openscience.cdk', name: 'cdk-bundle', version: cdkVersion
 }
-mainClassName = 'de.unijena.cheminf.fragment.fingerprint.performanceTest.Main'
-applicationName = 'FragmentFingerprints'
 
 tasks.withType(Test).configureEach {
     useJUnitPlatform()
@@ -89,16 +87,16 @@ tasks.withType(Test).configureEach {
 //Needed to make the created jar archives executable
 jar {
     manifest {
-        attributes 'Main-Class': mainClassName
+        attributes 'Main-Class': application.mainClass
     }
 }
 
 //Creates a jar archive that includes all dependencies of the project, i.e. that  FragmentFingerprints can be started by executing this jar
-task fatJar(type: Jar) {
+tasks.register('fatJar', Jar) {
     manifest {
         attributes 'Implementation-Title': 'Fragmentfingerprints Fat Jar File',
                 'Implementation-Version': archiveVersion,
-                'Main-Class': mainClassName
+                'Main-Class': application.mainClass.get()
         duplicatesStrategy = DuplicatesStrategy.INCLUDE
     }
     archiveAppendix = 'fat'
@@ -109,6 +107,7 @@ task fatJar(type: Jar) {
 }
 
 test {
+    useJUnitPlatform()
     finalizedBy jacocoTestReport // report is always generated after tests run
 }
 
@@ -146,9 +145,8 @@ spotless {
 
 sonar {
     properties {
-        property("sonar.projectKey", "JonasSchaub_FragmentFingerprints")
-        property("sonar.organization", "jonasschaub")
-        property("sonar.host.url", "https://sonarcloud.io")
+        property "sonar.projectKey", "JonasSchaub_FragmentFingerprints"
+        property "sonar.organization", "jonasschaub"
     }
 }
 
