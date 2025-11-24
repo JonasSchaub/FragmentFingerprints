@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2023 Betuel Sevindik, Felix Baensch, Jonas Schaub, Christoph Steinbeck, and Achim Zielesny
+ * Copyright (c) 2025 Betuel Sevindik, Maximilian Rottmann, Felix Baensch, Jonas Schaub, Christoph Steinbeck, and Achim Zielesny
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -39,10 +39,9 @@ import java.util.Objects;
  * fingerprints, so it is necessary to create the CountFingerprint class to treat the fingerprints as
  * key-based fingerprints.
  *
- * @author Betuel Sevindik
- * @version 1.0.0.0
+ * @author Betuel Sevindik, Maximilian Rottmann
+ * @version 1.1.0.0
  */
-//ToDo: Cleanup needed.
 public class CountFingerprint implements ICountFingerprint {
     //<editor-fold desc="private final class variables" defaultstate="collapsed">
     /**
