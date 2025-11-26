@@ -59,8 +59,8 @@ import java.util.Objects;
 public class FragmentFingerprinter implements IFragmentFingerprinter {
     //<editor-fold desc="private final class variables" defaultstate="collapsed">
     /**
-     * The fragmentArray is converted into a HashMap to speed up the matching of the unique SMILES.
-     * The Map maps the unique SMILES of the predefined fragments to the position they have in the array.
+     * The fingerprint given during initialization is converted into a HashMap to speed up the matching of the unique SMILES.
+     * The Map maps the unique SMILES of the pre-defined fragments to the position they have in the fingerprint.
      */
     private final HashMap<String, Integer> uniqueSmilesToPositionMap;
     //</editor-fold>
@@ -74,7 +74,6 @@ public class FragmentFingerprinter implements IFragmentFingerprinter {
     //
     // <editor-fold defaultstate="collapsed" desc="Constructor">
     /**
-     * Constructor.
      * Initialization of the fragment fingerprinter by using a user-defined
      * set of fragments in the form of unique SMILES.
      * If the list passed during initialization contains duplicates, they will be removed.
@@ -82,9 +81,9 @@ public class FragmentFingerprinter implements IFragmentFingerprinter {
      * key fragments present, as duplicates are removed. This means that duplicate fragment SMILES strings in the input
      * list are ignored and are not part of the fingerprint multiple times.
      *
-     * @param aFragmentsForMasterVectorList is the ist in which the predefined fragments are stored.
-     * @throws NullPointerException is thrown if the list aFragmentsForMasterVectorList is null.
-     * @throws IllegalArgumentException is thrown if the list contains blank strings.
+     * @param aFragmentsForMasterVectorList in which the predefined fragments are stored.
+     * @throws NullPointerException is thrown if the list param (or any of its elements) is null.
+     * @throws IllegalArgumentException is thrown if the list param contains blank strings.
      */
     public FragmentFingerprinter(List<String> aFragmentsForMasterVectorList) throws NullPointerException, IllegalArgumentException {
         // Check whether aFragmentsForMasterVectorList is null or whether there are elements (strings) in the list that are empty.
@@ -105,11 +104,11 @@ public class FragmentFingerprinter implements IFragmentFingerprinter {
      *
      * @param aListOfUniqueSmiles is a list that stores fragments in the form of unique SMILES.
      * To be able to calculate the fingerprint for a molecule, the fragments should belong to one molecule.
-     * @return BitSet. BitSet is a CDK class that implements the IBitFingerprint interface of CDK.
+     * @return BitSetFingerprint. BitSetFingerprint is a CDK class that implements the IBitFingerprint interface of CDK.
      * This allows methods to be used that return useful information from the calculated bit fingerprint,
      * such as the number of positive bits in the fingerprint, etc.
-     * @throws NullPointerException is thrown if the list aListOfUniqueSmiles is null.
-     * @throws IllegalArgumentException is thrown if the list aListOfUniqueSmiles contains blank/empty strings.
+     * @throws NullPointerException is thrown if the list param (or any of its elements) is null.
+     * @throws IllegalArgumentException is thrown if the list param contains blank/empty strings.
      */
     @Override
     public IBitFingerprint getBitFingerprint(List<String> aListOfUniqueSmiles) throws NullPointerException, IllegalArgumentException {
@@ -187,8 +186,8 @@ public class FragmentFingerprinter implements IFragmentFingerprinter {
      * once in the list. To be able to calculate the fingerprint for a molecule,
      * the fragments should belong to one molecule.
      * @return count fingerprint
-     * @throws NullPointerException is thrown if the list aUniqueSmilesToFrequencyList is null.
-     * @throws IllegalArgumentException is thrown if the list aListOfUniqueSmiles contains blank/empty strings.
+     * @throws NullPointerException is thrown if the list param (or any of its elements) is null.
+     * @throws IllegalArgumentException is thrown if the list param contains blank/empty strings.
      */
     @Override
     public ICountFingerprint getCountFingerprint(List<String> aUniqueSmilesList) throws NullPointerException, IllegalArgumentException {
@@ -309,18 +308,20 @@ public class FragmentFingerprinter implements IFragmentFingerprinter {
      * @param aListOfUniqueSmiles is a list that stores molecule fragments or arbitrary fragments
      * in the form of unique SMILES.
      * @return int[] bit array
-     * @throws NullPointerException is thrown if the list aListOfUniqueSmiles is null.
-     * @throws IllegalArgumentException is thrown if the list aListOfUniqueSmiles contains blank/empty strings.
+     * @throws NullPointerException is thrown if the list param (or any of its elements) is null.
+     * @throws IllegalArgumentException is thrown if the list param contains blank/empty strings.
      */
     public int[] getBitArray(List<String> aListOfUniqueSmiles) throws NullPointerException, IllegalArgumentException {
         this.validityCheckOfParameterList(aListOfUniqueSmiles,"aListOfUniqueSmiles (list of string instances) is null.",
                 "aListOfUniqueSmiles (at least one list element) is null.",
                 "aListOfUniqueSmiles (at least one list element) is blank/empty.");
-        //converts BitSetFingerprint to BitArray
+        //converts BitSetFingerprint to BitSet
         int[] tmpReturnArray = new int[this.uniqueSmilesToPositionMap.size()];
         for (int tmpPositivePosition : this.getBitFingerprint(aListOfUniqueSmiles).getSetbits()) {
             tmpReturnArray[tmpPositivePosition] = 1;
         }
+        //ToDo: convert this and dependencies to BitSet return
+        //return this.getBitFingerprint(aListOfUniqueSmiles).asBitSet();
         return tmpReturnArray;
     }
     //
@@ -358,6 +359,7 @@ public class FragmentFingerprinter implements IFragmentFingerprinter {
         for (int tmpPositivePosition : this.getBitFingerprint(tmpListOfUniqueSmiles).getSetbits()) {
             tmpReturnArray[tmpPositivePosition] = 1;
         }
+        //ToDo: convert this and dependencies to BitSet return
         return tmpReturnArray;
     }
     //
@@ -404,8 +406,8 @@ public class FragmentFingerprinter implements IFragmentFingerprinter {
      * @param aListOfUniqueSmiles is a list that stores molecule fragments or arbitrary fragments
      * in the form of unique SMILES.
      * @return int[] count array
-     * @throws NullPointerException is thrown if the list aListOfUniqueSmiles is null.
-     * @throws IllegalArgumentException is thrown if the list aListOfUniqueSmiles contains blank/empty strings.
+     * @throws NullPointerException is thrown if the list param (or any of its elements) is null.
+     * @throws IllegalArgumentException is thrown if the list param contains blank/empty strings.
      */
     public int[] getCountArray(List<String> aListOfUniqueSmiles) throws NullPointerException, IllegalArgumentException {
         this.validityCheckOfParameterList(aListOfUniqueSmiles,"aListOfUniqueSmiles (list of string instances) is null.",
@@ -423,6 +425,9 @@ public class FragmentFingerprinter implements IFragmentFingerprinter {
      *
      * @param aFragmentsUniqueSmilesList to be checked against the pre-defined fingerprint
      * @param aPreInitFloatArray         pre-initialized float[] array with size of pre-defined fragment fingerprint and additional space for descriptive float components
+     *
+     * @throws NullPointerException is thrown if the list param (or any of its elements) is null.
+     * @throws IllegalArgumentException is thrown if the list param contains blank/empty strings.
      */
     public void getFloatBitFingerprint(
             //aFragmentsUniqueSmilesList contains fragments of ONE molecule
@@ -451,6 +456,8 @@ public class FragmentFingerprinter implements IFragmentFingerprinter {
      *
      * @param aFragmentsUniqueSmilesList of fragment SMILES to be compared to the pre-defined fingerprint
      * @param aPreInitFloatArray         pre-initialized float[] in which the fingerprint is to be stored
+     * @throws NullPointerException is thrown if the list param (or any of its elements) is null.
+     * @throws IllegalArgumentException is thrown if the list param contains blank/empty strings.
      */
     public void getFloatCountFingerprint(
             List<String> aFragmentsUniqueSmilesList,
@@ -467,10 +474,10 @@ public class FragmentFingerprinter implements IFragmentFingerprinter {
     }
     //
     /**
-     * Public method to get a float[][] matrix containing the fingerprints for the given SMILES in regard to the
-     * pre-defined fragment fingerprint.
+     * Public method to get a float[][] matrix containing the fingerprints for the given SMILES lists (fragment sets
+     * of distinct molecules) in regard to the pre-defined fragment fingerprint.
      * It shall be noted that each List in the given List (List of Lists) represents ONE molecule's fragments.
-     * Therefor, the whole list represents the entirety of fragments.
+     * Therefore, the whole list represents the entirety of fragments.
      * Further, a setting whether to use "bit set" or "count/frequency of fragment" is available.
      * It is recommended to check the size of the pre-initialized float matrix. In case of a matrix with a pre-initialized
      * size smaller than the actual required size, an exception will be thrown and no matrix filling will take place.
@@ -492,7 +499,7 @@ public class FragmentFingerprinter implements IFragmentFingerprinter {
         } else {
             //checks each matrix array (~column count) for allowed size
             for (int i = 0; i < aFloatDataMatrix.length; i++) {
-                if (aFragmentsUniqueSmilesListsList.get(i).size() > aFloatDataMatrix[i].length ) {
+                if (this.uniqueSmilesToPositionMap.size() > aFloatDataMatrix[i].length ) {
                     throw new IllegalArgumentException("Given fragments list size was larger than provided matrix array size.");
                 }
             }
@@ -534,6 +541,9 @@ public class FragmentFingerprinter implements IFragmentFingerprinter {
     /**
      * Method stores all key fragments specified during initialization in an array. It ensures that there are
      * no fragment duplicates in the array.
+     * <p>
+     * !Important note: This is generated on the fly and not stored!
+     * </p>
      *
      * @return String[]
      */
