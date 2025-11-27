@@ -63,6 +63,10 @@ public class FragmentFingerprinter implements IFragmentFingerprinter {
      * The Map maps the unique SMILES of the pre-defined fragments to the position they have in the fingerprint.
      */
     private final HashMap<String, Integer> uniqueSmilesToPositionMap;
+    /**
+     * SubstructureFingerprinter instance initialized once in the constructor and used throughout the FragmentFingerprinter class.
+     */
+    private final SubstructureFingerprinter substructureFingerprinter;
     //</editor-fold>
     //
     //<editor-fold desc="private static final class variables" defaultstate="collapsed">
@@ -91,6 +95,7 @@ public class FragmentFingerprinter implements IFragmentFingerprinter {
                 "aFragmentsForMasterVectorList (at least one list element) is null.",
                 "aFragmentsForMasterVectorList (at least one list element) is blank/empty.");
         this.uniqueSmilesToPositionMap = this.buildUniqueSmilesToPositionMap(aFragmentsForMasterVectorList);
+        this.substructureFingerprinter = new SubstructureFingerprinter(this.getPredefinedFragmentArrayWithoutDuplicates());
     }
     // </editor-fold>
     //
@@ -231,10 +236,7 @@ public class FragmentFingerprinter implements IFragmentFingerprinter {
      */
     @Override
     public IBitFingerprint getBitFingerprint(IAtomContainer container) throws CDKException {
-        String[] tmpPredefinedFragments = this.getPredefinedFragmentArrayWithoutDuplicates();
-        SubstructureFingerprinter tmpSubstructureFingerprint = new SubstructureFingerprinter(tmpPredefinedFragments);
-        IBitFingerprint tmpBitFingerprintBySubstructureSearch = tmpSubstructureFingerprint.getBitFingerprint(container);
-        return tmpBitFingerprintBySubstructureSearch;
+        return this.substructureFingerprinter.getBitFingerprint(container);
     }
     //
     /**
@@ -243,10 +245,7 @@ public class FragmentFingerprinter implements IFragmentFingerprinter {
      */
     @Override
     public ICountFingerprint getCountFingerprint(IAtomContainer container) throws CDKException {
-        String[] tmpPredefinedFragments = this.getPredefinedFragmentArrayWithoutDuplicates();
-        SubstructureFingerprinter tmpSubstructureFingerprint = new SubstructureFingerprinter(tmpPredefinedFragments);
-        ICountFingerprint tmpCountFingerprintBySubstructureSearch = tmpSubstructureFingerprint.getCountFingerprint(container);
-        return tmpCountFingerprintBySubstructureSearch;
+        return this.substructureFingerprinter.getCountFingerprint(container);
     }
     //
     /**
@@ -285,17 +284,23 @@ public class FragmentFingerprinter implements IFragmentFingerprinter {
      * Important, the number of possible bit definitions may differ from the number of key
      * fragments passed during initialization, since duplicates are removed.
      *
-     * @param aBit position in the fingerprint.
+     * @param aBitPosition in the fingerprint.
      * @return unique SMILES corresponding to the specified position.
-     * @throws IllegalArgumentException is thrown if the given bit position is not present in the fingerprint.
+     * @throws IllegalArgumentException is thrown if the given bit position is not (or cannot be) present in the fingerprint.
      */
-    public String getBitDefinition(int aBit) throws IllegalArgumentException {
-        String[] tmpPredefinedFragmentsInArray = this.getPredefinedFragmentArrayWithoutDuplicates();
-        if(aBit < tmpPredefinedFragmentsInArray.length && aBit >= 0) {
-            return tmpPredefinedFragmentsInArray[aBit];
+    public String getBitDefinition(int aBitPosition) throws IllegalArgumentException {
+        if (aBitPosition < 0) {
+            throw new IllegalArgumentException("Given bit position cannot be smaller than 0.");
+        } else if (aBitPosition >= this.uniqueSmilesToPositionMap.size()) {
+            throw new IllegalArgumentException("Given bit position cannot be larger than position map.");
         } else {
-            throw new IllegalArgumentException("This bit is not defined/present in the fingerprint.");
+            for (Map.Entry<String, Integer> tmpEntry : this.uniqueSmilesToPositionMap.entrySet()) {
+                if (tmpEntry.getValue() == aBitPosition) {
+                    return tmpEntry.getKey();
+                }
+            }
         }
+        throw new IllegalArgumentException("This bit is not defined/present in the fingerprint.");
     }
     //
     /**
@@ -320,8 +325,6 @@ public class FragmentFingerprinter implements IFragmentFingerprinter {
         for (int tmpPositivePosition : this.getBitFingerprint(aListOfUniqueSmiles).getSetbits()) {
             tmpReturnArray[tmpPositivePosition] = 1;
         }
-        //ToDo: convert this and dependencies to BitSet return
-        //return this.getBitFingerprint(aListOfUniqueSmiles).asBitSet();
         return tmpReturnArray;
     }
     //
@@ -359,8 +362,41 @@ public class FragmentFingerprinter implements IFragmentFingerprinter {
         for (int tmpPositivePosition : this.getBitFingerprint(tmpListOfUniqueSmiles).getSetbits()) {
             tmpReturnArray[tmpPositivePosition] = 1;
         }
-        //ToDo: convert this and dependencies to BitSet return
         return tmpReturnArray;
+    }
+    //
+    /**
+     * Method directly returning the BitSet of the fingerprint generated from the given list of SMILES.
+     *
+     * @param aListOfUniqueSmiles storing the fragments or molecules from which a fingerprint (and BitSet) is to be generated
+     * @return BitSet of the generated fingerprint
+     */
+    public BitSet getBitSet(List<String> aListOfUniqueSmiles) throws NullPointerException, IllegalArgumentException {
+        this.validityCheckOfParameterList(aListOfUniqueSmiles,"aListOfUniqueSmiles (list of string instances) is null.",
+                "aListOfUniqueSmiles (at least one list element) is null.",
+                "aListOfUniqueSmiles (at least one list element) is blank/empty.");
+        return this.getBitFingerprint(aListOfUniqueSmiles).asBitSet();
+    }
+    /**
+     * Method directly returning the BitSet of the fingerprint generated from the given frequency map.
+     *
+     * @param aUniqueSmilesToFrequencyMap with SMILES to frequency representation from which a fingerprint (and BitSet) is to be generated
+     * @return BitSet of the generated fingerprint
+     */
+    public BitSet getBitSet(Map<String, Integer> aUniqueSmilesToFrequencyMap) throws NullPointerException, IllegalArgumentException {
+        Objects.requireNonNull(aUniqueSmilesToFrequencyMap,
+                "aUniqueSmilesToFrequencyMap (Map of string and integer instances) is null.");
+        List<String> tmpListOfUniqueSmiles = new ArrayList<>(aUniqueSmilesToFrequencyMap.size());
+        for (Map.Entry<String, Integer> tmpEntry : aUniqueSmilesToFrequencyMap.entrySet()) {
+            if (tmpEntry.getKey() == null || tmpEntry.getValue() == null) {
+                throw new NullPointerException("Given map of string and integer instances contains " +
+                        "instances that are null.");
+            } else if (tmpEntry.getKey().isEmpty() || tmpEntry.getKey().isBlank()) {
+                throw new IllegalArgumentException("Given map of strings an integer instances contains strings that are blank/empty.");
+            }
+            tmpListOfUniqueSmiles.add(tmpEntry.getKey());
+        }
+        return this.getBitFingerprint(tmpListOfUniqueSmiles).asBitSet();
     }
     //
     /**
