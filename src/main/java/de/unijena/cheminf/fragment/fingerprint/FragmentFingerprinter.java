@@ -173,7 +173,7 @@ public class FragmentFingerprinter implements IFragmentFingerprinter {
         for (Map.Entry<String, Integer> tmpEntry : this.uniqueSmilesToPositionMap.entrySet()) {
             tmpSmilesPositionArray[tmpEntry.getValue()] = tmpEntry.getKey();
         }
-        return new CountFingerprint(tmpSmilesPositionArray, tmpPositionToFrequencyMap);
+        return new CountFingerprint(this.uniqueSmilesToPositionMap, tmpPositionToFrequencyMap);
     }
     //
     /**
