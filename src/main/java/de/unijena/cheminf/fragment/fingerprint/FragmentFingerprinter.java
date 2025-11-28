@@ -173,7 +173,7 @@ public class FragmentFingerprinter implements IFragmentFingerprinter {
         for (Map.Entry<String, Integer> tmpEntry : this.uniqueSmilesToPositionMap.entrySet()) {
             tmpSmilesPositionArray[tmpEntry.getValue()] = tmpEntry.getKey();
         }
-        return new CountFingerprint(this.uniqueSmilesToPositionMap, tmpPositionToFrequencyMap);
+        return new CountFingerprint(this.uniqueSmilesToPositionMap.size(), tmpPositionToFrequencyMap);
     }
     //
     /**
@@ -450,6 +450,27 @@ public class FragmentFingerprinter implements IFragmentFingerprinter {
                 "aListOfUniqueSmiles (at least one list element) is null.",
                 "aListOfUniqueSmiles (at least one list element) is blank/empty.");
         return this.createCountArray(aListOfUniqueSmiles);
+    }
+    //
+    /**
+     * Method to return the count/occurrences/frequency of a given SMILES String in a given CountFingerprint instance.
+     * !Important: The CountFingerprint instance has got to be generated with the currently instanced/active FragmentFingerprinter!
+     *
+     * @param aSmiles String to get count for
+     * @param aCountFingerprint wherein to search for SMILES String
+     * @return integer count of given SMILES String
+     * @throws IllegalArgumentException if SMILES is not present in fingerprint
+     */
+    public int count(String aSmiles, CountFingerprint aCountFingerprint) throws IllegalArgumentException {
+        if(!this.uniqueSmilesToPositionMap.containsKey(aSmiles)) {
+            throw new IllegalArgumentException("The given SMILES string is not available");
+        }
+        int tmpPosition =  this.uniqueSmilesToPositionMap.get(aSmiles);
+        try {
+            return aCountFingerprint.getSmilesPositionToFrequencyMap().get(tmpPosition);
+        } catch (NullPointerException aNullpointerException) {
+            throw new IllegalArgumentException("Given SMILES string does not occur in CountFingerprint.");
+        }
     }
     //
     //<editor-fold desc="Public Methods - float variants">

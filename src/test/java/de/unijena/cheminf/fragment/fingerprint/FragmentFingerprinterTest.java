@@ -48,6 +48,7 @@ import java.util.Arrays;
 import java.util.BitSet;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Class to test the correct working of FragmentFingerprinter
@@ -431,18 +432,6 @@ public class FragmentFingerprinterTest {
     }
     //
     /**
-     * Tests the hash value at position 17 in the count fingerprints.
-     *
-     * Test molecule: Variamycin
-     */
-    @Test
-    public void getHashTest(){
-        int tmpHashTestForGivenIndex = 17;
-        int tmpHashForGivenIndexInVariamycin =  FragmentFingerprinterTest.countFingerprintTest.getHash(17);
-        Assertions.assertEquals(tmpHashTestForGivenIndex, tmpHashForGivenIndexInVariamycin);
-    }
-    //
-    /**
      * Tests whether the correct count value is supplied for the hash value 10.
      *
      * Test molecule: Variamycin
@@ -455,18 +444,6 @@ public class FragmentFingerprinterTest {
     }
     //
     /**
-     * Tests whether the fingerprint contains the given hash. The given hash is 30.
-     *
-     * Test molecule: Variamycin
-     */
-    @Test
-    public void hasHashTest() {
-        boolean tmpHasHashForGivenIndex = false;
-        boolean tmpHasHashForGivenIndexInVariamycinFingerprint = FragmentFingerprinterTest.countFingerprintTest.hasHash(30);
-        Assertions.assertEquals(tmpHasHashForGivenIndex, tmpHasHashForGivenIndexInVariamycinFingerprint);
-    }
-    //
-    /**
      * Tests the count method
      *
      * Test molecule: Variamycin
@@ -474,7 +451,7 @@ public class FragmentFingerprinterTest {
     @Test
     public void countTest() {
         int tmpCountForGivenSmilesString = 5;
-        int tmpCountForGivenSmilesStringInVariamycinFingerprint = FragmentFingerprinterTest.countFingerprintTest.count("CCCCC");
+        int tmpCountForGivenSmilesStringInVariamycinFingerprint = FragmentFingerprinterTest.fragmentFingerprinter.count("CCCCC", countFingerprintTest);
         Assertions.assertEquals(tmpCountForGivenSmilesString, tmpCountForGivenSmilesStringInVariamycinFingerprint);
     }
     //
@@ -524,30 +501,6 @@ public class FragmentFingerprinterTest {
         int tmpCountForGivenIndexTest = 5;
         int tmpCountForGivenIndexInVariamycinFingerprint = FragmentFingerprinterTest.fragmentFingerprinter.getCountFingerprint(FragmentFingerprinterTest.countListOfUniqueSmiles).getCount(26);
         Assertions.assertEquals(tmpCountForGivenIndexTest, tmpCountForGivenIndexInVariamycinFingerprint);
-    }
-    //
-    /**
-     * Tests the hash value at position 10 in the count fingerprint.
-     *
-     * Test molecule: Variamycin
-     */
-    @Test
-    public void getHashTestInputList() {
-        int tmpHashForGivenIndexTest = 10;
-        int tmpHashForGivenIndexInVariamcyinFingerprint = FragmentFingerprinterTest.fragmentFingerprinter.getCountFingerprint(FragmentFingerprinterTest.countListOfUniqueSmiles).getHash(10);
-        Assertions.assertEquals(tmpHashForGivenIndexTest,tmpHashForGivenIndexInVariamcyinFingerprint);
-    }
-    //
-    /**
-     * Tests whether the fingerprint contains the given hash. The given hash is 20.
-     *
-     * Test molecule: Variamycin
-     */
-    @Test
-    public void hasHashTestInputList() {
-        boolean tmpHasHashForGivenIndex = true;
-        boolean tmpHasHashForGivenIndexInVariamycinFingerprint = FragmentFingerprinterTest.fragmentFingerprinter.getCountFingerprint(FragmentFingerprinterTest.countListOfUniqueSmiles).hasHash(20);
-        Assertions.assertEquals(tmpHasHashForGivenIndex, tmpHasHashForGivenIndexInVariamycinFingerprint);
     }
     //
     /**
@@ -673,6 +626,119 @@ public class FragmentFingerprinterTest {
         Assertions.assertEquals(33.0f, tmpFloatMatrix[1][10]);
         Assertions.assertEquals(33.0f, tmpFloatMatrix[1][11]);
     }
+    //
+    /**
+     *  Tests the correct functionality of mergeCountFingerprint() of CountFingerprint class.
+     *  Two fingerprints are therefor generated and merged and checked for equal integers with a fixed result.
+     */
+    @Test
+    public void TestMergeCountFingerprint() {
+        List<String> tmpSmilesList = new ArrayList<>(5);
+        tmpSmilesList.add("C");
+        tmpSmilesList.add("*O");
+        tmpSmilesList.add("cccc");
+        tmpSmilesList.add("*O*");
+        tmpSmilesList.add("OC=O");
+        //
+        HashMap<String, Integer> tmpFreqMap = new HashMap<>((int) (tmpSmilesList.size() * 1.5f) + 1, 0.75f);
+        tmpFreqMap.put("C", 5);
+        tmpFreqMap.put("*O", 4);
+        tmpFreqMap.put("cccc", 3);
+        tmpFreqMap.put("*O*", 2);
+        tmpFreqMap.put("OC=O", 1);
+        //
+        FragmentFingerprinter tmpFFp = new FragmentFingerprinter(tmpSmilesList);
+        //
+        CountFingerprint tmpCountFingerprint1 = (CountFingerprint) tmpFFp.getCountFingerprint(tmpFreqMap);
+        //
+        HashMap<String, Integer> tmpFreqMap2 = new HashMap<>((int) (tmpSmilesList.size() * 1.5f) + 1, 0.75f);
+        tmpFreqMap2.put("C", 1);
+        tmpFreqMap2.put("*O", 2);
+        tmpFreqMap2.put("cccc", 3);
+        tmpFreqMap2.put("*O*", 4);
+        tmpFreqMap2.put("OC=O", 5);
+        //
+        CountFingerprint tmpCountFingerprint2 = (CountFingerprint) tmpFFp.getCountFingerprint(tmpFreqMap2);
+        //
+        CountFingerprint tmpMergedCountFingerprint = tmpCountFingerprint2.mergeCountFingerprint(tmpCountFingerprint1);
+        //
+        HashMap<String, Integer> tmpAddMap = new HashMap<>((int) (tmpSmilesList.size() * 1.5f) + 1, 0.75f);
+        tmpAddMap.put("C", 6);
+        tmpAddMap.put("*O", 6);
+        tmpAddMap.put("cccc", 6);
+        tmpAddMap.put("*O*", 6);
+        tmpAddMap.put("OC=O", 6);
+        //
+        CountFingerprint tmpCountFingerprintForAssertion = (CountFingerprint) tmpFFp.getCountFingerprint(tmpAddMap);
+        //
+        Map<Integer, Integer> tmpMergedMap = tmpMergedCountFingerprint.getSmilesPositionToFrequencyMap();
+        Map<Integer, Integer> tmpAssertionMap = tmpCountFingerprintForAssertion.getSmilesPositionToFrequencyMap();
+        for (Map.Entry<Integer, Integer> tmpEntry : tmpAssertionMap.entrySet()) {
+            Assertions.assertEquals(tmpEntry.getValue(), tmpMergedMap.get(tmpEntry.getKey()));
+        }
+    }
+    //
+    /**
+     * Test for FragmentFingerprinter getBitSet(List of Strings) where correct fingerprint generation and conversion to
+     * BitSet is checked.
+     */
+    @Test
+    public void TestGetBitSetOfList() {
+        List<String> tmpSmilesList = new ArrayList<>(5);
+        tmpSmilesList.add("C");
+        tmpSmilesList.add("*O");
+        tmpSmilesList.add("cccc");
+        tmpSmilesList.add("*O*");
+        tmpSmilesList.add("OC=O");
+        FragmentFingerprinter tmpFFp = new FragmentFingerprinter(tmpSmilesList);
+        //extra entry to see behavior of bit set
+        tmpSmilesList.add("S");
+        BitSet tmpTestBitSet = tmpFFp.getBitSet(tmpSmilesList);
+        BitSet tmpExpectBitSet = new BitSet();
+        tmpExpectBitSet.set(0, true);
+        tmpExpectBitSet.set(1, true);
+        tmpExpectBitSet.set(2, true);
+        tmpExpectBitSet.set(3, true);
+        tmpExpectBitSet.set(4, true);
+        //
+        for (int i = 0; i < tmpExpectBitSet.size(); i++) {
+            Assertions.assertEquals(tmpExpectBitSet.get(i), tmpTestBitSet.get(i));
+        }
+    }/**
+     * Test for FragmentFingerprinter getBitSet(SMILES to frequency map) where correct fingerprint generation and
+     * conversion to BitSet is checked.
+     */
+    @Test
+    public void TestGetBitSetOfFrequencyMap() {
+        List<String> tmpSmilesList = new ArrayList<>(5);
+        tmpSmilesList.add("C");
+        tmpSmilesList.add("*O");
+        tmpSmilesList.add("cccc");
+        tmpSmilesList.add("*O*");
+        tmpSmilesList.add("OC=O");
+        FragmentFingerprinter tmpFFp = new FragmentFingerprinter(tmpSmilesList);
+        Map<String, Integer> tmpSmilesToFrequencyMap = new HashMap<>((int) (5 * 1.5), 0.75f);
+        tmpSmilesToFrequencyMap.put("C", 1);
+        tmpSmilesToFrequencyMap.put("*O", 2);
+        tmpSmilesToFrequencyMap.put("cccc", 3);
+        tmpSmilesToFrequencyMap.put("*O*", 4);
+        tmpSmilesToFrequencyMap.put("OC=O", 5);
+        //extra entry as other test for bit set generation
+        tmpSmilesToFrequencyMap.put("S", 6);
+        //
+        BitSet tmpTestBitSet = tmpFFp.getBitSet(tmpSmilesToFrequencyMap);
+        BitSet tmpExpectBitSet = new BitSet();
+        tmpExpectBitSet.set(0, true);
+        tmpExpectBitSet.set(1, true);
+        tmpExpectBitSet.set(2, true);
+        tmpExpectBitSet.set(3, true);
+        tmpExpectBitSet.set(4, true);
+        //
+        for (int i = 0; i < tmpExpectBitSet.size(); i++) {
+            Assertions.assertEquals(tmpExpectBitSet.get(i), tmpTestBitSet.get(i));
+        }
+    }
+
     //</editor-fold>
     //
     //<editor-fold desc="Test count arrays of all molecules" defaultstate="collapsed">

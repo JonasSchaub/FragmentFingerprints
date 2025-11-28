@@ -52,6 +52,10 @@ public class CountFingerprint implements ICountFingerprint {
      * the fragments are stored if a match has occurred. In the following, the map can also be referred to as a raw map.
      */
     private final HashMap<Integer,Integer> uniqueSmilesPositionToFrequencyCountRawMap;
+    /**
+     * Private final integer storing the pre-defined fingerprint size.
+     */
+    private final int definedFingerprintSize;
     //</editor-fold>
     //
     //<editor-fold desc="private class variables" defaultstate="collapsed">
@@ -60,40 +64,54 @@ public class CountFingerprint implements ICountFingerprint {
      * behaves the same as a bit fingerprint.
      */
     private boolean behaveAsBitFingerprint;
-    /**
-     * The HashMap maps the predefined (key) fragments/unique SMILES to the position they have in the fingerprint.
-     */
-    private HashMap<String,Integer> uniqueSmilesToPositionMap;
     //</editor-fold>
     //
     //<editor-fold desc="Constructor" defaultstate="collapsed">
     /**
-     * Constructor.
-     * Initialization of CountFingerprint.
+     * Initialization of default CountFingerprint.
      * The specified parameters are checked for validity.
      * Duplicate fragment SMILES (key fragments) in the given array will be ignored and not be a part of the
      * count fingerprint multiple times.
      *
-     * @param aSmilesToPositionMap contains SMILES strings mapped to their position in a defined fingerprint.
-     *                             The position in this map should match the
+     * @param aFingerprintSize defines the size of the fingerprint
      * @param aPositionToFrequencyMap This map is a raw map and must map the positions of key fragments in the
      *                                fingerprint to their frequencies in the molecule or any set of fragments.
      * @throws NullPointerException is thrown if the arguments are null.
-     * @throws IllegalArgumentException is thrown if the list anArrayOfFragments contains blank/empty strings.
+     * @throws IllegalArgumentException is thrown if the given size is smaller than one.
      */
-    public CountFingerprint(Map<String, Integer> aSmilesToPositionMap, Map<Integer, Integer> aPositionToFrequencyMap) throws NullPointerException, IllegalArgumentException {
-        Objects.requireNonNull(aSmilesToPositionMap, "aSmilesToPositionMap is null.");
+    public CountFingerprint(int aFingerprintSize, Map<Integer, Integer> aPositionToFrequencyMap) throws NullPointerException, IllegalArgumentException {
         Objects.requireNonNull(aPositionToFrequencyMap, "aPositionToFrequencyMap is null.");
-        for (Map.Entry<String, Integer> tmpEntry : aSmilesToPositionMap.entrySet()) {
-            if (tmpEntry.getKey().isEmpty() || tmpEntry.getKey().isBlank()) {
-                throw new IllegalArgumentException("At least one SMILES entry is empty or blank.");
+        for (Map.Entry<Integer, Integer> tmpEntry : aPositionToFrequencyMap.entrySet()) {
+            if (tmpEntry.getValue() == null) {
+                throw new NullPointerException("At least one map entry has null value.");
             }
         }
-        //omittable by using the given map (aSmilesToPositionMap)
-//        this.buildUniqueSmilesToPositionMap();
-        this.uniqueSmilesToPositionMap = (HashMap<String, Integer>) aSmilesToPositionMap;
+        if (aFingerprintSize < 1) {
+            throw new IllegalArgumentException("Fingerprint size cannot be zero or less.");
+        }
+        this.definedFingerprintSize = aFingerprintSize;
         this.uniqueSmilesPositionToFrequencyCountRawMap = (HashMap<Integer, Integer>) aPositionToFrequencyMap;
         this.behaveAsBitFingerprint = false;
+    }
+    //
+    /**
+     * Initialization of CountFingerprint with a given behavior statement.
+     *
+     * @param aFingerprintSize defines the size of the fingerprint
+     * @param aPositionToFrequencyMap This map is a raw map and must map the positions of key fragments in the
+     *                                fingerprint to their frequencies in the molecule or any set of fragments.
+     * @param aFingerprintBehaviorStatement defines whether CountFingerprint should behave ass BitFingerprint
+     * @throws NullPointerException is thrown if the arguments are null.
+     * @throws IllegalArgumentException is thrown if the given size is smaller than one.
+     */
+    public CountFingerprint(int aFingerprintSize, Map<Integer, Integer> aPositionToFrequencyMap, boolean aFingerprintBehaviorStatement) throws NullPointerException, IllegalArgumentException {
+        Objects.requireNonNull(aPositionToFrequencyMap, "aPositionToFrequencyMap is null.");
+        if (aFingerprintSize < 1) {
+            throw new IllegalArgumentException("Fingerprint size cannot be zero or smaller");
+        }
+        this.definedFingerprintSize = aFingerprintSize;
+        this.uniqueSmilesPositionToFrequencyCountRawMap = (HashMap<Integer, Integer>) aPositionToFrequencyMap;
+        this.behaveAsBitFingerprint = aFingerprintBehaviorStatement;
     }
     //</editor-fold>
     //
@@ -109,7 +127,7 @@ public class CountFingerprint implements ICountFingerprint {
      */
     @Override
     public long size() {
-        return this.uniqueSmilesToPositionMap.size();
+        return this.definedFingerprintSize;
     }
     //
     /**
@@ -123,7 +141,7 @@ public class CountFingerprint implements ICountFingerprint {
      */
     @Override
     public int numOfPopulatedbins() {
-        return this.uniqueSmilesToPositionMap.size();
+        return this.definedFingerprintSize;
     }
     //
     /**
@@ -140,7 +158,7 @@ public class CountFingerprint implements ICountFingerprint {
      */
     @Override
     public int getCount(int index) throws IllegalArgumentException {
-        if (index >= this.uniqueSmilesToPositionMap.size() || index < 0) {
+        if (index >= this.definedFingerprintSize || index < 0) {
             throw new IllegalArgumentException("This position does not exist in the fingerprint (undefined state).");
         } else if (index >= 0 && this.uniqueSmilesPositionToFrequencyCountRawMap.containsKey(index)) {
             if (this.behaveAsBitFingerprint) {
@@ -156,20 +174,12 @@ public class CountFingerprint implements ICountFingerprint {
     /**
      * {@inheritDoc}
      *
-     * Since this is a key-based fingerprint, the hash value is  the position of the bin in the
-     * fingerprint (no hash value is calculated).
+     * @throws UnsupportedOperationException as the fingerprint is not a hash fingerprint
      *
      */
     @Override
     public int getHash(int index) {
-        String[] tmpPredefinedFragmentsInArray = new String[this.uniqueSmilesToPositionMap.size()];
-        for(String tmpKeyFragmentPositionInFingerprint : this.uniqueSmilesToPositionMap.keySet()) {
-            tmpPredefinedFragmentsInArray[this.uniqueSmilesToPositionMap.get(tmpKeyFragmentPositionInFingerprint)] = tmpKeyFragmentPositionInFingerprint;
-        }
-        if(index >= tmpPredefinedFragmentsInArray.length || index < 0 ) {
-            throw new IllegalArgumentException("This hash value/position does not exist in the fingerprint (undefined state).");
-        }
-        return this.uniqueSmilesToPositionMap.get(tmpPredefinedFragmentsInArray[index]);
+        throw new UnsupportedOperationException("No hash returnable as this fingerprint is not a hash fingerprint.");
     }
     //
     /**
@@ -194,20 +204,11 @@ public class CountFingerprint implements ICountFingerprint {
     /**
      * {@inheritDoc}
      *
-     * The parameter hash is not a calculated hash value, but also corresponds to the
-     * position of the bin in the fingerprint.
-     *
-     * @throws IllegalArgumentException is thrown if the given hash value is negative.
+     * @throws UnsupportedOperationException due to not being a hash fingerprint.
      */
     @Override
     public boolean hasHash(int hash) throws IllegalArgumentException {
-        if(hash < this.uniqueSmilesToPositionMap.size() && hash >= 0) {
-            return true;
-        } else if (hash < 0) {
-            throw new IllegalArgumentException("Negative values are not allowed.");
-        } else {
-            return false;
-        }
+        throw new UnsupportedOperationException("Fingerprint is not a hash fingerprint.");
     }
     //
     /**
@@ -224,7 +225,7 @@ public class CountFingerprint implements ICountFingerprint {
      */
     @Override
     public int getCountForHash(int hash) throws IllegalArgumentException {
-        if (hash >= this.uniqueSmilesToPositionMap.size() || hash < 0) {
+        if (hash >= this.definedFingerprintSize || hash < 0) {
             throw new IllegalArgumentException("This position does not exist in the fingerprint (undefined state).");
         } else if (hash >= 0 && this.uniqueSmilesPositionToFrequencyCountRawMap.containsKey(hash)) {
             if (this.behaveAsBitFingerprint) {
@@ -239,39 +240,18 @@ public class CountFingerprint implements ICountFingerprint {
     //</editor-fold>
     //
     //<editor-fold desc="Public method" defaultstate="collapsed">
-    /**
-     * Method returns the frequency in the count fingerprint for a given SMILES string.
-     *
-     * @param aSmiles SMILES String for which the frequency is to be returned. These SMILES should represent a key fragment.
-     * @return int count value
-     * @throws IllegalArgumentException is thrown if the given SMILES string is not a key fragment.
-     */
-    public int count(String aSmiles) throws IllegalArgumentException {
-        if(!this.uniqueSmilesToPositionMap.containsKey(aSmiles)) {
-            throw new IllegalArgumentException("The given SMILES string is not available");
-        }
-        int tmpPosition =  this.uniqueSmilesToPositionMap.get(aSmiles);
-        if(this.uniqueSmilesPositionToFrequencyCountRawMap.containsKey(tmpPosition)) {
-            if(this.behaveAsBitFingerprint) {
-                return 1;
-            } else {
-                return this.uniqueSmilesPositionToFrequencyCountRawMap.get(tmpPosition);
-            }
-        } else {
-            return 0;
-        }
-    }
     //
     /**
-     * Method for merging the given fingerprint fp into a current fingerprint.
+     * Method for merging the given fingerprint into a current fingerprint.
      * Merging is intended only for count fingerprints generated from the same fragment set.
      *
      * @param aCountFingerprint to be merged
      * @return CountFingerprint, i.e. a merged count fingerprint.
      */
-    public CountFingerprint mergedCountFingerprint(CountFingerprint aCountFingerprint) {
-        if(this.uniqueSmilesToPositionMap.size() != aCountFingerprint.size()) {
-            throw new IllegalArgumentException("The two fingerprints are not the same size. Is only possible with" +
+    //memory wise unclever as new CountFingerprint is generated when merged
+    public CountFingerprint mergeCountFingerprint(CountFingerprint aCountFingerprint) {
+        if(this.definedFingerprintSize != aCountFingerprint.size()) {
+            throw new IllegalArgumentException("The two fingerprints are not the same size. Merge is only possible with" +
                     "fingerprints that come from the same fragment set.");
         }
         HashMap<Integer, Integer> tmpRawMap = new HashMap<>(this.uniqueSmilesPositionToFrequencyCountRawMap);
@@ -282,7 +262,7 @@ public class CountFingerprint implements ICountFingerprint {
                 tmpRawMap.put(tmpKey, aCountFingerprint.getRawMap().get(tmpKey));
             }
         }
-        return new CountFingerprint(this.uniqueSmilesToPositionMap,tmpRawMap);
+        return new CountFingerprint(this.definedFingerprintSize,tmpRawMap);
     }
     //
     /**
@@ -304,30 +284,5 @@ public class CountFingerprint implements ICountFingerprint {
     private HashMap<Integer, Integer> getRawMap() {
         return this.uniqueSmilesPositionToFrequencyCountRawMap;
     }
-    //
-    /**
-     * The key fragments defined during initialization are stored in a map.
-     * The map maps the key fragments to their positions in the fingerprint.
-     *
-     * @return HashMap<String,Integer>
-     */
-    //ToDo: method needed in any way? (implementation like fragment fingerprinter?) or simply fall back to in constructor given SmilesToPosition map
-//    private HashMap<String, Integer> buildUniqueSmilesToPositionMap() {
-//        /**
-//         * Initial capacity value for maps
-//         */
-//        double INITIAL_CAPACITY_VALUE = 1.5;
-//        this.uniqueSmilesToPositionMap = new HashMap<>((int) (this.predefinedFragmentSmiles.length* INITIAL_CAPACITY_VALUE), 0.75f);
-//        int tmpValuePosition = 0;
-//        for (String tmpKey : this.predefinedFragmentSmiles) {
-//            if(!this.uniqueSmilesToPositionMap.containsKey(tmpKey)) {
-//                this.uniqueSmilesToPositionMap.put(tmpKey, tmpValuePosition);
-//                tmpValuePosition++;
-//            } else {
-//                continue;
-//            }
-//        }
-//        return this.uniqueSmilesToPositionMap;
-//    }
     //</editor-fold>
 }
