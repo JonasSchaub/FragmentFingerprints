@@ -27,8 +27,10 @@ package de.unijena.cheminf.fragment.fingerprint;
 import org.openscience.cdk.fingerprint.ICountFingerprint;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 
 /**
  * The CountFingerprint class implements the CDK interface ICountFingerprint.
@@ -51,7 +53,7 @@ public class CountFingerprint implements ICountFingerprint {
      * to the frequency of this fragment in the molecule. So, in this map, only the positions and frequencies of
      * the fragments are stored if a match has occurred. In the following, the map can also be referred to as a raw map.
      */
-    private final HashMap<Integer,Integer> uniqueSmilesPositionToFrequencyCountRawMap;
+    private final Map<Integer,Integer> uniqueSmilesPositionToFrequencyCountRawMap;
     /**
      * Private final integer storing the pre-defined fingerprint size.
      */
@@ -80,18 +82,7 @@ public class CountFingerprint implements ICountFingerprint {
      * @throws IllegalArgumentException is thrown if the given size is smaller than one.
      */
     public CountFingerprint(int aFingerprintSize, Map<Integer, Integer> aPositionToFrequencyMap) throws NullPointerException, IllegalArgumentException {
-        Objects.requireNonNull(aPositionToFrequencyMap, "aPositionToFrequencyMap is null.");
-        for (Map.Entry<Integer, Integer> tmpEntry : aPositionToFrequencyMap.entrySet()) {
-            if (tmpEntry.getValue() == null) {
-                throw new NullPointerException("At least one map entry has null value.");
-            }
-        }
-        if (aFingerprintSize < 1) {
-            throw new IllegalArgumentException("Fingerprint size cannot be zero or less.");
-        }
-        this.definedFingerprintSize = aFingerprintSize;
-        this.uniqueSmilesPositionToFrequencyCountRawMap = (HashMap<Integer, Integer>) aPositionToFrequencyMap;
-        this.behaveAsBitFingerprint = false;
+        this(aFingerprintSize, aPositionToFrequencyMap, false);
     }
     //
     /**
@@ -110,7 +101,7 @@ public class CountFingerprint implements ICountFingerprint {
             throw new IllegalArgumentException("Fingerprint size cannot be zero or smaller");
         }
         this.definedFingerprintSize = aFingerprintSize;
-        this.uniqueSmilesPositionToFrequencyCountRawMap = (HashMap<Integer, Integer>) aPositionToFrequencyMap;
+        this.uniqueSmilesPositionToFrequencyCountRawMap = aPositionToFrequencyMap;
         this.behaveAsBitFingerprint = aFingerprintBehaviorStatement;
     }
     //</editor-fold>
@@ -225,44 +216,63 @@ public class CountFingerprint implements ICountFingerprint {
      */
     @Override
     public int getCountForHash(int hash) throws IllegalArgumentException {
-        if (hash >= this.definedFingerprintSize || hash < 0) {
-            throw new IllegalArgumentException("This position does not exist in the fingerprint (undefined state).");
-        } else if (hash >= 0 && this.uniqueSmilesPositionToFrequencyCountRawMap.containsKey(hash)) {
-            if (this.behaveAsBitFingerprint) {
-                return 1;
-            } else {
-                return this.uniqueSmilesPositionToFrequencyCountRawMap.get(hash);
-            }
-        } else {
-            return 0;
-        }
+        return this.getCount(hash);
     }
     //</editor-fold>
     //
     //<editor-fold desc="Public method" defaultstate="collapsed">
     //
     /**
-     * Method for merging the given fingerprint into a current fingerprint.
-     * Merging is intended only for count fingerprints generated from the same fragment set.
+     * Static method to merge two specified CountFingerprint instances into a NEW CountFingerprint instance created from
+     * their combined frequency maps.
+     * Neither param fingerprints are changed when merged.
+     * Merging is only supported (and recommended) for fingerprints generated from the same (sub)set of fragments.
      *
-     * @param aCountFingerprint to be merged
-     * @return CountFingerprint, i.e. a merged count fingerprint.
+     * @param aFirstCountFingerprintToMerge First CountFingerprint instance to merge
+     * @param aSecondCountFingerprintToMerge Second CountFingerprint instance to merge
+     * @throws NullPointerException if either given fingerprint is null
+     * @throws IllegalArgumentException if defined fingerprint size does not match between given fingerprints
+     * @return new ICountFingerprint with combined occurrence frequencies
      */
-    //memory wise unclever as new CountFingerprint is generated when merged
-    public CountFingerprint mergeCountFingerprint(CountFingerprint aCountFingerprint) {
-        if(this.definedFingerprintSize != aCountFingerprint.size()) {
-            throw new IllegalArgumentException("The two fingerprints are not the same size. Merge is only possible with" +
+    //merges two param fingerprints into new instance
+    public static ICountFingerprint mergeCountFingerprint(CountFingerprint aFirstCountFingerprintToMerge,
+                                                          CountFingerprint aSecondCountFingerprintToMerge)
+            throws NullPointerException, IllegalArgumentException {
+        Objects.requireNonNull(aFirstCountFingerprintToMerge, "Given fingerprint was null.");
+        Objects.requireNonNull(aSecondCountFingerprintToMerge, "Given fingerprint was null.");
+        if (aFirstCountFingerprintToMerge.getDefinedFingerprintSize() != aSecondCountFingerprintToMerge.getDefinedFingerprintSize()) {
+            throw new IllegalArgumentException("Defined fingerprint size does not match. A merge is only possible with" +
                     "fingerprints that come from the same fragment set.");
         }
-        HashMap<Integer, Integer> tmpRawMap = new HashMap<>(this.uniqueSmilesPositionToFrequencyCountRawMap);
-        for(int tmpKey : aCountFingerprint.getRawMap().keySet()) {
-            if (tmpRawMap.containsKey(tmpKey)) {
-                tmpRawMap.put(tmpKey, tmpRawMap.get(tmpKey) + aCountFingerprint.getRawMap().get(tmpKey));
-            } else {
-                tmpRawMap.put(tmpKey, aCountFingerprint.getRawMap().get(tmpKey));
+        int tmpFirstFPMapSize = aFirstCountFingerprintToMerge.getSmilesPositionToFrequencyMap().size();
+        int tmpSecondFPMapSize = aSecondCountFingerprintToMerge.getSmilesPositionToFrequencyMap().size();
+        //get all "true" map positions and equalize positions -> combined positions
+        Set<Integer> tmpPositivePositionsSet = new HashSet<>((int) ((tmpFirstFPMapSize + tmpSecondFPMapSize) * 1.5f), 0.75f);
+        tmpPositivePositionsSet.addAll(aFirstCountFingerprintToMerge.getSmilesPositionToFrequencyMap().keySet());
+        tmpPositivePositionsSet.addAll(aSecondCountFingerprintToMerge.getSmilesPositionToFrequencyMap().keySet());
+        //map of combined fragment frequencies
+        Map<Integer, Integer> tmpCombinedFrequencyMap = new HashMap<>((int) (tmpPositivePositionsSet.size() * 1.5f), 0.75f);
+        for (int tmpPosition : tmpPositivePositionsSet) {
+            boolean tmpFirstContainsPos = aFirstCountFingerprintToMerge.getSmilesPositionToFrequencyMap().containsKey(tmpPosition);
+            boolean tmpSecondContainsPos = aSecondCountFingerprintToMerge.getSmilesPositionToFrequencyMap().containsKey(tmpPosition);
+            //if both maps "positive" at current position -> combine values
+            if (tmpFirstContainsPos && tmpSecondContainsPos) {
+                tmpCombinedFrequencyMap.put(tmpPosition,
+                        //add values together
+                        aFirstCountFingerprintToMerge.getSmilesPositionToFrequencyMap().get(tmpPosition)
+                                + aSecondCountFingerprintToMerge.getSmilesPositionToFrequencyMap().get(tmpPosition));
+            }
+            //if only first map contains pos -> only put value of first into combined map
+            else if (tmpFirstContainsPos) {
+                tmpCombinedFrequencyMap.put(tmpPosition, aFirstCountFingerprintToMerge.getSmilesPositionToFrequencyMap().get(tmpPosition));
+            }
+            //if only second map contains pos -> only put value of second into combined map
+            else if (tmpSecondContainsPos) {
+                tmpCombinedFrequencyMap.put(tmpPosition, aSecondCountFingerprintToMerge.getSmilesPositionToFrequencyMap().get(tmpPosition));
             }
         }
-        return new CountFingerprint(this.definedFingerprintSize,tmpRawMap);
+        //instance new CountFingerprint from combined frequency map
+        return new CountFingerprint(aFirstCountFingerprintToMerge.getDefinedFingerprintSize(), tmpCombinedFrequencyMap);
     }
     //
     /**
@@ -273,16 +283,15 @@ public class CountFingerprint implements ICountFingerprint {
     public Map<Integer, Integer> getSmilesPositionToFrequencyMap() {
         return this.uniqueSmilesPositionToFrequencyCountRawMap;
     }
-    //</editor-fold>
     //
-    //<editor-fold desc="Private method" defaultstate="collapsed">
     /**
-     * Returns the raw map of a count fingerprint
+     * Public getter for internally used size of given pre-defined fingerprint.
      *
-     * @return HashMap<Integer,Integer> raw map
+     * @return int of defined fingerprint size
      */
-    private HashMap<Integer, Integer> getRawMap() {
-        return this.uniqueSmilesPositionToFrequencyCountRawMap;
+    public int getDefinedFingerprintSize() {
+        return this.definedFingerprintSize;
     }
     //</editor-fold>
+    //
 }

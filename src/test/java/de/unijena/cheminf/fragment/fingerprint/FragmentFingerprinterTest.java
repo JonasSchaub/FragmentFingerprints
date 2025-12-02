@@ -660,7 +660,7 @@ public class FragmentFingerprinterTest {
         //
         CountFingerprint tmpCountFingerprint2 = (CountFingerprint) tmpFFp.getCountFingerprint(tmpFreqMap2);
         //
-        CountFingerprint tmpMergedCountFingerprint = tmpCountFingerprint2.mergeCountFingerprint(tmpCountFingerprint1);
+        CountFingerprint tmpMergedCountFingerprint = (CountFingerprint) CountFingerprint.mergeCountFingerprint(tmpCountFingerprint1, tmpCountFingerprint2);
         //
         HashMap<String, Integer> tmpAddMap = new HashMap<>((int) (tmpSmilesList.size() * 1.5f) + 1, 0.75f);
         tmpAddMap.put("C", 6);
