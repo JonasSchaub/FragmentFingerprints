@@ -203,8 +203,12 @@ public class FragmentFingerprinterTest {
         }
         tmpFingerprintResultPrintWriter.close();
         // Objects necessary for the test are created (used only in @Test)
-        FragmentFingerprinterTest.countFingerprintTest = (CountFingerprint) FragmentFingerprinterTest.fragmentFingerprinter.getCountFingerprint(FragmentFingerprinterTest.moleculeFragmentList.get(FragmentFingerprinterTest.moleculeFragmentList.size() - 1));
-        FragmentFingerprinterTest.bitFingerprintTest = FragmentFingerprinterTest.fragmentFingerprinter.getBitFingerprint(FragmentFingerprinterTest.dataForGeneratingBitFingerprint);
+        int tmpListMinusOneSize = FragmentFingerprinterTest.moleculeFragmentList.size() - 1;
+        Map<String, Integer> tmpMap = FragmentFingerprinterTest.moleculeFragmentList.get(tmpListMinusOneSize);
+        FragmentFingerprinterTest.countFingerprintTest =
+                (CountFingerprint) FragmentFingerprinterTest.fragmentFingerprinter.getCountFingerprint(tmpMap);
+        FragmentFingerprinterTest.bitFingerprintTest =
+                FragmentFingerprinterTest.fragmentFingerprinter.getBitFingerprint(FragmentFingerprinterTest.dataForGeneratingBitFingerprint);
 
         // Variamycin fragments
         FragmentFingerprinterTest.countListOfUniqueSmiles = new ArrayList<>(35);
