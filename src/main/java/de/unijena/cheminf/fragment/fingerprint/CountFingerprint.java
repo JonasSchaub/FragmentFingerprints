@@ -27,10 +27,8 @@ package de.unijena.cheminf.fragment.fingerprint;
 import org.openscience.cdk.fingerprint.ICountFingerprint;
 
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Set;
 
 /**
  * The CountFingerprint class implements the CDK interface ICountFingerprint.
@@ -246,29 +244,16 @@ public class CountFingerprint implements ICountFingerprint {
         }
         int tmpFirstFPMapSize = aFirstCountFingerprintToMerge.getSmilesPositionToFrequencyMap().size();
         int tmpSecondFPMapSize = aSecondCountFingerprintToMerge.getSmilesPositionToFrequencyMap().size();
-        //get all "true" map positions and equalize positions -> combined positions
-        Set<Integer> tmpPositivePositionsSet = new HashSet<>((int) ((tmpFirstFPMapSize + tmpSecondFPMapSize) * 1.5f), 0.75f);
-        tmpPositivePositionsSet.addAll(aFirstCountFingerprintToMerge.getSmilesPositionToFrequencyMap().keySet());
-        tmpPositivePositionsSet.addAll(aSecondCountFingerprintToMerge.getSmilesPositionToFrequencyMap().keySet());
         //map of combined fragment frequencies
-        Map<Integer, Integer> tmpCombinedFrequencyMap = new HashMap<>((int) (tmpPositivePositionsSet.size() * 1.5f), 0.75f);
-        for (int tmpPosition : tmpPositivePositionsSet) {
-            boolean tmpFirstContainsPos = aFirstCountFingerprintToMerge.getSmilesPositionToFrequencyMap().containsKey(tmpPosition);
-            boolean tmpSecondContainsPos = aSecondCountFingerprintToMerge.getSmilesPositionToFrequencyMap().containsKey(tmpPosition);
-            //if both maps "positive" at current position -> combine values
-            if (tmpFirstContainsPos && tmpSecondContainsPos) {
-                tmpCombinedFrequencyMap.put(tmpPosition,
-                        //add values together
-                        aFirstCountFingerprintToMerge.getSmilesPositionToFrequencyMap().get(tmpPosition)
-                                + aSecondCountFingerprintToMerge.getSmilesPositionToFrequencyMap().get(tmpPosition));
-            }
-            //if only first map contains pos -> only put value of first into combined map
-            else if (tmpFirstContainsPos) {
-                tmpCombinedFrequencyMap.put(tmpPosition, aFirstCountFingerprintToMerge.getSmilesPositionToFrequencyMap().get(tmpPosition));
-            }
-            //if only second map contains pos -> only put value of second into combined map
-            else if (tmpSecondContainsPos) {
-                tmpCombinedFrequencyMap.put(tmpPosition, aSecondCountFingerprintToMerge.getSmilesPositionToFrequencyMap().get(tmpPosition));
+        Map<Integer, Integer> tmpCombinedFrequencyMap = new HashMap<>((int) ((tmpFirstFPMapSize + tmpSecondFPMapSize) * 1.5f), 0.75f);
+        for (Map.Entry<Integer, Integer> tmpEntry : aFirstCountFingerprintToMerge.getSmilesPositionToFrequencyMap().entrySet()) {
+            tmpCombinedFrequencyMap.put(tmpEntry.getKey(), tmpEntry.getValue());
+        }
+        for (Map.Entry<Integer, Integer> tmpEntry : aSecondCountFingerprintToMerge.getSmilesPositionToFrequencyMap().entrySet()) {
+            if (tmpCombinedFrequencyMap.containsKey(tmpEntry.getKey())) {
+                tmpCombinedFrequencyMap.put(tmpEntry.getKey(), tmpCombinedFrequencyMap.get(tmpEntry.getKey()) + tmpEntry.getValue());
+            } else {
+                tmpCombinedFrequencyMap.put(tmpEntry.getKey(), tmpEntry.getValue());
             }
         }
         //instance new CountFingerprint from combined frequency map
