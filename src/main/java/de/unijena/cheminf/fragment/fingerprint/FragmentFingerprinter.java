@@ -64,6 +64,10 @@ public class FragmentFingerprinter implements IFragmentFingerprinter {
      */
     private final HashMap<String, Integer> uniqueSmilesToPositionMap;
     /**
+     * Private integer for storing the internal map's size in order to divert from on-the-fly calculation.
+     */
+    private final int uniqueSmilesToPositionMapSize;
+    /**
      * SubstructureFingerprinter instance initialized once in the constructor and used throughout the FragmentFingerprinter class.
      */
     private final SubstructureFingerprinter substructureFingerprinter;
@@ -87,7 +91,7 @@ public class FragmentFingerprinter implements IFragmentFingerprinter {
      *
      * @param aFragmentsForMasterVectorList in which the predefined fragments are stored.
      * @throws NullPointerException is thrown if the list param (or any of its elements) is null.
-     * @throws IllegalArgumentException is thrown if the list param contains blank strings.
+     * @throws IllegalArgumentException is thrown if the list param contains blank Strings or Strings cannot be parsed as SMARTS.
      */
     public FragmentFingerprinter(List<String> aFragmentsForMasterVectorList) throws NullPointerException, IllegalArgumentException {
         // Check whether aFragmentsForMasterVectorList is null or whether there are elements (strings) in the list that are empty.
@@ -95,6 +99,7 @@ public class FragmentFingerprinter implements IFragmentFingerprinter {
                 "aFragmentsForMasterVectorList (at least one list element) is null.",
                 "aFragmentsForMasterVectorList (at least one list element) is blank/empty.");
         this.uniqueSmilesToPositionMap = this.buildUniqueSmilesToPositionMap(aFragmentsForMasterVectorList);
+        this.uniqueSmilesToPositionMapSize = this.uniqueSmilesToPositionMap.size();
         this.substructureFingerprinter = new SubstructureFingerprinter(this.getPredefinedFragmentArrayWithoutDuplicates());
     }
     // </editor-fold>
@@ -120,7 +125,7 @@ public class FragmentFingerprinter implements IFragmentFingerprinter {
         this.validityCheckOfParameterList(aListOfUniqueSmiles,"Given list of string instances is null.",
                 "Given list includes at least one null element.",
                 "Given list includes at least one blank/empty element.");
-        BitSet tmpBitSet = new BitSet(this.uniqueSmilesToPositionMap.size());
+        BitSet tmpBitSet = new BitSet(this.uniqueSmilesToPositionMapSize);
         for (String tmpSmiles : aListOfUniqueSmiles) {
             if (this.uniqueSmilesToPositionMap.containsKey(tmpSmiles)) {
                 tmpBitSet.set(this.uniqueSmilesToPositionMap.get(tmpSmiles), true);
@@ -151,9 +156,8 @@ public class FragmentFingerprinter implements IFragmentFingerprinter {
     public ICountFingerprint getCountFingerprint(Map<String, Integer> aSmilesToFrequencyMap) throws NullPointerException, IllegalArgumentException {
         Objects.requireNonNull(aSmilesToFrequencyMap, "Given map of string and integer instances is null.");
         HashMap<Integer, Integer> tmpPositionToFrequencyMap = new HashMap<>(
-                (int) (this.uniqueSmilesToPositionMap.size() * 1.5f),
+                (int) (this.uniqueSmilesToPositionMapSize * 1.5f),
                 0.75f);
-        String[] tmpSmilesPositionArray = new String[this.uniqueSmilesToPositionMap.size()];
         for (Map.Entry<String, Integer> tmpEntry : aSmilesToFrequencyMap.entrySet()) {
             if (tmpEntry.getKey() == null || tmpEntry.getValue() == null) {
                 throw new NullPointerException("Given map of string and integer instances contains " +
@@ -167,13 +171,7 @@ public class FragmentFingerprinter implements IFragmentFingerprinter {
                 tmpPositionToFrequencyMap.put(tmpPosition, tmpFrequency);
             }
         }
-        //uniqueSmilesToPositionMap.keySet().toArray(new String[0]) produces an array where 'map position value != array position'
-        //example: key -> "CCCCC", value -> '26' (position in fingerprint)
-        // in array: because keySet is iterated through as is: 'position' 5 associated with "CCCCC" -> array[5] = "CCCCC"
-        for (Map.Entry<String, Integer> tmpEntry : this.uniqueSmilesToPositionMap.entrySet()) {
-            tmpSmilesPositionArray[tmpEntry.getValue()] = tmpEntry.getKey();
-        }
-        return new CountFingerprint(this.uniqueSmilesToPositionMap.size(), tmpPositionToFrequencyMap);
+        return new CountFingerprint(this.uniqueSmilesToPositionMapSize, tmpPositionToFrequencyMap);
     }
     //
     /**
@@ -196,7 +194,7 @@ public class FragmentFingerprinter implements IFragmentFingerprinter {
      */
     @Override
     public ICountFingerprint getCountFingerprint(List<String> aUniqueSmilesList) throws NullPointerException, IllegalArgumentException {
-        HashMap<String, Integer> tmpUniqueSmilesToFrequencyCountMap = new HashMap<>((int) (this.uniqueSmilesToPositionMap.size() * 1.5f), 0.75f);
+        HashMap<String, Integer> tmpUniqueSmilesToFrequencyCountMap = new HashMap<>((int) (this.uniqueSmilesToPositionMapSize * 1.5f), 0.75f);
         Objects.requireNonNull(aUniqueSmilesList, "aUniqueSmilesToFrequencyList (list of string instances) is null.");
         for (String tmpSmiles : aUniqueSmilesList) {
             Objects.requireNonNull(tmpSmiles, "aUniqueSmilesToFrequencyList (at least one list element) is null.");
@@ -218,7 +216,7 @@ public class FragmentFingerprinter implements IFragmentFingerprinter {
     @Override
     public String getVersionDescription() {
         return getClass().getSimpleName() + "/" + FragmentFingerprinter.FRAGMENT_FINGERPRINTER_VERSION +
-                ' ' + "num_bits" + '=' + this.uniqueSmilesToPositionMap.size();
+                ' ' + "num_bits" + '=' + this.uniqueSmilesToPositionMapSize;
     }
     //
     /**
@@ -273,7 +271,7 @@ public class FragmentFingerprinter implements IFragmentFingerprinter {
      */
     @Override
     public int getSize() {
-        return this.uniqueSmilesToPositionMap.size();
+        return this.uniqueSmilesToPositionMapSize;
     }
     // </editor-fold>
     //
@@ -291,7 +289,7 @@ public class FragmentFingerprinter implements IFragmentFingerprinter {
     public String getBitDefinition(int aBitPosition) throws IllegalArgumentException {
         if (aBitPosition < 0) {
             throw new IllegalArgumentException("Given bit position cannot be smaller than 0.");
-        } else if (aBitPosition >= this.uniqueSmilesToPositionMap.size()) {
+        } else if (aBitPosition >= this.uniqueSmilesToPositionMapSize) {
             throw new IllegalArgumentException("Given bit position cannot be larger than position map.");
         } else {
             for (Map.Entry<String, Integer> tmpEntry : this.uniqueSmilesToPositionMap.entrySet()) {
@@ -321,7 +319,7 @@ public class FragmentFingerprinter implements IFragmentFingerprinter {
                 "aListOfUniqueSmiles (at least one list element) is null.",
                 "aListOfUniqueSmiles (at least one list element) is blank/empty.");
         //converts BitSetFingerprint to BitSet
-        int[] tmpReturnArray = new int[this.uniqueSmilesToPositionMap.size()];
+        int[] tmpReturnArray = new int[this.uniqueSmilesToPositionMapSize];
         for (int tmpPositivePosition : this.getBitFingerprint(aListOfUniqueSmiles).getSetbits()) {
             tmpReturnArray[tmpPositivePosition] = 1;
         }
@@ -348,7 +346,7 @@ public class FragmentFingerprinter implements IFragmentFingerprinter {
     public int[] getBitArray(Map<String,Integer> aUniqueSmilesToFrequencyMap) throws NullPointerException, IllegalArgumentException {
         Objects.requireNonNull(aUniqueSmilesToFrequencyMap, "aUniqueSmilesToFrequencyMap (Map of string and integer instances) is null.");
         //converts BitSetFingerprint to BitArray
-        int[] tmpReturnArray = new int[this.uniqueSmilesToPositionMap.size()];
+        int[] tmpReturnArray = new int[this.uniqueSmilesToPositionMapSize];
         List<String> tmpListOfUniqueSmiles = new ArrayList<>(aUniqueSmilesToFrequencyMap.size());
         for (Map.Entry<String, Integer> tmpEntry : aUniqueSmilesToFrequencyMap.entrySet()) {
             if (tmpEntry.getKey() == null || tmpEntry.getValue() == null) {
@@ -486,7 +484,7 @@ public class FragmentFingerprinter implements IFragmentFingerprinter {
      * @throws NullPointerException is thrown if the list param (or any of its elements) is null.
      * @throws IllegalArgumentException is thrown if the list param contains blank/empty strings.
      */
-    public void getFloatBitFingerprint(
+    protected void getFloatBitFingerprint(
             //aFragmentsUniqueSmilesList contains fragments of ONE molecule
             List<String> aFragmentsUniqueSmilesList,
             float[] aPreInitFloatArray) {
@@ -516,7 +514,7 @@ public class FragmentFingerprinter implements IFragmentFingerprinter {
      * @throws NullPointerException is thrown if the list param (or any of its elements) is null.
      * @throws IllegalArgumentException is thrown if the list param contains blank/empty strings.
      */
-    public void getFloatCountFingerprint(
+    protected void getFloatCountFingerprint(
             List<String> aFragmentsUniqueSmilesList,
             float[] aPreInitFloatArray) {
         this.validityCheckOfParameterList(aFragmentsUniqueSmilesList,
@@ -556,7 +554,7 @@ public class FragmentFingerprinter implements IFragmentFingerprinter {
         } else {
             //checks each matrix array (~column count) for allowed size
             for (int i = 0; i < aFloatDataMatrix.length; i++) {
-                if (this.uniqueSmilesToPositionMap.size() > aFloatDataMatrix[i].length ) {
+                if (this.uniqueSmilesToPositionMapSize > aFloatDataMatrix[i].length ) {
                     throw new IllegalArgumentException("Given fragments list size was larger than provided matrix array size.");
                 }
             }
@@ -586,7 +584,7 @@ public class FragmentFingerprinter implements IFragmentFingerprinter {
      * @return int[] count array
      */
     private int[] createCountArray(List<String> aListOfUniqueSmiles) {
-        int[] tmpCountArray = new int[this.uniqueSmilesToPositionMap.size()];
+        int[] tmpCountArray = new int[this.uniqueSmilesToPositionMapSize];
         CountFingerprint tmpCountFingerprint = (CountFingerprint) this.getCountFingerprint(aListOfUniqueSmiles);
         Map<Integer, Integer> tmpPositionToFrequencyMap = tmpCountFingerprint.getSmilesPositionToFrequencyMap();
         for (Map.Entry<Integer, Integer> tmpEntry : tmpPositionToFrequencyMap.entrySet()) {
@@ -605,7 +603,7 @@ public class FragmentFingerprinter implements IFragmentFingerprinter {
      * @return String[]
      */
     private String[] getPredefinedFragmentArrayWithoutDuplicates() {
-        String[] tmpPredefinedFragmentsInArray = new String[this.uniqueSmilesToPositionMap.size()];
+        String[] tmpPredefinedFragmentsInArray = new String[this.uniqueSmilesToPositionMapSize];
         for (Map.Entry<String, Integer> tmpEntry : this.uniqueSmilesToPositionMap.entrySet()) {
             tmpPredefinedFragmentsInArray[tmpEntry.getValue()] = tmpEntry.getKey();
         }
