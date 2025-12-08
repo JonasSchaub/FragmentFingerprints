@@ -32,6 +32,7 @@ import org.openscience.cdk.fingerprint.SubstructureFingerprinter;
 import org.openscience.cdk.interfaces.IAtomContainer;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.BitSet;
 import java.util.HashMap;
 import java.util.List;
@@ -45,13 +46,8 @@ import java.util.Objects;
  * the form of unique SMILES to create the fingerprint. These structures must be passed when the
  * class is instantiated (in the constructor). The class implements the interface IFragmentFingerprinter,
  * which inherits the IFingerprinter (CDK), which allows the class to compute fingerprints in 2 ways.
- * The first way to calculate a bit or count fingerprint is to perform a substructure comparison with all
- * predefined fragments for a given IAtomContainer. The fingerprint created by the substructure search is based on
- * the CDK class SubstructureFingerprinter. The predefined fragment SMILES are interpreted as SMARTS patterns by the
- * SubstructureFingerprinter class. The second way to calculate fingerprints is by comparing
- * given fragments, which are in the form of unique SMILES, with the predefined fragments.
- * The second possibility is thus based on a pure comparison of strings. It is important to note that the two
- * different ways of creating fingerprints can produce different results.
+ * The fingerprints are calculated by comparing given fragments, which are in the form of unique SMILES,
+ * with the predefined fragments.
  *
  * @author Betuel Sevindik, Maximilian Rottmann
  * @version 1.1.0.0
@@ -67,10 +63,6 @@ public class FragmentFingerprinter implements IFragmentFingerprinter {
      * Private integer for storing the internal map's size in order to divert from on-the-fly calculation.
      */
     private final int uniqueSmilesToPositionMapSize;
-    /**
-     * SubstructureFingerprinter instance initialized once in the constructor and used throughout the FragmentFingerprinter class.
-     */
-    private final SubstructureFingerprinter substructureFingerprinter;
     //</editor-fold>
     //
     //<editor-fold desc="private static final class variables" defaultstate="collapsed">
@@ -100,7 +92,6 @@ public class FragmentFingerprinter implements IFragmentFingerprinter {
                 "aFragmentsForMasterVectorList (at least one list element) is blank/empty.");
         this.uniqueSmilesToPositionMap = this.buildUniqueSmilesToPositionMap(aFragmentsForMasterVectorList);
         this.uniqueSmilesToPositionMapSize = this.uniqueSmilesToPositionMap.size();
-        this.substructureFingerprinter = new SubstructureFingerprinter(this.getPredefinedFragmentArrayWithoutDuplicates());
     }
     // </editor-fold>
     //
@@ -234,7 +225,7 @@ public class FragmentFingerprinter implements IFragmentFingerprinter {
      */
     @Override
     public IBitFingerprint getBitFingerprint(IAtomContainer container) throws CDKException {
-        return this.substructureFingerprinter.getBitFingerprint(container);
+        throw new UnsupportedOperationException("Please use the CDK class SubstructureFingerprinter instead of this class");
     }
     //
     /**
@@ -243,7 +234,7 @@ public class FragmentFingerprinter implements IFragmentFingerprinter {
      */
     @Override
     public ICountFingerprint getCountFingerprint(IAtomContainer container) throws CDKException {
-        return this.substructureFingerprinter.getCountFingerprint(container);
+        throw new UnsupportedOperationException("Please use the CDK class SubstructureFingerprinter instead of this class");
     }
     //
     /**
@@ -521,7 +512,10 @@ public class FragmentFingerprinter implements IFragmentFingerprinter {
                 "Given list of string instances is null.",
                 "Given list includes at least one null element.",
                 "Given list includes at least one blank/empty element.");
+        //set every position corresponding to fingerprint position 0.0f
+        Arrays.fill(aPreInitFloatArray, 0, this.uniqueSmilesToPositionMapSize, 0.0f);
         for (String tmpSmiles : aFragmentsUniqueSmilesList) {
+            //ToDo: overwrite position with frequency instead of 'add' with for each
             if (this.uniqueSmilesToPositionMap.containsKey(tmpSmiles)) {
                 aPreInitFloatArray[this.uniqueSmilesToPositionMap.get(tmpSmiles)]++;
             }
@@ -542,6 +536,7 @@ public class FragmentFingerprinter implements IFragmentFingerprinter {
      * @param anUseBitArrayStatement setting whether "bit set" or "count/frequency" should be used for the matrix
      */
     public void getFragmentsComponentsFloatMatrix(
+            //ToDo: MORTAR returns Map<String, Integer> for frequency
             List<List<String>> aFragmentsUniqueSmilesListsList,
             float[][] aFloatDataMatrix,
             //extendable with future fingerprint generators via 'settings' like below
