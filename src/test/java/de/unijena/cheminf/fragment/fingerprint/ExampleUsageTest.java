@@ -24,7 +24,6 @@
 
 package de.unijena.cheminf.fragment.fingerprint;
 
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.openscience.cdk.fingerprint.IBitFingerprint;
 import org.openscience.cdk.fragment.ExhaustiveFragmenter;
