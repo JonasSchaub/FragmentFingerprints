@@ -32,10 +32,8 @@ import org.openscience.cdk.fingerprint.SubstructureFingerprinter;
 import org.openscience.cdk.interfaces.IAtomContainer;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.BitSet;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -465,33 +463,6 @@ public class FragmentFingerprinter implements IFragmentFingerprinter {
     //
     //<editor-fold desc="Public Methods - float variants">
     /**
-     * Public method for creating a float "bit set fingerprint" in form of a float[] array.
-     * For this, a given list of SMILES strings is compared with the pre-defined fragments (master vector of fragments for fingerprint definition).
-     * The given list is consecutively checked against the pre-generated SMILES string to position-in-fingerprint map.
-     * If the map contains the current string, its respective position in the provided float array is set to the value '1.0f'.
-     *
-     * @param aFragmentsUniqueSmilesList to be checked against the pre-defined fingerprint
-     * @param aPreInitFloatArray         pre-initialized float[] array with size of pre-defined fragment fingerprint and additional space for descriptive float components
-     *
-     * @throws NullPointerException is thrown if the list param (or any of its elements) is null.
-     * @throws IllegalArgumentException is thrown if the list param contains blank/empty strings.
-     */
-    protected void getFloatBitFingerprint(
-            //aFragmentsUniqueSmilesList contains fragments of ONE molecule
-            List<String> aFragmentsUniqueSmilesList,
-            float[] aPreInitFloatArray) {
-        this.validityCheckOfParameterList(aFragmentsUniqueSmilesList,
-                "Given list of string instances is null.",
-                "Given list includes at least one null element.",
-                "Given list includes at least one blank/empty element.");
-        for (String tmpSmiles : aFragmentsUniqueSmilesList) {
-            if (this.uniqueSmilesToPositionMap.containsKey(tmpSmiles)) {
-                aPreInitFloatArray[this.uniqueSmilesToPositionMap.get(tmpSmiles)] = 1.0f;
-            }
-        }
-    }
-    //map variant
-    /**
      * Method to generate the float fingerprint of a given molecule's fragments (i.e. the given map).
      * A setting is defined whether bit or count/frequency representation shall be used for generating the fingerprint.
      *
@@ -499,7 +470,6 @@ public class FragmentFingerprinter implements IFragmentFingerprinter {
      * @param aPreInitFloatArray is a pre-initialized float[] array (-> matrix row)
      * @param anUseBitArrayStatement is the setting whether bit or count/frequency representation is to be used
      */
-    //ToDo: swap other implementation to analog version
     protected void getFloatFingerprint(
             Map<String, Integer> aFragmentsFrequenciesMap,
             float[] aPreInitFloatArray,
@@ -517,85 +487,12 @@ public class FragmentFingerprinter implements IFragmentFingerprinter {
                 if (anUseBitArrayStatement) {
                     aPreInitFloatArray[this.uniqueSmilesToPositionMap.get(tmpFragmentEntry.getKey())] = 1.0f;
                 } else {
-                    aPreInitFloatArray[this.uniqueSmilesToPositionMap.get(tmpFragmentEntry.getKey())] = (float) tmpFragmentEntry.getValue();
+                    aPreInitFloatArray[this.uniqueSmilesToPositionMap.get(tmpFragmentEntry.getKey())] = tmpFragmentEntry.getValue();
                 }
             }
         }
     }
     //
-    /**
-     * Public method for generating a float count fingerprint in form of a float[] array.
-     * This fingerprint projects the frequency (-> count) of occurrence of the pre-defined fingerprint fragments within
-     * the given SMILES.
-     * <p>
-     * For example: The pre-defined fragment fingerprint contains the SMILES for methane as "C", for an ether substructure
-     * as "*O*", and for a hydroxide group as "[H]OC". The given SMILES list contains only three "C" fragments. Then,
-     * the generated fingerprint would look like the following: [3.0f, 0.0f, 0.0f]
-     * </p>
-     *
-     * @param aFragmentsUniqueSmilesList of fragment SMILES to be compared to the pre-defined fingerprint
-     * @param aPreInitFloatArray         pre-initialized float[] in which the fingerprint is to be stored
-     * @throws NullPointerException is thrown if the list param (or any of its elements) is null.
-     * @throws IllegalArgumentException is thrown if the list param contains blank/empty strings.
-     */
-    protected void getFloatCountFingerprint(
-            List<String> aFragmentsUniqueSmilesList,
-            float[] aPreInitFloatArray) {
-        this.validityCheckOfParameterList(aFragmentsUniqueSmilesList,
-                "Given list of string instances is null.",
-                "Given list includes at least one null element.",
-                "Given list includes at least one blank/empty element.");
-        //set every position corresponding to fingerprint position 0.0f
-        Arrays.fill(aPreInitFloatArray, 0, this.uniqueSmilesToPositionMapSize, 0.0f);
-        for (String tmpSmiles : aFragmentsUniqueSmilesList) {
-            //ToDo: overwrite position with frequency instead of 'add' with for each
-            if (this.uniqueSmilesToPositionMap.containsKey(tmpSmiles)) {
-                aPreInitFloatArray[this.uniqueSmilesToPositionMap.get(tmpSmiles)]++;
-            }
-        }
-    }
-    //
-    /**
-     * Public method to get a float[][] matrix containing the fingerprints for the given SMILES lists (fragment sets
-     * of distinct molecules) in regard to the pre-defined fragment fingerprint.
-     * It shall be noted that each List in the given List (List of Lists) represents ONE molecule's fragments.
-     * Therefore, the whole list represents the entirety of fragments.
-     * Further, a setting whether to use "bit set" or "count/frequency of fragment" is available.
-     * It is recommended to check the size of the pre-initialized float matrix. In case of a matrix with a pre-initialized
-     * size smaller than the actual required size, an exception will be thrown and no matrix filling will take place.
-     *
-     * @param aFragmentsUniqueSmilesListsList with Lists of SMILES to compare with the defined fingerprint
-     * @param aFloatDataMatrix to be filled with the float fingerprints of the given fragments
-     * @param anUseBitArrayStatement setting whether "bit set" or "count/frequency" should be used for the matrix
-     */
-    public void getFragmentsComponentsFloatMatrix(
-            List<List<String>> aFragmentsUniqueSmilesListsList,
-            float[][] aFloatDataMatrix,
-            //extendable with future fingerprint generators via 'settings' like below
-            boolean anUseBitArrayStatement
-    ) {
-        Objects.requireNonNull(aFragmentsUniqueSmilesListsList);
-        //checks whole matrix (row count) for allowed size
-        if (aFragmentsUniqueSmilesListsList.size() > aFloatDataMatrix.length) {
-            throw new IllegalArgumentException("Given fragments lists list's size was larger than provided matrix' length.");
-        } else {
-            //checks each matrix array (~column count) for allowed size
-            for (int i = 0; i < aFloatDataMatrix.length; i++) {
-                if (this.uniqueSmilesToPositionMapSize > aFloatDataMatrix[i].length ) {
-                    throw new IllegalArgumentException("Given fragments list size was larger than provided matrix array size.");
-                }
-            }
-            //float[row count][column count]
-            for (int i = 0; i < aFloatDataMatrix.length; i++) {
-                if (anUseBitArrayStatement) {
-                    this.getFloatBitFingerprint(aFragmentsUniqueSmilesListsList.get(i), aFloatDataMatrix[i]);
-                } else {
-                    this.getFloatCountFingerprint(aFragmentsUniqueSmilesListsList.get(i), aFloatDataMatrix[i]);
-                }
-            }
-        }
-    }
-
     /**
      * Public method to get a float[][] matrix containing the fingerprints for the given maps list (fragment sets
      *  of distinct molecules) in regard to the pre-defined fragment fingerprint.
@@ -605,31 +502,32 @@ public class FragmentFingerprinter implements IFragmentFingerprinter {
      * It is recommended to check the size of the pre-initialized float matrix. In case of a matrix with a pre-initialized
      *  size smaller than the actual required size, an exception will be thrown and no matrix filling will take place.
      *
-     * @param aFragmentsFrequenciesMapsList contains maps of SMILES-Frequency pairs of fragments
+     * @param aFragmentsFrequenciesMapsArray contains maps of SMILES-Frequency pairs of fragments
      * @param aFloatDataMatrix is a pre-initialized float[][] matrix to write data into
      * @param anUseBitArrayStatement is the setting whether bit or count/frequency representation should be used
      */
-    //ToDo: check in tests if correct functionality
-    public void getFragmentsComponentsMapVariantFloatMatrix(
-            //List of all molecules' fragments (through MoleculeDataModels) of a specific fragmentation
-            List<Map<String,Integer>> aFragmentsFrequenciesMapsList, //swappable with array?
+    public void getFragmentsComponentsFloatMatrix(
+            //array of maps of all molecules' fragments of a specific fragmentation
+            Map<String, Integer>[] aFragmentsFrequenciesMapsArray,
             float[][] aFloatDataMatrix,
             boolean anUseBitArrayStatement) {
-        Objects.requireNonNull(aFragmentsFrequenciesMapsList);
+        Objects.requireNonNull(aFragmentsFrequenciesMapsArray);
         //checks whole matrix (row count) for allowed size by comparing to given list size
-        if (aFragmentsFrequenciesMapsList.size() > aFloatDataMatrix.length) {
-            throw new IllegalArgumentException("Given fragments map's size was larger than provided matrix' length.");
+        if (aFragmentsFrequenciesMapsArray.length > aFloatDataMatrix.length) {
+            throw new IllegalArgumentException("Given fragments maps array length was larger than provided matrix' length.");
         } else {
             //checks each matrix array (~column count) for allowed size
-            for (int i = 0; i < aFloatDataMatrix.length; i++) {
-                if (this.uniqueSmilesToPositionMapSize > aFloatDataMatrix[i].length ) {
+            for (float[] tmpInnerFloatArray : aFloatDataMatrix) {
+                if (this.uniqueSmilesToPositionMapSize > tmpInnerFloatArray.length) {
                     throw new IllegalArgumentException("Given matrix' array (row) size was smaller than the pre-defined fingerprint.");
                 }
             }
             //float[row count][column count]
-            Iterator<Map<String, Integer>> tmpMapsListIterator = aFragmentsFrequenciesMapsList.iterator();
-            for (int i = 0; i < aFloatDataMatrix.length; i++) {
-                this.getFloatFingerprint(tmpMapsListIterator.next(), aFloatDataMatrix[i], anUseBitArrayStatement);
+            for (int i = 0; i < aFragmentsFrequenciesMapsArray.length; i++) {
+                this.getFloatFingerprint(
+                        aFragmentsFrequenciesMapsArray[i], //gives frequencies map of specific molecule
+                        aFloatDataMatrix[i], //defines where to put generated fingerprint in the matrix
+                        anUseBitArrayStatement); //defines whether bit or count/frequency representation is used
             }
         }
     }

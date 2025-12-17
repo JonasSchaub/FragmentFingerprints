@@ -577,8 +577,61 @@ public class FragmentFingerprinterTest {
      * The fragments for the bit fingerprint were generated via fragmentation analysis of 1000 picked molecules from the
      * COCONUT database. The fragments represent the 10 most frequently occurring fragments.
      */
+//    @Test
+//    public void generateFragmentsComponentsFloatMatrixTest() {
+//        List<String> tmpBitSetFragmentsList = new ArrayList<>(10);
+//        tmpBitSetFragmentsList.add("C");
+//        tmpBitSetFragmentsList.add("CC");
+//        tmpBitSetFragmentsList.add("[H]OC");
+//        tmpBitSetFragmentsList.add("*n(*)*");
+//        tmpBitSetFragmentsList.add("*O*");
+//        tmpBitSetFragmentsList.add("CCC");
+//        tmpBitSetFragmentsList.add("C=C");
+//        tmpBitSetFragmentsList.add("c");
+//        tmpBitSetFragmentsList.add("*Cl");
+//        tmpBitSetFragmentsList.add("CCCC");
+//        FragmentFingerprinter tmpFFp = new FragmentFingerprinter(tmpBitSetFragmentsList);
+//        //fragments of structure "2-(6-hydroxy-6,9-dihydro-1H-purin-9-yl)-5-(hydroxymethyl)oxolane-3,4-diol"
+//        List<String> tmpStructureFragmentsList = new ArrayList<>(10);
+//        tmpStructureFragmentsList.add("[H]OC");
+//        tmpStructureFragmentsList.add("[H]OC");
+//        tmpStructureFragmentsList.add("[H]OC");
+//        tmpStructureFragmentsList.add("*O*");
+//        tmpStructureFragmentsList.add("*N=CN(*)CO[H]");
+//        tmpStructureFragmentsList.add("*n(*)*");
+//        tmpStructureFragmentsList.add("*n(*)*");
+//        tmpStructureFragmentsList.add("CCCCC");
+//        tmpStructureFragmentsList.add("c");
+//        tmpStructureFragmentsList.add("cc");
+//        List<List<String>> tmpListsList = new ArrayList<>(2);
+//        tmpListsList.add(tmpStructureFragmentsList);
+//        tmpListsList.add(new ArrayList<>());
+//        //[row count][column count]
+//        float[][] tmpFloatMatrix = new float[2][12];
+//        //visualization that fragment fingerprinter does not change overshoot matrix cells (fingerprint array length < column count)
+//        tmpFloatMatrix[0][10] = 33.0f;
+//        tmpFloatMatrix[0][11] = 33.0f;
+//        tmpFloatMatrix[1][10] = 33.0f;
+//        tmpFloatMatrix[1][11] = 33.0f;
+//        tmpFFp.getFragmentsComponentsFloatMatrix(tmpListsList, tmpFloatMatrix, true);
+//        //manual matrix inspection:
+////        for (int i = 0; i < tmpFloatMatrix.length; i++) {
+////            System.out.println(Arrays.toString(tmpFloatMatrix[i]));
+////        }
+//        //correct fingerprint was generated and put in matrix:
+//        Assertions.assertEquals(1.0f, tmpFloatMatrix[0][2]);
+//        Assertions.assertEquals(1.0f, tmpFloatMatrix[0][3]);
+//        Assertions.assertEquals(1.0f, tmpFloatMatrix[0][4]);
+//        Assertions.assertEquals(1.0f, tmpFloatMatrix[0][7]);
+//        //overshoot matrix cells were not changed by fragment fingerprinter:
+//        Assertions.assertEquals(33.0f, tmpFloatMatrix[0][10]);
+//        Assertions.assertEquals(33.0f, tmpFloatMatrix[0][11]);
+//        //even if no fingerprint was generated and filled into matrix:
+//        Assertions.assertEquals(33.0f, tmpFloatMatrix[1][10]);
+//        Assertions.assertEquals(33.0f, tmpFloatMatrix[1][11]);
+//    }
     @Test
-    public void generateFragmentsComponentsFloatMatrixTest() {
+    public void TestMapVariantFloatMatrixGeneration() {
         List<String> tmpBitSetFragmentsList = new ArrayList<>(10);
         tmpBitSetFragmentsList.add("C");
         tmpBitSetFragmentsList.add("CC");
@@ -591,21 +644,21 @@ public class FragmentFingerprinterTest {
         tmpBitSetFragmentsList.add("*Cl");
         tmpBitSetFragmentsList.add("CCCC");
         FragmentFingerprinter tmpFFp = new FragmentFingerprinter(tmpBitSetFragmentsList);
-        //fragments of structure "2-(6-hydroxy-6,9-dihydro-1H-purin-9-yl)-5-(hydroxymethyl)oxolane-3,4-diol"
-        List<String> tmpStructureFragmentsList = new ArrayList<>(10);
-        tmpStructureFragmentsList.add("[H]OC");
-        tmpStructureFragmentsList.add("[H]OC");
-        tmpStructureFragmentsList.add("[H]OC");
-        tmpStructureFragmentsList.add("*O*");
-        tmpStructureFragmentsList.add("*N=CN(*)CO[H]");
-        tmpStructureFragmentsList.add("*n(*)*");
-        tmpStructureFragmentsList.add("*n(*)*");
-        tmpStructureFragmentsList.add("CCCCC");
-        tmpStructureFragmentsList.add("c");
-        tmpStructureFragmentsList.add("cc");
-        List<List<String>> tmpListsList = new ArrayList<>(2);
-        tmpListsList.add(tmpStructureFragmentsList);
-        tmpListsList.add(new ArrayList<>());
+        //map of fragments with frequency
+        Map<String, Integer> tmpFragmentsFrequenciesMap = new HashMap<>(15, 0.75f);
+        tmpFragmentsFrequenciesMap.put("C", 10);
+        tmpFragmentsFrequenciesMap.put("CC", 9);
+        tmpFragmentsFrequenciesMap.put("[H]OC", 8);
+        tmpFragmentsFrequenciesMap.put("*n(*)*", 7);
+        tmpFragmentsFrequenciesMap.put("*O*", 6);
+        tmpFragmentsFrequenciesMap.put("CCC", 5);
+        tmpFragmentsFrequenciesMap.put("C=C", 4);
+        tmpFragmentsFrequenciesMap.put("c", 3);
+        tmpFragmentsFrequenciesMap.put("*Cl", 2);
+        tmpFragmentsFrequenciesMap.put("CCCC", 1);
+        //
+        Map<String, Integer>[] tmpMoleculeFragmentsArray = new HashMap[1];
+        tmpMoleculeFragmentsArray[0] = tmpFragmentsFrequenciesMap;
         //[row count][column count]
         float[][] tmpFloatMatrix = new float[2][12];
         //visualization that fragment fingerprinter does not change overshoot matrix cells (fingerprint array length < column count)
@@ -613,22 +666,30 @@ public class FragmentFingerprinterTest {
         tmpFloatMatrix[0][11] = 33.0f;
         tmpFloatMatrix[1][10] = 33.0f;
         tmpFloatMatrix[1][11] = 33.0f;
-        tmpFFp.getFragmentsComponentsFloatMatrix(tmpListsList, tmpFloatMatrix, true);
-        //manual matrix inspection:
-//        for (int i = 0; i < tmpFloatMatrix.length; i++) {
-//            System.out.println(Arrays.toString(tmpFloatMatrix[i]));
-//        }
-        //correct fingerprint was generated and put in matrix:
-        Assertions.assertEquals(1.0f, tmpFloatMatrix[0][2]);
-        Assertions.assertEquals(1.0f, tmpFloatMatrix[0][3]);
-        Assertions.assertEquals(1.0f, tmpFloatMatrix[0][4]);
-        Assertions.assertEquals(1.0f, tmpFloatMatrix[0][7]);
-        //overshoot matrix cells were not changed by fragment fingerprinter:
+        //
+        tmpFFp.getFragmentsComponentsFloatMatrix(tmpMoleculeFragmentsArray, tmpFloatMatrix, true);
+        for (int i = 0; i < tmpFloatMatrix.length; i++) {
+            for (int j = 0; j < tmpFloatMatrix[i].length; j++) {
+                if (tmpFloatMatrix[i][j] != 1.0f && tmpFloatMatrix[i][j] != 33.0f) {
+                    if (i != 1) {
+                        Assertions.fail();
+                    }
+                }
+            }
+        }
+        tmpFFp.getFragmentsComponentsFloatMatrix(tmpMoleculeFragmentsArray, tmpFloatMatrix, false);
+        Assertions.assertEquals(10.0f, tmpFloatMatrix[0][0]);
+        Assertions.assertEquals(9.0f, tmpFloatMatrix[0][1]);
+        Assertions.assertEquals(8.0f, tmpFloatMatrix[0][2]);
+        Assertions.assertEquals(7.0f, tmpFloatMatrix[0][3]);
+        Assertions.assertEquals(6.0f, tmpFloatMatrix[0][4]);
+        Assertions.assertEquals(5.0f, tmpFloatMatrix[0][5]);
+        Assertions.assertEquals(4.0f, tmpFloatMatrix[0][6]);
+        Assertions.assertEquals(3.0f, tmpFloatMatrix[0][7]);
+        Assertions.assertEquals(2.0f, tmpFloatMatrix[0][8]);
+        Assertions.assertEquals(1.0f, tmpFloatMatrix[0][9]);
         Assertions.assertEquals(33.0f, tmpFloatMatrix[0][10]);
         Assertions.assertEquals(33.0f, tmpFloatMatrix[0][11]);
-        //even if no fingerprint was generated and filled into matrix:
-        Assertions.assertEquals(33.0f, tmpFloatMatrix[1][10]);
-        Assertions.assertEquals(33.0f, tmpFloatMatrix[1][11]);
     }
     //
     /**
