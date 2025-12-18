@@ -28,9 +28,8 @@ plugins {
     id 'jacoco'
     id 'java-library'
     id 'java'
-    id("com.diffplug.spotless") version "6.19.0"
-    id 'org.gradle.maven-publish'
-    id 'signing'
+    id "com.diffplug.spotless" version "8.1.0"
+    id "com.vanniktech.maven.publish" version "0.35.0"
     id "org.sonarqube" version "7.1.0.6387"
 }
 
@@ -41,7 +40,7 @@ application {
 
 group = 'io.github.jonasschaub'
 //see also version for publishing below! And do not forget to update CITATION.cff version as well!!!
-version = '1.1.0.0'
+version = '1.2.0'
 
 //sourceCompatibility = 1.17
 
@@ -50,7 +49,7 @@ java {
     toolchain {
         languageVersion = JavaLanguageVersion.of(17)
     }
-    withJavadocJar()
+    //withJavadocJar()
     withSourcesJar()
 }
 
@@ -62,17 +61,18 @@ javadoc {
 
 repositories {
     mavenCentral()
-    maven {
-        url 'https://s01.oss.sonatype.org/content/repositories/snapshots'
-    }
 }
 
-def cdkVersion = '2.9'
+def cdkVersion = '2.11'
 dependencies {
     implementation group: 'org.jetbrains', name : 'annotations', version: '23.0.0'
+    implementation group: 'org.openscience.cdk', name: 'cdk-fingerprint', version: cdkVersion
+    implementation group: 'org.openscience.cdk', name: 'cdk-fragment', version: cdkVersion
+    implementation group: 'org.openscience.cdk', name: 'cdk-silent', version: cdkVersion
+    implementation group: 'org.openscience.cdk', name: 'cdk-atomtype', version: cdkVersion
     testImplementation("org.junit.jupiter:junit-jupiter:6.0.1")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
-    implementation group: 'org.openscience.cdk', name: 'cdk-bundle', version: cdkVersion
+
 }
 
 tasks.withType(Test).configureEach {
@@ -152,119 +152,72 @@ sonar {
 
 //Archives artifacts executed with build
 artifacts {
-    archives javadocJar, sourcesJar
+    //archives javadocJar, sourcesJar
     archives fatJar
 }
 
-publishing {
-    publications {
-        mavenJava(MavenPublication) {
+mavenPublishing {
+    publishToMavenCentral(false, false) // automaticRelease = false, validateDeployment = false
 
-            groupId = 'io.github.jonasschaub'
-            artifactId = 'FragmentFingerprints'
-            version = '1.1.0.0'
+    signAllPublications()
 
-            from components.java
+    coordinates("io.github.jonasschaub", "FragmentFingerprints", "1.2.0")
 
-            versionMapping {
-                usage('java-api') {
-                    fromResolutionOf('runtimeClasspath')
-                }
-                usage('java-runtime') {
-                    fromResolutionResult()
-                }
+    pom {
+        name = "FragmentFingerprints"
+        description = "Implementation of the ART 2-A clustering algorithm in Java."
+        url = "https://github.com/JonasSchaub/FragmentFingerprints"
+        inceptionYear = "2023"
+        licenses {
+            license {
+                name = "MIT"
+                url = "https://opensource.org/license/mit/"
+                distribution = "https://opensource.org/license/mit/"
             }
-
-            pom {
-
-                name = 'FragmentFingerprints'
-                description = 'A library to generate fingerprints for molecular structures based on a set of fragments'
-                url = 'https://github.com/JonasSchaub/FragmentFingerprints'
-
-                //this way, properties can be added:
-                //properties = [
-                //myProp: "value",
-                //"prop.with.dots": "anotherValue"
-                //]
-
-                licenses {
-                    license {
-                        name = 'MIT'
-                        url = 'https://opensource.org/licenses/MIT'
-                    }
+        }
+        developers {
+            developers {
+                developer {
+                    id = "B-s123"
+                    name = "Betuel Sevindik"
+                    email = "betuel.sevindik@studmail.w-hs.de"
+                    url = "https://github.com/B-s123"
                 }
-
-                developers {
-                    developer {
-                        id = 'B-s123'
-                        name = 'Betuel Sevindik'
-                        email = 'betuel.sevindik@studmail.w-hs.de'
-                        url = 'https://github.com/B-s123'
-                    }
-                    developer {
-                        id = 'FelixBaensch'
-                        name = 'Felix Baensch'
-                        email = 'felix.baensch@w-hs.de'
-                        url = 'https://github.com/FelixBaensch'
-                    }
-                    developer {
-                        id = 'JonasSchaub'
-                        name = 'Jonas Schaub'
-                        email = 'jonas.schaub@uni-jena.de'
-                        url = 'https://github.com/JonasSchaub'
-                    }
-                    developer {
-                        name = 'Christoph Steinbeck'
-                        email = 'christoph.steinbeck@uni-jena.de'
-                        url = 'https://cheminf.uni-jena.de/members/steinbeck/'
-                    }
-                    developer {
-                        name = 'Achim Zielesny'
-                        email = 'achim.zielesny@w-hs.de'
-                        url = 'https://www.w-hs.de/service/informationen-zur-person/person/zielesny/'
-                    }
+                developer {
+                    id = "Mila1004"
+                    name = "Maximilian Rottmann"
+                    email = "maximilian.rottmann@studmail.w-hs.de"
+                    url = "https://github.com/Mila1004"
                 }
-
-                scm {
-                    connection = 'scm:git:git://github.com/JonasSchaub/FragmentFingerprints.git'
-                    developerConnection = 'scm:git:ssh://github.com/JonasSchaub/FragmentFingerprints.git'
-                    url = 'https://github.com/JonasSchaub/FragmentFingerprints/'
+                developer {
+                    id = "FelixBaensch"
+                    name = "Felix Baensch"
+                    email = "felix.baensch@w-hs.de"
+                    url = "https://github.com/FelixBaensch"
+                }
+                developer {
+                    id = "JonasSchaub"
+                    name = "Jonas Schaub"
+                    email = "jonas.schaub@uni-jena.de"
+                    url = "https://github.com/JonasSchaub"
+                }
+                developer {
+                    name = "Christoph Steinbeck"
+                    email = "christoph.steinbeck@uni-jena.de"
+                    url = "https://cheminf.uni-jena.de/members/steinbeck/"
+                }
+                developer {
+                    id = "zielesny"
+                    name = "Achim Zielesny"
+                    email = "achim.zielesny@w-hs.de"
+                    url = "https://www.w-hs.de/service/informationen-zur-person/person/zielesny/"
                 }
             }
         }
-    }
-    repositories {
-        maven {
-            //these two lines did not work because dir() apparently asks for a local path
-            //def releasesRepoUrl = layout.buildDirectory.dir('https://s01.oss.sonatype.org/content/repositories/releases/')
-            //def snapshotsRepoUrl = layout.buildDirectory.dir('https://s01.oss.sonatype.org/content/repositories/snapshots/')
-
-            //TODO: is this actually the way to fully automatically do it?
-            //def releasesRepoUrl = 'https://s01.oss.sonatype.org/content/repositories/releases/'
-            //def snapshotsRepoUrl = 'https://s01.oss.sonatype.org/content/repositories/snapshots/'
-            //url = version.endsWith('SNAPSHOT') ? snapshotsRepoUrl : releasesRepoUrl
-
-            //after publishing, go to https://s01.oss.sonatype.org, log in, close the staged repo, and release it if everything worked out
-            url = "https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/"
-            credentials {
-                //uses keys and passwords declared in userhome/.gradle/gradle.properties
-                //username = property("ossrhUsername") as String
-                //password = property("ossrhPassword") as String
-                //uses environment variables declared in yml file which passes GitHub secrets to it
-                username = System.getenv("MAVEN_USERNAME")
-                password = System.getenv("MAVEN_PASSWORD")
-            }
+        scm {
+            connection = 'scm:git:git://github.com/JonasSchaub/FragmentFingerprints.git'
+            developerConnection = 'scm:git:ssh://github.com/JonasSchaub/FragmentFingerprints.git'
+            url = 'https://github.com/JonasSchaub/FragmentFingerprints/'
         }
     }
-}
-
-signing {
-    //uses keys and passwords declared in userhome/.gradle/gradle.properties, works locally
-    //sign publishing.publications.mavenJava
-
-    //uses environment variables declared in yml file which passes GitHub secrets to it
-    def signingKey = System.getenv("signingKey")
-    def signingPassword = System.getenv("signingPassword")
-    useInMemoryPgpKeys(signingKey, signingPassword)
-    sign publishing.publications.mavenJava
 }

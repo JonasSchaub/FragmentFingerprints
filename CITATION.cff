@@ -1,12 +1,15 @@
 cff-version: 1.2.0
 title: FragmentFingerprinter
-version: 1.1.0.0
+version: 1.2.0.
 message: "If you use this software, please cite it as below."
 type: software
 authors:
   - family-names: "Sevindik"
     given-names: "Betuel"
     orcid: "https://orcid.org/0000-0002-9448-8603"
+  - family-names: "Rottmann"
+    given-names: "Maximilian"
+    orcid: "https://orcid.org/0009-0006-6367-9788"
   - family-names: "Baensch"
     given-names: "Felix"   
     orcid: "https://orcid.org/0000-0001-8973-8463"
@@ -20,6 +23,6 @@ authors:
     given-names: "Achim"    
     orcid: "https://orcid.org/0000-0003-0722-4229"
 doi: "10.5281/zenodo.7998215"
-date-released: 2023-10-27
+date-released: 2025-12-18
 url: "https://github.com/JonasSchaub/FragmentFingerprints"
 license: MIT
