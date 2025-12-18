@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2023 Betuel Sevindik, Felix Baensch, Jonas Schaub, Christoph Steinbeck, and Achim Zielesny
+ * Copyright (c) 2025 Betuel Sevindik, Maximilian Rottmann, Felix Baensch, Jonas Schaub, Christoph Steinbeck, and Achim Zielesny
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -48,12 +48,13 @@ import java.util.Arrays;
 import java.util.BitSet;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Class to test the correct working of FragmentFingerprinter
  *
- * @author Betuel Sevindik
- * @version 1.0.0.0
+ * @author Betuel Sevindik, Maximilian Rottmann
+ * @version 1.1.0.0
  */
 public class FragmentFingerprinterTest {
     //<editor-fold desc="private static final class variables" defaultstate="collapsed">
@@ -202,8 +203,12 @@ public class FragmentFingerprinterTest {
         }
         tmpFingerprintResultPrintWriter.close();
         // Objects necessary for the test are created (used only in @Test)
-        FragmentFingerprinterTest.countFingerprintTest = FragmentFingerprinterTest.fragmentFingerprinter.getCountFingerprint(FragmentFingerprinterTest.moleculeFragmentList.get(FragmentFingerprinterTest.moleculeFragmentList.size() - 1));
-        FragmentFingerprinterTest.bitFingerprintTest = FragmentFingerprinterTest.fragmentFingerprinter.getBitFingerprint(FragmentFingerprinterTest.dataForGeneratingBitFingerprint);
+        int tmpListMinusOneSize = FragmentFingerprinterTest.moleculeFragmentList.size() - 1;
+        Map<String, Integer> tmpMap = FragmentFingerprinterTest.moleculeFragmentList.get(tmpListMinusOneSize);
+        FragmentFingerprinterTest.countFingerprintTest =
+                (CountFingerprint) FragmentFingerprinterTest.fragmentFingerprinter.getCountFingerprint(tmpMap);
+        FragmentFingerprinterTest.bitFingerprintTest =
+                FragmentFingerprinterTest.fragmentFingerprinter.getBitFingerprint(FragmentFingerprinterTest.dataForGeneratingBitFingerprint);
 
         // Variamycin fragments
         FragmentFingerprinterTest.countListOfUniqueSmiles = new ArrayList<>(35);
@@ -431,18 +436,6 @@ public class FragmentFingerprinterTest {
     }
     //
     /**
-     * Tests the hash value at position 17 in the count fingerprints.
-     *
-     * Test molecule: Variamycin
-     */
-    @Test
-    public void getHashTest(){
-        int tmpHashTestForGivenIndex = 17;
-        int tmpHashForGivenIndexInVariamycin =  FragmentFingerprinterTest.countFingerprintTest.getHash(17);
-        Assertions.assertEquals(tmpHashTestForGivenIndex, tmpHashForGivenIndexInVariamycin);
-    }
-    //
-    /**
      * Tests whether the correct count value is supplied for the hash value 10.
      *
      * Test molecule: Variamycin
@@ -455,18 +448,6 @@ public class FragmentFingerprinterTest {
     }
     //
     /**
-     * Tests whether the fingerprint contains the given hash. The given hash is 30.
-     *
-     * Test molecule: Variamycin
-     */
-    @Test
-    public void hasHashTest() {
-        boolean tmpHasHashForGivenIndex = false;
-        boolean tmpHasHashForGivenIndexInVariamycinFingerprint = FragmentFingerprinterTest.countFingerprintTest.hasHash(30);
-        Assertions.assertEquals(tmpHasHashForGivenIndex, tmpHasHashForGivenIndexInVariamycinFingerprint);
-    }
-    //
-    /**
      * Tests the count method
      *
      * Test molecule: Variamycin
@@ -474,7 +455,7 @@ public class FragmentFingerprinterTest {
     @Test
     public void countTest() {
         int tmpCountForGivenSmilesString = 5;
-        int tmpCountForGivenSmilesStringInVariamycinFingerprint = FragmentFingerprinterTest.countFingerprintTest.count("CCCCC");
+        int tmpCountForGivenSmilesStringInVariamycinFingerprint = FragmentFingerprinterTest.fragmentFingerprinter.count("CCCCC", countFingerprintTest);
         Assertions.assertEquals(tmpCountForGivenSmilesString, tmpCountForGivenSmilesStringInVariamycinFingerprint);
     }
     //
@@ -524,30 +505,6 @@ public class FragmentFingerprinterTest {
         int tmpCountForGivenIndexTest = 5;
         int tmpCountForGivenIndexInVariamycinFingerprint = FragmentFingerprinterTest.fragmentFingerprinter.getCountFingerprint(FragmentFingerprinterTest.countListOfUniqueSmiles).getCount(26);
         Assertions.assertEquals(tmpCountForGivenIndexTest, tmpCountForGivenIndexInVariamycinFingerprint);
-    }
-    //
-    /**
-     * Tests the hash value at position 10 in the count fingerprint.
-     *
-     * Test molecule: Variamycin
-     */
-    @Test
-    public void getHashTestInputList() {
-        int tmpHashForGivenIndexTest = 10;
-        int tmpHashForGivenIndexInVariamcyinFingerprint = FragmentFingerprinterTest.fragmentFingerprinter.getCountFingerprint(FragmentFingerprinterTest.countListOfUniqueSmiles).getHash(10);
-        Assertions.assertEquals(tmpHashForGivenIndexTest,tmpHashForGivenIndexInVariamcyinFingerprint);
-    }
-    //
-    /**
-     * Tests whether the fingerprint contains the given hash. The given hash is 20.
-     *
-     * Test molecule: Variamycin
-     */
-    @Test
-    public void hasHashTestInputList() {
-        boolean tmpHasHashForGivenIndex = true;
-        boolean tmpHasHashForGivenIndexInVariamycinFingerprint = FragmentFingerprinterTest.fragmentFingerprinter.getCountFingerprint(FragmentFingerprinterTest.countListOfUniqueSmiles).hasHash(20);
-        Assertions.assertEquals(tmpHasHashForGivenIndex, tmpHasHashForGivenIndexInVariamycinFingerprint);
     }
     //
     /**
@@ -614,6 +571,239 @@ public class FragmentFingerprinterTest {
         String tmpBitDefinitionForGivenBitInVariamycinFingerprint = FragmentFingerprinterTest.fragmentFingerprinter.getBitDefinition(27);
         Assertions.assertEquals(tmpBitDefinitionForGivenBitTest, tmpBitDefinitionForGivenBitInVariamycinFingerprint);
     }
+    //
+    /**
+     * Test for correct float matrix generation and general matrix handling.
+     * The fragments for the bit fingerprint were generated via fragmentation analysis of 1000 picked molecules from the
+     * COCONUT database. The fragments represent the 10 most frequently occurring fragments.
+     */
+//    @Test
+//    public void generateFragmentsComponentsFloatMatrixTest() {
+//        List<String> tmpBitSetFragmentsList = new ArrayList<>(10);
+//        tmpBitSetFragmentsList.add("C");
+//        tmpBitSetFragmentsList.add("CC");
+//        tmpBitSetFragmentsList.add("[H]OC");
+//        tmpBitSetFragmentsList.add("*n(*)*");
+//        tmpBitSetFragmentsList.add("*O*");
+//        tmpBitSetFragmentsList.add("CCC");
+//        tmpBitSetFragmentsList.add("C=C");
+//        tmpBitSetFragmentsList.add("c");
+//        tmpBitSetFragmentsList.add("*Cl");
+//        tmpBitSetFragmentsList.add("CCCC");
+//        FragmentFingerprinter tmpFFp = new FragmentFingerprinter(tmpBitSetFragmentsList);
+//        //fragments of structure "2-(6-hydroxy-6,9-dihydro-1H-purin-9-yl)-5-(hydroxymethyl)oxolane-3,4-diol"
+//        List<String> tmpStructureFragmentsList = new ArrayList<>(10);
+//        tmpStructureFragmentsList.add("[H]OC");
+//        tmpStructureFragmentsList.add("[H]OC");
+//        tmpStructureFragmentsList.add("[H]OC");
+//        tmpStructureFragmentsList.add("*O*");
+//        tmpStructureFragmentsList.add("*N=CN(*)CO[H]");
+//        tmpStructureFragmentsList.add("*n(*)*");
+//        tmpStructureFragmentsList.add("*n(*)*");
+//        tmpStructureFragmentsList.add("CCCCC");
+//        tmpStructureFragmentsList.add("c");
+//        tmpStructureFragmentsList.add("cc");
+//        List<List<String>> tmpListsList = new ArrayList<>(2);
+//        tmpListsList.add(tmpStructureFragmentsList);
+//        tmpListsList.add(new ArrayList<>());
+//        //[row count][column count]
+//        float[][] tmpFloatMatrix = new float[2][12];
+//        //visualization that fragment fingerprinter does not change overshoot matrix cells (fingerprint array length < column count)
+//        tmpFloatMatrix[0][10] = 33.0f;
+//        tmpFloatMatrix[0][11] = 33.0f;
+//        tmpFloatMatrix[1][10] = 33.0f;
+//        tmpFloatMatrix[1][11] = 33.0f;
+//        tmpFFp.getFragmentsComponentsFloatMatrix(tmpListsList, tmpFloatMatrix, true);
+//        //manual matrix inspection:
+////        for (int i = 0; i < tmpFloatMatrix.length; i++) {
+////            System.out.println(Arrays.toString(tmpFloatMatrix[i]));
+////        }
+//        //correct fingerprint was generated and put in matrix:
+//        Assertions.assertEquals(1.0f, tmpFloatMatrix[0][2]);
+//        Assertions.assertEquals(1.0f, tmpFloatMatrix[0][3]);
+//        Assertions.assertEquals(1.0f, tmpFloatMatrix[0][4]);
+//        Assertions.assertEquals(1.0f, tmpFloatMatrix[0][7]);
+//        //overshoot matrix cells were not changed by fragment fingerprinter:
+//        Assertions.assertEquals(33.0f, tmpFloatMatrix[0][10]);
+//        Assertions.assertEquals(33.0f, tmpFloatMatrix[0][11]);
+//        //even if no fingerprint was generated and filled into matrix:
+//        Assertions.assertEquals(33.0f, tmpFloatMatrix[1][10]);
+//        Assertions.assertEquals(33.0f, tmpFloatMatrix[1][11]);
+//    }
+    @Test
+    public void TestMapVariantFloatMatrixGeneration() {
+        List<String> tmpBitSetFragmentsList = new ArrayList<>(10);
+        tmpBitSetFragmentsList.add("C");
+        tmpBitSetFragmentsList.add("CC");
+        tmpBitSetFragmentsList.add("[H]OC");
+        tmpBitSetFragmentsList.add("*n(*)*");
+        tmpBitSetFragmentsList.add("*O*");
+        tmpBitSetFragmentsList.add("CCC");
+        tmpBitSetFragmentsList.add("C=C");
+        tmpBitSetFragmentsList.add("c");
+        tmpBitSetFragmentsList.add("*Cl");
+        tmpBitSetFragmentsList.add("CCCC");
+        FragmentFingerprinter tmpFFp = new FragmentFingerprinter(tmpBitSetFragmentsList);
+        //map of fragments with frequency
+        Map<String, Integer> tmpFragmentsFrequenciesMap = new HashMap<>(15, 0.75f);
+        tmpFragmentsFrequenciesMap.put("C", 10);
+        tmpFragmentsFrequenciesMap.put("CC", 9);
+        tmpFragmentsFrequenciesMap.put("[H]OC", 8);
+        tmpFragmentsFrequenciesMap.put("*n(*)*", 7);
+        tmpFragmentsFrequenciesMap.put("*O*", 6);
+        tmpFragmentsFrequenciesMap.put("CCC", 5);
+        tmpFragmentsFrequenciesMap.put("C=C", 4);
+        tmpFragmentsFrequenciesMap.put("c", 3);
+        tmpFragmentsFrequenciesMap.put("*Cl", 2);
+        tmpFragmentsFrequenciesMap.put("CCCC", 1);
+        //
+        Map<String, Integer>[] tmpMoleculeFragmentsArray = new HashMap[1];
+        tmpMoleculeFragmentsArray[0] = tmpFragmentsFrequenciesMap;
+        //[row count][column count]
+        float[][] tmpFloatMatrix = new float[2][12];
+        //visualization that fragment fingerprinter does not change overshoot matrix cells (fingerprint array length < column count)
+        tmpFloatMatrix[0][10] = 33.0f;
+        tmpFloatMatrix[0][11] = 33.0f;
+        tmpFloatMatrix[1][10] = 33.0f;
+        tmpFloatMatrix[1][11] = 33.0f;
+        //
+        tmpFFp.getFragmentsComponentsFloatMatrix(tmpMoleculeFragmentsArray, tmpFloatMatrix, true);
+        for (int i = 0; i < tmpFloatMatrix.length; i++) {
+            for (int j = 0; j < tmpFloatMatrix[i].length; j++) {
+                if (tmpFloatMatrix[i][j] != 1.0f && tmpFloatMatrix[i][j] != 33.0f) {
+                    if (i != 1) {
+                        Assertions.fail();
+                    }
+                }
+            }
+        }
+        tmpFFp.getFragmentsComponentsFloatMatrix(tmpMoleculeFragmentsArray, tmpFloatMatrix, false);
+        Assertions.assertEquals(10.0f, tmpFloatMatrix[0][0]);
+        Assertions.assertEquals(9.0f, tmpFloatMatrix[0][1]);
+        Assertions.assertEquals(8.0f, tmpFloatMatrix[0][2]);
+        Assertions.assertEquals(7.0f, tmpFloatMatrix[0][3]);
+        Assertions.assertEquals(6.0f, tmpFloatMatrix[0][4]);
+        Assertions.assertEquals(5.0f, tmpFloatMatrix[0][5]);
+        Assertions.assertEquals(4.0f, tmpFloatMatrix[0][6]);
+        Assertions.assertEquals(3.0f, tmpFloatMatrix[0][7]);
+        Assertions.assertEquals(2.0f, tmpFloatMatrix[0][8]);
+        Assertions.assertEquals(1.0f, tmpFloatMatrix[0][9]);
+        Assertions.assertEquals(33.0f, tmpFloatMatrix[0][10]);
+        Assertions.assertEquals(33.0f, tmpFloatMatrix[0][11]);
+    }
+    //
+    /**
+     *  Tests the correct functionality of mergeCountFingerprint() of CountFingerprint class.
+     *  Two fingerprints are therefor generated and merged and checked for equal integers with a fixed result.
+     */
+    @Test
+    public void TestMergeCountFingerprint() {
+        List<String> tmpSmilesList = new ArrayList<>(5);
+        tmpSmilesList.add("C");
+        tmpSmilesList.add("*O");
+        tmpSmilesList.add("cccc");
+        tmpSmilesList.add("*O*");
+        tmpSmilesList.add("OC=O");
+        //
+        HashMap<String, Integer> tmpFreqMap = new HashMap<>((int) (tmpSmilesList.size() * 1.5f) + 1, 0.75f);
+        tmpFreqMap.put("C", 5);
+        tmpFreqMap.put("*O", 4);
+        tmpFreqMap.put("cccc", 3);
+        tmpFreqMap.put("*O*", 2);
+        tmpFreqMap.put("OC=O", 1);
+        //
+        FragmentFingerprinter tmpFFp = new FragmentFingerprinter(tmpSmilesList);
+        //
+        CountFingerprint tmpCountFingerprint1 = (CountFingerprint) tmpFFp.getCountFingerprint(tmpFreqMap);
+        //
+        HashMap<String, Integer> tmpFreqMap2 = new HashMap<>((int) (tmpSmilesList.size() * 1.5f) + 1, 0.75f);
+        tmpFreqMap2.put("C", 1);
+        tmpFreqMap2.put("*O", 2);
+        tmpFreqMap2.put("cccc", 3);
+        tmpFreqMap2.put("*O*", 4);
+        tmpFreqMap2.put("OC=O", 5);
+        //
+        CountFingerprint tmpCountFingerprint2 = (CountFingerprint) tmpFFp.getCountFingerprint(tmpFreqMap2);
+        //
+        CountFingerprint tmpMergedCountFingerprint = (CountFingerprint) CountFingerprint.mergeCountFingerprint(tmpCountFingerprint1, tmpCountFingerprint2);
+        //
+        HashMap<String, Integer> tmpAddMap = new HashMap<>((int) (tmpSmilesList.size() * 1.5f) + 1, 0.75f);
+        tmpAddMap.put("C", 6);
+        tmpAddMap.put("*O", 6);
+        tmpAddMap.put("cccc", 6);
+        tmpAddMap.put("*O*", 6);
+        tmpAddMap.put("OC=O", 6);
+        //
+        CountFingerprint tmpCountFingerprintForAssertion = (CountFingerprint) tmpFFp.getCountFingerprint(tmpAddMap);
+        //
+        Map<Integer, Integer> tmpMergedMap = tmpMergedCountFingerprint.getSmilesPositionToFrequencyMap();
+        Map<Integer, Integer> tmpAssertionMap = tmpCountFingerprintForAssertion.getSmilesPositionToFrequencyMap();
+        for (Map.Entry<Integer, Integer> tmpEntry : tmpAssertionMap.entrySet()) {
+            Assertions.assertEquals(tmpEntry.getValue(), tmpMergedMap.get(tmpEntry.getKey()));
+        }
+    }
+    //
+    /**
+     * Test for FragmentFingerprinter getBitSet(List of Strings) where correct fingerprint generation and conversion to
+     * BitSet is checked.
+     */
+    @Test
+    public void TestGetBitSetOfList() {
+        List<String> tmpSmilesList = new ArrayList<>(5);
+        tmpSmilesList.add("C");
+        tmpSmilesList.add("*O");
+        tmpSmilesList.add("cccc");
+        tmpSmilesList.add("*O*");
+        tmpSmilesList.add("OC=O");
+        FragmentFingerprinter tmpFFp = new FragmentFingerprinter(tmpSmilesList);
+        //extra entry to see behavior of bit set
+        tmpSmilesList.add("S");
+        BitSet tmpTestBitSet = tmpFFp.getBitSet(tmpSmilesList);
+        BitSet tmpExpectBitSet = new BitSet();
+        tmpExpectBitSet.set(0, true);
+        tmpExpectBitSet.set(1, true);
+        tmpExpectBitSet.set(2, true);
+        tmpExpectBitSet.set(3, true);
+        tmpExpectBitSet.set(4, true);
+        //
+        for (int i = 0; i < tmpExpectBitSet.size(); i++) {
+            Assertions.assertEquals(tmpExpectBitSet.get(i), tmpTestBitSet.get(i));
+        }
+    }/**
+     * Test for FragmentFingerprinter getBitSet(SMILES to frequency map) where correct fingerprint generation and
+     * conversion to BitSet is checked.
+     */
+    @Test
+    public void TestGetBitSetOfFrequencyMap() {
+        List<String> tmpSmilesList = new ArrayList<>(5);
+        tmpSmilesList.add("C");
+        tmpSmilesList.add("*O");
+        tmpSmilesList.add("cccc");
+        tmpSmilesList.add("*O*");
+        tmpSmilesList.add("OC=O");
+        FragmentFingerprinter tmpFFp = new FragmentFingerprinter(tmpSmilesList);
+        Map<String, Integer> tmpSmilesToFrequencyMap = new HashMap<>((int) (5 * 1.5), 0.75f);
+        tmpSmilesToFrequencyMap.put("C", 1);
+        tmpSmilesToFrequencyMap.put("*O", 2);
+        tmpSmilesToFrequencyMap.put("cccc", 3);
+        tmpSmilesToFrequencyMap.put("*O*", 4);
+        tmpSmilesToFrequencyMap.put("OC=O", 5);
+        //extra entry as other test for bit set generation
+        tmpSmilesToFrequencyMap.put("S", 6);
+        //
+        BitSet tmpTestBitSet = tmpFFp.getBitSet(tmpSmilesToFrequencyMap);
+        BitSet tmpExpectBitSet = new BitSet();
+        tmpExpectBitSet.set(0, true);
+        tmpExpectBitSet.set(1, true);
+        tmpExpectBitSet.set(2, true);
+        tmpExpectBitSet.set(3, true);
+        tmpExpectBitSet.set(4, true);
+        //
+        for (int i = 0; i < tmpExpectBitSet.size(); i++) {
+            Assertions.assertEquals(tmpExpectBitSet.get(i), tmpTestBitSet.get(i));
+        }
+    }
+
     //</editor-fold>
     //
     //<editor-fold desc="Test count arrays of all molecules" defaultstate="collapsed">
