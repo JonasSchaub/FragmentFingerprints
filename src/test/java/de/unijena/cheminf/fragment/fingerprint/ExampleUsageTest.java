@@ -1,7 +1,8 @@
 /*
  * MIT License
  *
- * Copyright (c) 2023 Betuel Sevindik, Felix Baensch, Jonas Schaub, Christoph Steinbeck, and Achim Zielesny
+ * Copyright (c) 2025 Betuel Sevindik, Maximilian Rottmann, Felix Baensch, Jonas
+ * Schaub, Christoph Steinbeck, and Achim Zielesny
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -36,8 +37,10 @@ import org.openscience.cdk.smiles.SmilesParser;
 
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Test class with usage examples for the fragment fingerprinter functionality.
@@ -47,48 +50,109 @@ import java.util.List;
  */
 public class ExampleUsageTest {
     /**
-     * At the very basic level, the fragment fingerprinter is a simple string matching-based functionality for creating
-     * bit and count vectors based on a set of initialisation strings that the fingerprinter checks given sets of
-     * strings for.
-     *
-     * The following illustrates this with a basic example.
+     * The fragments for the bit fingerprint were generated via fragmentation analysis of 1000 picked molecules from the
+     * COCONUT database. The structures represent the 10 most frequently occurring fragments.
      */
     @Test
-    public void generalExampleUsageTest() throws Exception {
-        List<String> tmpInitialisationStrings = List.of("Hannah", "Sam", "John", "Hugo", "Tim");
-        //Initialising the fingerprinter with the list of names
-        FragmentFingerprinter tmpFingerprinter = new FragmentFingerprinter(tmpInitialisationStrings);
-        //Creating a set of names to generate a fingerprint for
-        List<String> tmpMyPartyPeople = List.of("Hugo", "Hannah", "Sam", "Maria");
-        //Generating the bit fingerprint
-        IBitFingerprint tmpMyPartyPeopleFP = tmpFingerprinter.getBitFingerprint(tmpMyPartyPeople);
-        System.out.println(tmpMyPartyPeopleFP.cardinality());
-        /*
-         * Output: 3
-         *
-         * I.e. 3 positive bits in the fingerprint. Maria is ignored since she was not part of the initialisation set.
-         */
-        System.out.println(tmpMyPartyPeopleFP.asBitSet().toString());
-        /*
-         * Output: {0, 1, 3}
-         *
-         * Hannah is represented by position 0, Sam by position 1, and Hugo by position 3 in
-         * the fingerprint and these positions are positive in the bit fingerprint.
-         */
-        //Printing the bit definitions and whether they are positive or not in the "party" set of names
-        for (int i = 0; i < tmpFingerprinter.getSize(); i++) {
-            System.out.println(tmpFingerprinter.getBitDefinition(i) + ": " + tmpMyPartyPeopleFP.get(i));
+    public void floatMatrixExampleUsageTest() {
+        System.out.println("Float matrix example usage test:");
+        //generate list of master vector (pre-defined fingerprint)
+        List<String> tmpFingerprintList = new ArrayList<>(10);
+        //fragment SMILES Strings
+        tmpFingerprintList.add("C");
+        tmpFingerprintList.add("CC");
+        tmpFingerprintList.add("[H]OC");
+        tmpFingerprintList.add("*n(*)*");
+        tmpFingerprintList.add("*O*");
+        tmpFingerprintList.add("CCC");
+        tmpFingerprintList.add("C=C");
+        tmpFingerprintList.add("c");
+        tmpFingerprintList.add("*Cl");
+        tmpFingerprintList.add("CCCC");
+        //instance new FragmentFingerprinter with fingerprint fragments list from above
+        FragmentFingerprinter tmpFFp = new FragmentFingerprinter(tmpFingerprintList);
+
+
+        //list of fragments for which to generate a fingerprint
+        List<String> tmpFragmentsList = new ArrayList<>(12);
+        tmpFragmentsList.add("C");
+        tmpFragmentsList.add("CC");
+        tmpFragmentsList.add("[H]OC");
+        tmpFragmentsList.add("*n(*)*");
+        tmpFragmentsList.add("*O*");
+        tmpFragmentsList.add("CCC");
+        tmpFragmentsList.add("C=C");
+        tmpFragmentsList.add("c");
+        tmpFragmentsList.add("*Cl");
+        tmpFragmentsList.add("CCCC");
+
+
+        //map of fragment-frequency pairs for which to generate a fingerprint
+        Map<String, Integer> tmpFragmentsFrequenciesMap = new HashMap<>(16, 0.75f);
+        //the same fragments as above are used with example frequencies sorted for abundance
+        tmpFragmentsFrequenciesMap.put("C", 10);
+        tmpFragmentsFrequenciesMap.put("CC", 9);
+        tmpFragmentsFrequenciesMap.put("[H]OC", 8);
+        tmpFragmentsFrequenciesMap.put("*n(*)*", 7);
+        tmpFragmentsFrequenciesMap.put("*O*", 6);
+        tmpFragmentsFrequenciesMap.put("CCC", 5);
+        tmpFragmentsFrequenciesMap.put("C=C", 4);
+        tmpFragmentsFrequenciesMap.put("c", 3);
+        tmpFragmentsFrequenciesMap.put("*Cl", 2);
+        tmpFragmentsFrequenciesMap.put("CCCC", 1);
+        //as well, two more halogen groups are added to distinctively showcase the fingerprint functionality
+        //these fragments will be ignored for fingerprint generation as they are not in the pre-defined master vector
+        tmpFragmentsFrequenciesMap.put("*F", 1);
+        tmpFragmentsFrequenciesMap.put("*I", 1);
+        //two matrixes are initialized, one as big as the pre-defined fingerprint, one with additional columns
+        float[][] tmpDataMatrix = new float[1][10];
+        float[][] tmpDataMatrixWithOverhang = new float[1][15];
+
+
+        //list of fragments lists is created
+        List<List<String>> tmpFragmentsListsList = new ArrayList<>(2);
+        tmpFragmentsListsList.add(tmpFragmentsList);
+
+
+        //array for containing fragments-frequencies-maps is initialized
+        Map<String, Integer>[] tmpFragmentsMapsArray = new HashMap[1];
+        tmpFragmentsMapsArray[0] = tmpFragmentsFrequenciesMap;
+
+        //fingerprints are generated from maps array and directly filled into the specified matrix
+        // (using bit array behavior)
+
+        //tmpFFp.getFragmentsComponentsFloatMatrix(tmpFragmentsListsList, tmpDataMatrix, true);
+
+        tmpFFp.getFragmentsComponentsFloatMatrix(tmpFragmentsMapsArray, tmpDataMatrix, true);
+        //visualizing resulting matrix
+        System.out.println("Matrix without overhang columns:");
+        for (float[] tmpFloatArray : tmpDataMatrix) {
+            System.out.println(Arrays.toString(tmpFloatArray));
         }
-        /*
-         * Output:
-         * Hannah: true
-         * Sam: true
-         * John: false
-         * Hugo: true
-         * Tim: false
-         */
+        //now the same operation for the matrix with additional column space
+        tmpFFp.getFragmentsComponentsFloatMatrix(
+                tmpFragmentsMapsArray, tmpDataMatrixWithOverhang, true);
+
+        //tmpFFp.getFragmentsComponentsFloatMatrix(tmpFragmentsListsList, tmpDataMatrixWithOverhang, true);
+
+        //the FragmentFingerprinter will ignore array space AFTER the size of the pre-defined fingerprint
+        // (e. array with length 12 but pre-defined fingerprint of size 10 -> array position 10 and 11 will be untouched)
+        System.out.println("Matrix WITH overhang columns:");
+        for (float[] tmpFloatArray : tmpDataMatrixWithOverhang) {
+            System.out.println(Arrays.toString(tmpFloatArray));
+        }
+        //change behavior to count/frequency behavior
+        tmpFFp.getFragmentsComponentsFloatMatrix(tmpFragmentsMapsArray, tmpDataMatrix, false);
+
+        //tmpFFp.getFragmentsComponentsFloatMatrix(tmpFragmentsListsList, tmpDataMatrix, false);
+
+        //now instead of true/false represented by either 0.0f/1.0f, fragment frequency will be displayed in fingerprint
+        System.out.println("Matrix without overhang columns BUT count array behavior:");
+        for (float[] tmpFloatArray : tmpDataMatrix) {
+            System.out.println(Arrays.toString(tmpFloatArray));
+        }
+        //matrix with overhang works analogous and will not be shown explicitly
     }
-    //
     /**
      * The intended use case of the fragment fingerprinter functionality is to encode the presence and absence of
      * substructures in a given molecule that result from a molecular fragmentation study, i.e. the algorithmic
