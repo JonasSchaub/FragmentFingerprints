@@ -1,7 +1,8 @@
 /*
  * MIT License
  *
- * Copyright (c) 2025 Betuel Sevindik, Maximilian Rottmann, Felix Baensch, Jonas Schaub, Christoph Steinbeck, and Achim Zielesny
+ * Copyright (c) 2025 Betuel Sevindik, Maximilian Rottmann, Felix Baensch, Jonas
+ * Schaub, Christoph Steinbeck, and Achim Zielesny
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -68,7 +69,7 @@ public class FragmentFingerprinter implements IFragmentFingerprinter {
     /**
      * Version of fragment fingerprinter
      */
-    private static final String FRAGMENT_FINGERPRINTER_VERSION = "1.1.0.0";
+    private static final String FRAGMENT_FINGERPRINTER_VERSION = "1.2.0";
     //</editor-fold>
     //
     // <editor-fold defaultstate="collapsed" desc="Constructor">
