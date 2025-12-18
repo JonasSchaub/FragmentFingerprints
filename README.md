@@ -6,7 +6,7 @@
 [![GitHub issues](https://img.shields.io/github/issues/JonasSchaub/FragmentFingerprints.svg)](https://GitHub.com/JonasSchaub/FragmentFingerprints/issues/)
 [![GitHub contributors](https://img.shields.io/github/contributors/JonasSchaub/FragmentFingerprints.svg)](https://GitHub.com/JonasSchaub/FragmentFingerprints/graphs/contributors/)
 [![GitHub release](https://img.shields.io/github/release/JonasSchaub/FragmentFingerprints.svg)](https://github.com/JonasSchaub/FragmentFingerprints/releases/)
-[![Maven Central](https://maven-badges.herokuapp.com/maven-central/io.github.jonasschaub/FragmentFingerprints/badge.svg)](https://maven-badges.herokuapp.com/maven-central/io.github.jonasschaub/FragmentFingerprints)
+[![Maven Central Version](https://img.shields.io/maven-central/v/io.github.jonasschaub/FragmentFingerprints)](https://central.sonatype.com/artifact/io.github.jonasschaub/FragmentFingerprints)
 [![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=JonasSchaub_FragmentFingerprints&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=JonasSchaub_FragmentFingerprints)
 # FragmentFingerprints
 A library to generate fingerprints for molecular structures based on a set of fragments represented as SMILES strings.

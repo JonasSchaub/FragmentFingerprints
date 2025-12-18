@@ -165,7 +165,7 @@ mavenPublishing {
 
     pom {
         name = "FragmentFingerprints"
-        description = "Implementation of the ART 2-A clustering algorithm in Java."
+        description = "A library to generate fingerprints for molecular structures based on a set of fragments"
         url = "https://github.com/JonasSchaub/FragmentFingerprints"
         inceptionYear = "2023"
         licenses {
