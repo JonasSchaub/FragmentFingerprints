@@ -6,21 +6,21 @@
 [![GitHub issues](https://img.shields.io/github/issues/JonasSchaub/FragmentFingerprints.svg)](https://GitHub.com/JonasSchaub/FragmentFingerprints/issues/)
 [![GitHub contributors](https://img.shields.io/github/contributors/JonasSchaub/FragmentFingerprints.svg)](https://GitHub.com/JonasSchaub/FragmentFingerprints/graphs/contributors/)
 [![GitHub release](https://img.shields.io/github/release/JonasSchaub/FragmentFingerprints.svg)](https://github.com/JonasSchaub/FragmentFingerprints/releases/)
-[![Maven Central](https://maven-badges.herokuapp.com/maven-central/io.github.jonasschaub/FragmentFingerprints/badge.svg)](https://maven-badges.herokuapp.com/maven-central/io.github.jonasschaub/FragmentFingerprints)
+[![Maven Central Version](https://img.shields.io/maven-central/v/io.github.jonasschaub/FragmentFingerprints)](https://central.sonatype.com/artifact/io.github.jonasschaub/FragmentFingerprints)
 [![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=JonasSchaub_FragmentFingerprints&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=JonasSchaub_FragmentFingerprints)
 # FragmentFingerprints
-A library to generate fingerprints for molecular structures based on a set of fragments
+A library to generate fingerprints for molecular structures based on a set of fragments represented as SMILES strings.
 
 ## Description
 The library generates fragment fingerprints based on pre-defined fragments, 
-which can be set by the user, and can generate both bit and count fingerprints. 
+which can be set by the user. It can generate both bit and count fingerprints. 
 Fragment fingerprints are created by matching fragments or substructures of a 
-molecule with pre-defined fragments. If a match is found, the corresponding positions 
-in the fingerprint are filled. The special feature of the fragment fingerprinter is that fingerprints 
+molecule with pre-defined fragments. If a match is found, the corresponding position 
+in the fingerprint is set to true. The special feature of the fragment fingerprinter is that fingerprints 
 are generated exclusively by comparing unique SMILES (Strings). This means that both the pre-defined fragments and 
 the substructures or fragments of the molecule for which the fingerprint is 
 being generated must be represented as unique SMILES strings. The implementation of the fragment fingerprinter is based on
-the Chemistry Development Kit (CDK).
+the Chemistry Development Kit (CDK), i.e. it implements CDK interfaces for compatibility.
 
 ## Contents of this repository
 ### Sources
@@ -29,14 +29,14 @@ all source code packages including JUnit tests.
 
 ### Tests
 The test class <i>FragmentFingerprinterTest</i> tests the functionalities of fragment fingerprinter.
-Among other things, it tests whether the bit and count fingerprint of a molecule has been generated 
+Among other things, it tests whether the bit and count fingerprint of a molecule have been generated 
 correctly. Furthermore, various methods of the CountFingerprint and 
 BitSetFingerprint classes are tested.
 
 ### Test resources
 The test <a href="https://github.com/JonasSchaub/FragmentFingerprints/tree/FragmentFingerprint/src/test/resources/de/unijena/cheminf/fragment/fingerprint">"resources"</a> subfolder
 contains two text files. The text file named "FragmentList.txt" contains all key fragments. And the file 
-named "MoleculeList.txt" contains fragments/substructures of molecules. 
+named "MoleculeFragments.txt" contains fragments/substructures of molecules. 
 In total, 10 molecules with their corresponding fragments are stored in the file.
 
 ### Performance Test CMD Application
@@ -67,14 +67,14 @@ be pre-installed.
 **Needs to be pre-installed:**
 * Java Development Kit (JDK) version 17
   * [Adoptium OpenJDK](https://adoptium.net) (as one possible source of the JDK)
-* Gradle version 7.3
+* Gradle version 9.2.0
   * [Gradle Build Tool](https://gradle.org)
 
 **Managed by Gradle:**
-* Chemistry Development Kit (CDK) version 2.8
+* Chemistry Development Kit (CDK) version 2.11
   * [Chemistry Development Kit on GitHub](https://cdk.github.io/)
   * License: GNU Lesser General Public License 2.1
-* JUnit Jupiter version 5.9.1
+* JUnit Jupiter version 6.0.1
   * [JUnit ](https://junit.org/junit5/)
   * License: Eclipse Public License - v 2.0
 
