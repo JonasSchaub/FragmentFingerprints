@@ -90,14 +90,14 @@ public class CountFingerprint implements ICountFingerprint {
      * @param aFingerprintSize defines the size of the fingerprint
      * @param aPositionToFrequencyMap This map is a raw map and must map the positions of key fragments in the
      *                                fingerprint to their frequencies in the molecule or any set of fragments.
-     * @param aFingerprintBehaviorStatement defines whether CountFingerprint should behave ass BitFingerprint
+     * @param aFingerprintBehaviorStatement defines whether CountFingerprint should behave as BitFingerprint
      * @throws NullPointerException is thrown if the arguments are null.
      * @throws IllegalArgumentException is thrown if the given size is smaller than one.
      */
     public CountFingerprint(int aFingerprintSize, Map<Integer, Integer> aPositionToFrequencyMap, boolean aFingerprintBehaviorStatement) throws NullPointerException, IllegalArgumentException {
         Objects.requireNonNull(aPositionToFrequencyMap, "aPositionToFrequencyMap is null.");
         if (aFingerprintSize < 1) {
-            throw new IllegalArgumentException("Fingerprint size cannot be zero or smaller");
+            throw new IllegalArgumentException("Fingerprint size cannot be less than 1.");
         }
         this.definedFingerprintSize = aFingerprintSize;
         this.uniqueSmilesPositionToFrequencyCountRawMap = aPositionToFrequencyMap;
@@ -150,7 +150,7 @@ public class CountFingerprint implements ICountFingerprint {
     public int getCount(int index) throws IllegalArgumentException {
         if (index >= this.definedFingerprintSize || index < 0) {
             throw new IllegalArgumentException("This position does not exist in the fingerprint (undefined state).");
-        } else if (index >= 0 && this.uniqueSmilesPositionToFrequencyCountRawMap.containsKey(index)) {
+        } else if (this.uniqueSmilesPositionToFrequencyCountRawMap.containsKey(index)) {
             if (this.behaveAsBitFingerprint) {
                 return 1;
             } else {
@@ -240,7 +240,7 @@ public class CountFingerprint implements ICountFingerprint {
         Objects.requireNonNull(aFirstCountFingerprintToMerge, "Given fingerprint was null.");
         Objects.requireNonNull(aSecondCountFingerprintToMerge, "Given fingerprint was null.");
         if (aFirstCountFingerprintToMerge.getDefinedFingerprintSize() != aSecondCountFingerprintToMerge.getDefinedFingerprintSize()) {
-            throw new IllegalArgumentException("Defined fingerprint size does not match. A merge is only possible with" +
+            throw new IllegalArgumentException("Defined fingerprint size does not match. A merge is only possible with " +
                     "fingerprints that come from the same fragment set.");
         }
         int tmpFirstFPMapSize = aFirstCountFingerprintToMerge.getSmilesPositionToFrequencyMap().size();
@@ -263,6 +263,7 @@ public class CountFingerprint implements ICountFingerprint {
     //
     /**
      * Public getter for internal map of smiles fingerprint position to corresponding frequency.
+     * IMPORTANT! The returned map is not to be modified!
      *
      * @return Mapping of smiles fingerprint position to frequency
      */

@@ -71,8 +71,6 @@ public class ExampleUsageTest {
         tmpFingerprintList.add("CCCC");
         //instance new FragmentFingerprinter with fingerprint fragments list from above
         FragmentFingerprinter tmpFFp = new FragmentFingerprinter(tmpFingerprintList);
-
-
         //list of fragments for which to generate a fingerprint
         List<String> tmpFragmentsList = new ArrayList<>(12);
         tmpFragmentsList.add("C");
@@ -85,8 +83,6 @@ public class ExampleUsageTest {
         tmpFragmentsList.add("c");
         tmpFragmentsList.add("*Cl");
         tmpFragmentsList.add("CCCC");
-
-
         //map of fragment-frequency pairs for which to generate a fingerprint
         Map<String, Integer> tmpFragmentsFrequenciesMap = new HashMap<>(16, 0.75f);
         //the same fragments as above are used with example frequencies sorted for abundance
@@ -107,22 +103,11 @@ public class ExampleUsageTest {
         //two matrixes are initialized, one as big as the pre-defined fingerprint, one with additional columns
         float[][] tmpDataMatrix = new float[1][10];
         float[][] tmpDataMatrixWithOverhang = new float[1][15];
-
-
-        //list of fragments lists is created
-        List<List<String>> tmpFragmentsListsList = new ArrayList<>(2);
-        tmpFragmentsListsList.add(tmpFragmentsList);
-
-
         //array for containing fragments-frequencies-maps is initialized
         Map<String, Integer>[] tmpFragmentsMapsArray = new HashMap[1];
         tmpFragmentsMapsArray[0] = tmpFragmentsFrequenciesMap;
-
         //fingerprints are generated from maps array and directly filled into the specified matrix
         // (using bit array behavior)
-
-        //tmpFFp.getFragmentsComponentsFloatMatrix(tmpFragmentsListsList, tmpDataMatrix, true);
-
         tmpFFp.getFragmentsComponentsFloatMatrix(tmpFragmentsMapsArray, tmpDataMatrix, true);
         //visualizing resulting matrix
         System.out.println("Matrix without overhang columns:");
@@ -132,20 +117,14 @@ public class ExampleUsageTest {
         //now the same operation for the matrix with additional column space
         tmpFFp.getFragmentsComponentsFloatMatrix(
                 tmpFragmentsMapsArray, tmpDataMatrixWithOverhang, true);
-
-        //tmpFFp.getFragmentsComponentsFloatMatrix(tmpFragmentsListsList, tmpDataMatrixWithOverhang, true);
-
         //the FragmentFingerprinter will ignore array space AFTER the size of the pre-defined fingerprint
-        // (e. array with length 12 but pre-defined fingerprint of size 10 -> array position 10 and 11 will be untouched)
+        // (e.g. array with length 12 but pre-defined fingerprint of size 10 -> array position 10 and 11 will be untouched)
         System.out.println("Matrix WITH overhang columns:");
         for (float[] tmpFloatArray : tmpDataMatrixWithOverhang) {
             System.out.println(Arrays.toString(tmpFloatArray));
         }
         //change behavior to count/frequency behavior
         tmpFFp.getFragmentsComponentsFloatMatrix(tmpFragmentsMapsArray, tmpDataMatrix, false);
-
-        //tmpFFp.getFragmentsComponentsFloatMatrix(tmpFragmentsListsList, tmpDataMatrix, false);
-
         //now instead of true/false represented by either 0.0f/1.0f, fragment frequency will be displayed in fingerprint
         System.out.println("Matrix without overhang columns BUT count array behavior:");
         for (float[] tmpFloatArray : tmpDataMatrix) {
