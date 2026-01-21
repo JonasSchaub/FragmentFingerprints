@@ -57,32 +57,20 @@ public class ExampleUsageTest {
     public void floatMatrixExampleUsageTest() {
         System.out.println("Float matrix example usage test:");
         //generate list of master vector (pre-defined fingerprint)
-        List<String> tmpFingerprintList = new ArrayList<>(10);
+        List<String> tmpFingerprintMasterList = new ArrayList<>(10);
         //fragment SMILES Strings
-        tmpFingerprintList.add("C");
-        tmpFingerprintList.add("CC");
-        tmpFingerprintList.add("[H]OC");
-        tmpFingerprintList.add("*n(*)*");
-        tmpFingerprintList.add("*O*");
-        tmpFingerprintList.add("CCC");
-        tmpFingerprintList.add("C=C");
-        tmpFingerprintList.add("c");
-        tmpFingerprintList.add("*Cl");
-        tmpFingerprintList.add("CCCC");
+        tmpFingerprintMasterList.add("C");
+        tmpFingerprintMasterList.add("CC");
+        tmpFingerprintMasterList.add("[H]OC");
+        tmpFingerprintMasterList.add("*n(*)*");
+        tmpFingerprintMasterList.add("*O*");
+        tmpFingerprintMasterList.add("CCC");
+        tmpFingerprintMasterList.add("C=C");
+        tmpFingerprintMasterList.add("c");
+        tmpFingerprintMasterList.add("*Cl");
+        tmpFingerprintMasterList.add("CCCC");
         //instance new FragmentFingerprinter with fingerprint fragments list from above
-        FragmentFingerprinter tmpFFp = new FragmentFingerprinter(tmpFingerprintList);
-        //list of fragments for which to generate a fingerprint
-        List<String> tmpFragmentsList = new ArrayList<>(12);
-        tmpFragmentsList.add("C");
-        tmpFragmentsList.add("CC");
-        tmpFragmentsList.add("[H]OC");
-        tmpFragmentsList.add("*n(*)*");
-        tmpFragmentsList.add("*O*");
-        tmpFragmentsList.add("CCC");
-        tmpFragmentsList.add("C=C");
-        tmpFragmentsList.add("c");
-        tmpFragmentsList.add("*Cl");
-        tmpFragmentsList.add("CCCC");
+        FragmentFingerprinter tmpFFp = new FragmentFingerprinter(tmpFingerprintMasterList);
         //map of fragment-frequency pairs for which to generate a fingerprint
         Map<String, Integer> tmpFragmentsFrequenciesMap = new HashMap<>(16, 0.75f);
         //the same fragments as above are used with example frequencies sorted for abundance

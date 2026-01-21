@@ -90,18 +90,18 @@ public class CountFingerprint implements ICountFingerprint {
      * @param aFingerprintSize defines the size of the fingerprint
      * @param aPositionToFrequencyMap This map is a raw map and must map the positions of key fragments in the
      *                                fingerprint to their frequencies in the molecule or any set of fragments.
-     * @param aFingerprintBehaviorStatement defines whether CountFingerprint should behave as BitFingerprint
+     * @param aBehaveAsBitFingerprintStatement defines whether CountFingerprint should behave as BitFingerprint (
      * @throws NullPointerException is thrown if the arguments are null.
      * @throws IllegalArgumentException is thrown if the given size is smaller than one.
      */
-    public CountFingerprint(int aFingerprintSize, Map<Integer, Integer> aPositionToFrequencyMap, boolean aFingerprintBehaviorStatement) throws NullPointerException, IllegalArgumentException {
+    public CountFingerprint(int aFingerprintSize, Map<Integer, Integer> aPositionToFrequencyMap, boolean aBehaveAsBitFingerprintStatement) throws NullPointerException, IllegalArgumentException {
         Objects.requireNonNull(aPositionToFrequencyMap, "aPositionToFrequencyMap is null.");
         if (aFingerprintSize < 1) {
             throw new IllegalArgumentException("Fingerprint size cannot be less than 1.");
         }
         this.definedFingerprintSize = aFingerprintSize;
         this.uniqueSmilesPositionToFrequencyCountRawMap = aPositionToFrequencyMap;
-        this.behaveAsBitFingerprint = aFingerprintBehaviorStatement;
+        this.behaveAsBitFingerprint = aBehaveAsBitFingerprintStatement;
     }
     //</editor-fold>
     //

@@ -104,7 +104,7 @@ public class FragmentFingerprinterTest {
      */
     private static IBitFingerprint bitFingerprintTest;
     /**
-     * Bit fingerprint of naphthalene derivate.
+     * Bit fingerprint of naphthalene derivative.
      */
     private static IBitFingerprint cNP0437667BitFP;
     /**
@@ -112,7 +112,7 @@ public class FragmentFingerprinterTest {
      */
     private static CountFingerprint countFingerprintTest;
     /**
-     * Fragments of Naphthalene dervivate.
+     * Fragments of Naphthalene derivative.
      */
     private static List<String> cNP0437667Fragments;
     /**
@@ -123,14 +123,6 @@ public class FragmentFingerprinterTest {
      * List contains molecule fragments with desired fragment duplicates.
      */
    private static ArrayList<String> countListOfUniqueSmiles;
-    //</editor-fold>
-    //
-    //<editor-fold desc="Constructor" defaultstate="collapsed">
-    /**
-     * Empty Constructor
-     */
-    public FragmentFingerprinterTest() {
-    }
     //</editor-fold>
     //
     //<editor-fold desc="BeforeAll method" defaultstate="collapsed">
@@ -247,7 +239,7 @@ public class FragmentFingerprinterTest {
          * In the following, a molecular structure data set is imported that contains 100 natural products with a
          * naphthalene substructure taken from the COCONUT natural products database. These are fragmented using the CDK
          * ExhaustiveFragmenter functionality that breaks single non-ring bonds in input molecules to generate fragments.
-         * The resulting fragments are collected together with their fraquencies as unique SMILES representations.
+         * The resulting fragments are collected together with their frequencies as unique SMILES representations.
          * Fragments that occur more than two times are then used to initialise the fragment fingerprinter. At the end,
          * the "naphthalene-derivatives exhaustive fragmenter fingerprint" is generated for 3-hydroxy-2-naphthoic acid.
          */
@@ -618,11 +610,10 @@ public class FragmentFingerprinterTest {
         tmpFFp.getFragmentsComponentsFloatMatrix(tmpMoleculeFragmentsArray, tmpFloatMatrix, true);
         for (int i = 0; i < tmpFloatMatrix.length; i++) {
             for (int j = 0; j < tmpFloatMatrix[i].length; j++) {
-                if (tmpFloatMatrix[i][j] != 1.0f && tmpFloatMatrix[i][j] != 33.0f) {
-                    if (i != 1) {
+                if (tmpFloatMatrix[i][j] != 1.0f && tmpFloatMatrix[i][j] != 33.0f && i != 1) {
                         Assertions.fail();
                     }
-                }
+
             }
         }
         tmpFFp.getFragmentsComponentsFloatMatrix(tmpMoleculeFragmentsArray, tmpFloatMatrix, false);
@@ -639,6 +630,24 @@ public class FragmentFingerprinterTest {
         Assertions.assertEquals(1.0f, tmpFloatMatrix[0][9]);
         Assertions.assertEquals(33.0f, tmpFloatMatrix[0][10]);
         Assertions.assertEquals(33.0f, tmpFloatMatrix[0][11]);
+    }
+    @Test
+    public void testFragmentFingerprintArrayInput() {
+        String[] tmpSmilesArray = new String[5];
+        tmpSmilesArray[0] = "C";
+        tmpSmilesArray[1] = "CC";
+        tmpSmilesArray[2] = "COH";
+        tmpSmilesArray[3] = "C=C";
+        tmpSmilesArray[4] = "CS";
+        FragmentFingerprinter tmpFFp = new FragmentFingerprinter(tmpSmilesArray);
+        List<String> tmpSmilesList = new ArrayList<>(5);
+        tmpSmilesList.add("C");
+        tmpSmilesList.add("CC");
+        tmpSmilesList.add("COH");
+        tmpSmilesList.add("C=C");
+        tmpSmilesList.add("CS");
+        FragmentFingerprinter tmpListFFp = new FragmentFingerprinter(tmpSmilesList);
+        Assertions.assertEquals(tmpListFFp.getSize(), tmpFFp.getSize());
     }
     //
     /**
