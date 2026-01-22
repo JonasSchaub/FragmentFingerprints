@@ -41,7 +41,7 @@ import java.util.Objects;
  * key-based fingerprints.
  *
  * @author Betuel Sevindik, Maximilian Rottmann
- * @version 1.1.0.0
+ * @version 1.2.0.0
  */
 public class CountFingerprint implements ICountFingerprint {
     //<editor-fold desc="private final class variables" defaultstate="collapsed">

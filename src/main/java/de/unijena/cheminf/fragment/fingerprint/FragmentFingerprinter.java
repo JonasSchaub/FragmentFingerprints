@@ -44,12 +44,12 @@ import java.util.Objects;
  * Thus, the class requires predefined structures/fragments in
  * the form of unique SMILES to create the fingerprint. These structures must be passed when the
  * class is instantiated (in the constructor). The class implements the interface IFragmentFingerprinter,
- * which inherits the IFingerprinter (CDK), which allows the class to compute fingerprints in 2 ways.
+ * which inherits the IFingerprinter (CDK).
  * The fingerprints are calculated by comparing given fragments, which are in the form of unique SMILES,
  * with the predefined fragments.
  *
  * @author Betuel Sevindik, Maximilian Rottmann
- * @version 1.1.0.0
+ * @version 1.2.0.0
  */
 public class FragmentFingerprinter implements IFragmentFingerprinter {
     //<editor-fold desc="private final class variables" defaultstate="collapsed">
@@ -79,14 +79,14 @@ public class FragmentFingerprinter implements IFragmentFingerprinter {
     /**
      * Initialization of the fragment fingerprinter by using a user-defined
      * set of fragments in the form of unique SMILES (here: a list of Strings).
-     * If the list passed during initialization contains duplicates, they will be removed.
-     * The number of predefined fragments specified by the user may then differ from the actual number of
-     * key fragments present, as duplicates are removed. This means that duplicate fragment SMILES strings in the input
-     * list are ignored and are not part of the fingerprint multiple times.
+     * Any duplicates contained in the passed list will be removed, resulting in the number of predefined fragments,
+     * specified by the user, possibly differing from the actual number of key fragments present.
+     * This means that duplicate fragment SMILES strings in the input
+     * list are ignored and not represented multiple times in the fingerprint.
      *
      * @param aFragmentsForMasterVectorList in which the predefined fragments are stored.
      * @throws NullPointerException is thrown if the list param (or any of its elements) is null.
-     * @throws IllegalArgumentException is thrown if the list param contains blank Strings or Strings cannot be parsed as SMARTS.
+     * @throws IllegalArgumentException is thrown if the list param contains blank Strings.
      */
     public FragmentFingerprinter(List<String> aFragmentsForMasterVectorList) throws NullPointerException, IllegalArgumentException {
         // Check whether aFragmentsForMasterVectorList is null or whether there are elements (strings) in the list that are empty.
@@ -100,14 +100,14 @@ public class FragmentFingerprinter implements IFragmentFingerprinter {
     /**
      * Initialization of the fragment fingerprinter by using a user-defined
      * set of fragments in the form of unique SMILES (here: an array of Strings).
-     * If the array passed during initialization contains duplicates, they will be removed.
-     * The number of predefined fragments specified by the user may then differ from the actual number of
-     * key fragments present, as duplicates are removed. This means that duplicate fragment SMILES strings in the input
-     * are ignored and are not part of the fingerprint multiple times.
+     * Any duplicates contained in the passed array will be removed, resulting in the number of predefined fragments,
+     * specified by the user, possibly differing from the actual number of key fragments present.
+     * This means that duplicate fragment SMILES strings in the input
+     * array are ignored and not represented multiple times in the fingerprint.
      *
      * @param aFragmentsForMasterVectorArray in which the predefined fragments are stored.
      * @throws NullPointerException is thrown if the array param (or any of its elements) is null.
-     * @throws IllegalArgumentException is thrown if the array param contains blank Strings or Strings cannot be parsed as SMARTS.
+     * @throws IllegalArgumentException is thrown if the array param contains blank Strings.
      */
     public FragmentFingerprinter(String[] aFragmentsForMasterVectorArray) throws NullPointerException, IllegalArgumentException {
         this.validityCheckOfParameterArray(aFragmentsForMasterVectorArray,
@@ -237,6 +237,8 @@ public class FragmentFingerprinter implements IFragmentFingerprinter {
     //
     /**
      * {@inheritDoc}
+     *
+     * @throws UnsupportedOperationException as the method is no longer supported.
      */
     @Override
     public BitSet getFingerprint(IAtomContainer mol) throws UnsupportedOperationException {
@@ -247,6 +249,8 @@ public class FragmentFingerprinter implements IFragmentFingerprinter {
     /**
      * {@inheritDoc}
      * @see SubstructureFingerprinter
+     *
+     * @throws UnsupportedOperationException as the method is no longer supported.
      */
     @Override
     public IBitFingerprint getBitFingerprint(IAtomContainer container) throws UnsupportedOperationException {
@@ -257,6 +261,8 @@ public class FragmentFingerprinter implements IFragmentFingerprinter {
     /**
      * {@inheritDoc}
      * @see SubstructureFingerprinter
+     *
+     * @throws UnsupportedOperationException as the method is no longer supported.
      */
     @Override
     public ICountFingerprint getCountFingerprint(IAtomContainer container) throws UnsupportedOperationException {
@@ -299,6 +305,7 @@ public class FragmentFingerprinter implements IFragmentFingerprinter {
      * Returns the bit definitions i.e. which bit stands for which fragment SMILES.
      * Important, the number of possible bit definitions may differ from the number of key
      * fragments passed during initialization, since duplicates are removed.
+     * Equally important, be advised that this operation runs in O(n) time.
      *
      * @param aBitPosition in the fingerprint.
      * @return unique SMILES corresponding to the specified position.
@@ -487,8 +494,11 @@ public class FragmentFingerprinter implements IFragmentFingerprinter {
      * @param aCountFingerprint wherein to search for SMILES String
      * @return integer count of given SMILES String
      * @throws IllegalArgumentException if SMILES is not present in fingerprint
+     * @throws NullPointerException if either/both params are null
      */
     public int count(String aSmiles, CountFingerprint aCountFingerprint) throws IllegalArgumentException {
+        Objects.requireNonNull(aSmiles, "Given SMILES was null.");
+        Objects.requireNonNull(aCountFingerprint, "Given CountFingerprint was null.");
         if(!this.uniqueSmilesToPositionMap.containsKey(aSmiles)) {
             throw new IllegalArgumentException("The given SMILES string is not present in defined fingerprint.");
         }
@@ -508,6 +518,9 @@ public class FragmentFingerprinter implements IFragmentFingerprinter {
      * @param aFragmentsFrequenciesMap contains SMILES-frequency pairs of the molecule's fragments
      * @param aPreInitFloatArray is a pre-initialized float[] array (-> matrix row)
      * @param anUseBitArrayStatement is the setting whether bit or count/frequency representation is to be used
+     *
+     * @throws NullPointerException if parameter fragments map is null
+     * @throws IllegalArgumentException if the frequency of a fragment was smaller than 0
      */
     private void getFloatFingerprint(
             Map<String, Integer> aFragmentsFrequenciesMap,
@@ -544,6 +557,9 @@ public class FragmentFingerprinter implements IFragmentFingerprinter {
      * @param aFragmentsFrequenciesMapsArray contains maps of SMILES-Frequency pairs of fragments
      * @param aFloatDataMatrix is a pre-initialized float[][] matrix to write data into
      * @param anUseBitArrayStatement is the setting whether bit or count/frequency representation should be used
+     *
+     * @throws NullPointerException if given array of frequencies maps is null
+     * @throws IllegalArgumentException if matrix sizes (row or column) are insufficient
      */
     public void getFragmentsComponentsFloatMatrix(
             //array of maps of all molecules' fragments of a specific fragmentation

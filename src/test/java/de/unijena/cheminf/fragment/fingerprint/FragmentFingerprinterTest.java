@@ -55,7 +55,7 @@ import java.util.Map;
  * Class to test the correct working of FragmentFingerprinter
  *
  * @author Betuel Sevindik, Maximilian Rottmann
- * @version 1.1.0.0
+ * @version 1.2.0.0
  */
 public class FragmentFingerprinterTest {
     //<editor-fold desc="private static final class variables" defaultstate="collapsed">

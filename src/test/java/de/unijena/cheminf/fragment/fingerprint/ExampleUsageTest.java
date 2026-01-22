@@ -45,8 +45,8 @@ import java.util.Map;
 /**
  * Test class with usage examples for the fragment fingerprinter functionality.
  *
- * @version 1.0.0.0
- * @author Jonas Schaub
+ * @version 1.1.0.0
+ * @author Jonas Schaub, Maximilian Rottmann
  */
 public class ExampleUsageTest {
     /**
