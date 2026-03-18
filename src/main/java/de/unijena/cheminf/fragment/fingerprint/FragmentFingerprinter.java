@@ -441,7 +441,7 @@ public class FragmentFingerprinter implements IFragmentFingerprinter {
      */
     public int[] getCountArray(Map<String, Integer> aUniqueSmilesToFrequencyMap) throws NullPointerException, IllegalArgumentException {
         Objects.requireNonNull(aUniqueSmilesToFrequencyMap, "aUniqueSmilesToFrequencyMap (Map of string and integer instances) is null.");
-        List<String> tmpListOfUniqueSmiles = new ArrayList<>(aUniqueSmilesToFrequencyMap.size());
+        int[] tmpCountArray = new int[this.uniqueSmilesToPositionMapSize];
         for (Map.Entry<String, Integer> tmpEntry : aUniqueSmilesToFrequencyMap.entrySet()) {
             if (tmpEntry.getKey() == null || tmpEntry.getValue() == null) {
                 throw new NullPointerException("Given map of string and integer instances contains " +
@@ -449,11 +449,12 @@ public class FragmentFingerprinter implements IFragmentFingerprinter {
             } else if (tmpEntry.getKey().isBlank()) {
                 throw new IllegalArgumentException("Given map of strings and integer instances contains strings that are blank/empty.");
             }
-            for(int i = 1; i <= tmpEntry.getValue(); i++) {
-                tmpListOfUniqueSmiles.add(tmpEntry.getKey());
+            Integer tmpPosition = this.uniqueSmilesToPositionMap.get(tmpEntry.getKey());
+            if (tmpPosition != null) {
+                tmpCountArray[tmpPosition] = tmpEntry.getValue();
             }
         }
-        return this.createCountArray(tmpListOfUniqueSmiles);
+        return tmpCountArray;
     }
     //
     /**
