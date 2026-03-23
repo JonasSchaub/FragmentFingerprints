@@ -173,14 +173,29 @@ public class CountFingerprint implements ICountFingerprint {
     }
     //
     /**
-     * UnsupportedOperationException. This method is not supported.
      * {@inheritDoc}
+     * Important: Modifies the current instance!
      *
      * @throws UnsupportedOperationException method is not supported
      */
     @Override
-    public void merge(ICountFingerprint fp) {
-        throw new UnsupportedOperationException();
+    public void merge(ICountFingerprint aCountFingerprint) {
+        Objects.requireNonNull(aCountFingerprint, "Given fingerprint was null.");
+        if (!(aCountFingerprint instanceof CountFingerprint)) {
+            throw new ClassCastException("Can only merge CountFingerprint instances. Provided class: " + aCountFingerprint.getClass().getName());
+        }
+        int countFingerprintToMergeSize = ((CountFingerprint) aCountFingerprint).getDefinedFingerprintSize();
+        if (this.definedFingerprintSize != countFingerprintToMergeSize) {
+            throw new IllegalArgumentException("Defined fingerprint size does not match. A merge is only possible for fingerprints of the same fragment set.");
+        }
+        //merge frequencies of given fingerprint into this instance
+        for (Map.Entry<Integer, Integer> tmpEntry : ((CountFingerprint) aCountFingerprint).getSmilesPositionToFrequencyMap().entrySet()) {
+            if (this.uniqueSmilesPositionToFrequencyCountRawMap.containsKey(tmpEntry.getKey())) {
+                this.uniqueSmilesPositionToFrequencyCountRawMap.put(tmpEntry.getKey(), this.uniqueSmilesPositionToFrequencyCountRawMap.get(tmpEntry.getKey()) + tmpEntry.getValue());
+            } else {
+                this.uniqueSmilesPositionToFrequencyCountRawMap.put(tmpEntry.getKey(), tmpEntry.getValue());
+            }
+        }
     }
     //
     /**
