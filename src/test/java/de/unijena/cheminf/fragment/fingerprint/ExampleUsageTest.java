@@ -102,6 +102,10 @@ public class ExampleUsageTest {
         for (float[] tmpFloatArray : tmpDataMatrix) {
             System.out.println(Arrays.toString(tmpFloatArray));
         }
+        /* Output:
+        [1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0]
+         */
+        //
         //now the same operation for the matrix with additional column space
         tmpFFp.getFragmentsComponentsFloatMatrix(
                 tmpFragmentsMapsArray, tmpDataMatrixWithOverhang, true);
@@ -111,6 +115,10 @@ public class ExampleUsageTest {
         for (float[] tmpFloatArray : tmpDataMatrixWithOverhang) {
             System.out.println(Arrays.toString(tmpFloatArray));
         }
+        /* Output:
+        [1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+         */
+        //
         //change behavior to count/frequency behavior
         tmpFFp.getFragmentsComponentsFloatMatrix(tmpFragmentsMapsArray, tmpDataMatrix, false);
         //now instead of true/false represented by either 0.0f/1.0f, fragment frequency will be displayed in fingerprint
@@ -118,7 +126,10 @@ public class ExampleUsageTest {
         for (float[] tmpFloatArray : tmpDataMatrix) {
             System.out.println(Arrays.toString(tmpFloatArray));
         }
-        //matrix with overhang works analogous and will not be shown explicitly
+        /* Output:
+        [10.0, 9.0, 8.0, 7.0, 6.0, 5.0, 4.0, 3.0, 2.0, 1.0]
+         */
+        //matrix with overhang works analogous as in example above and will not be shown explicitly
     }
     /**
      * The intended use case of the fragment fingerprinter functionality is to encode the presence and absence of
