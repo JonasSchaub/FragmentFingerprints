@@ -50,15 +50,31 @@ import java.util.Map;
  */
 public class ExampleUsageTest {
     /**
-     * The fragments for the bit fingerprint were generated via fragmentation analysis of 1000 picked molecules from the
-     * COCONUT database. The structures represent the 10 most frequently occurring fragments.
+     * Demonstrates the getFragmentsComponentsFloatMatrix() method with two fingerprinting modes:
+     * bit array (binary presence/absence) and count array (fragment frequencies).
+     *
+     * The method processes an array of fragment-frequency maps and populates a pre-initialized
+     * float matrix with fingerprint values. This is useful for batch processing multiple molecules
+     * or generating matrix-based representations suitable for machine learning pipelines.
+     *
+     * The fragments used represent the 10 most frequently occurring fragments from a COCONUT
+     * database analysis of 1000 molecules.
+     *
+     * @see FragmentFingerprinter#getFragmentsComponentsFloatMatrix(Map[], float[][], boolean)
+     * @see CountFingerprint for alternative fingerprinting approaches
      */
     @Test
     public void floatMatrixExampleUsageTest() {
         System.out.println("Float matrix example usage test:");
-        //generate list of master vector (pre-defined fingerprint)
+        //
+        // SETUP:
+        //
+        // Master vector (pre-defined fingerprint) defines the standardized fragment set.
+        // Each index in this list maps to a column position in the resulting fingerprint matrix.
+        // Only fragments present in this master list will be included in the fingerprint.
         List<String> tmpFingerprintMasterList = new ArrayList<>(10);
-        //fragment SMILES Strings
+        // SMILES representations of fragments (canonical/unique form required for consistent fingerprinting)
+        // The order here determines the bit/column index mapping in the fingerprinter
         tmpFingerprintMasterList.add("C");
         tmpFingerprintMasterList.add("CC");
         tmpFingerprintMasterList.add("[H]OC");
@@ -69,11 +85,20 @@ public class ExampleUsageTest {
         tmpFingerprintMasterList.add("c");
         tmpFingerprintMasterList.add("*Cl");
         tmpFingerprintMasterList.add("CCCC");
-        //instance new FragmentFingerprinter with fingerprint fragments list from above
+        // Initialize FragmentFingerprinter with the master fragment list. This creates an internal
+        // SMILES-to-position mapping (Map<String, Integer>) that will be used to:
+        // 1) Determine fingerprint size (equal to number of unique fragments)
+        // 2) Map fragment SMILES to their column indices in the output matrix
+        // 3) Filter unrecognized fragments when generating fingerprints
         FragmentFingerprinter tmpFFp = new FragmentFingerprinter(tmpFingerprintMasterList);
-        //map of fragment-frequency pairs for which to generate a fingerprint
+        // Fragment-frequency map for a single molecule (represents one row in output matrix).
+        // Key: fragment SMILES; Value: occurrence count in the molecule.
+        // The getFragmentsComponentsFloatMatrix() method expects an array of such maps,
+        // where each array element represents one molecule.
         Map<String, Integer> tmpFragmentsFrequenciesMap = new HashMap<>(16, 0.75f);
-        //the same fragments as above are used with example frequencies sorted for abundance
+        // Populate with example fragment frequencies (sorted descending by abundance).
+        // These represent the counts of each fragment found in a sample molecule.
+        // Values will be converted to 1.0f in bit-array mode, or retained in count-array mode.
         tmpFragmentsFrequenciesMap.put("C", 10);
         tmpFragmentsFrequenciesMap.put("CC", 9);
         tmpFragmentsFrequenciesMap.put("[H]OC", 8);
@@ -84,20 +109,34 @@ public class ExampleUsageTest {
         tmpFragmentsFrequenciesMap.put("c", 3);
         tmpFragmentsFrequenciesMap.put("*Cl", 2);
         tmpFragmentsFrequenciesMap.put("CCCC", 1);
-        //as well, two more halogen groups are added to distinctively showcase the fingerprint functionality
-        //these fragments will be ignored for fingerprint generation as they are not in the pre-defined master vector
+        // Additional fragments (*F, *I) are included to demonstrate the filtering mechanism:
+        // getFragmentsComponentsFloatMatrix() only processes fragments that exist in the master list
+        // (initialized in FragmentFingerprinter constructor). Unknown fragments are silently ignored.
+        // This is why the output only shows values for the 10 master fragments, not these 2 additions.
         tmpFragmentsFrequenciesMap.put("*F", 1);
         tmpFragmentsFrequenciesMap.put("*I", 1);
-        //two matrixes are initialized, one as big as the pre-defined fingerprint, one with additional columns
+        //
+        // USAGE:
+        //
+        // Initialize two float matrices with different column counts:
+        // - tmpDataMatrix: exactly matches fingerprint size (10 columns) - demonstrates standard usage
+        // - tmpDataMatrixWithOverhang: larger than fingerprint size (15 columns) - tests matrix validation
+        // The method validates that matrix columns >= fingerprint size; excess columns remain untouched.
         float[][] tmpDataMatrix = new float[1][10];
         float[][] tmpDataMatrixWithOverhang = new float[1][15];
-        //array for containing fragments-frequencies-maps is initialized
+        // Initialize array of fragment-frequency maps. In this example, a single-element array
+        // is used (representing one molecule), but the method processes multiple molecules in batch.
         Map<String, Integer>[] tmpFragmentsMapsArray = new HashMap[1];
         tmpFragmentsMapsArray[0] = tmpFragmentsFrequenciesMap;
-        //fingerprints are generated from maps array and directly filled into the specified matrix
-        // (using bit array behavior)
+        // Call getFragmentsComponentsFloatMatrix() with anUseBitArrayStatement=true to generate a BIT-ARRAY fingerprint.
+        // Internal method flow:
+        // 1) Validates matrix dimensions (rows >= maps array length, columns >= fingerprint size)
+        // 2) Iterates through each map in the array and calls private getFloatFingerprint()
+        // 3) For recognized fragments: sets matrix[row][column] = 1.0f (presence indicator)
+        // 4) For unrecognized fragments: ignores them (no value set)
+        // 5) Uninitialized positions (fragments not in this molecule) remain 0.0f
         tmpFFp.getFragmentsComponentsFloatMatrix(tmpFragmentsMapsArray, tmpDataMatrix, true);
-        //visualizing resulting matrix
+        // Visualize resulting matrix
         System.out.println("Matrix without overhang columns:");
         for (float[] tmpFloatArray : tmpDataMatrix) {
             System.out.println(Arrays.toString(tmpFloatArray));
@@ -106,11 +145,15 @@ public class ExampleUsageTest {
         [1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0]
          */
         //
-        //now the same operation for the matrix with additional column space
+        // Demonstrate matrix overhang handling with the same bit-array mode operation:
+        // This matrix has 15 columns but the fingerprint only uses 10 (based on 10 master fragments).
+        // The getFragmentsComponentsFloatMatrix() method:
+        // 1) Only writes to indices 0-9 (columns within fingerprint size)
+        // 2) Leaves columns 10-14 untouched (preserving any pre-existing values)
+        // This allows reusing matrix memory or combining multiple fingerprints in one matrix.
         tmpFFp.getFragmentsComponentsFloatMatrix(
                 tmpFragmentsMapsArray, tmpDataMatrixWithOverhang, true);
-        //the FragmentFingerprinter will ignore array space AFTER the size of the pre-defined fingerprint
-        // (e.g. array with length 12 but pre-defined fingerprint of size 10 -> array position 10 and 11 will be untouched)
+        // Visualize matrix
         System.out.println("Matrix WITH overhang columns:");
         for (float[] tmpFloatArray : tmpDataMatrixWithOverhang) {
             System.out.println(Arrays.toString(tmpFloatArray));
@@ -119,9 +162,13 @@ public class ExampleUsageTest {
         [1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0]
          */
         //
-        //change behavior to count/frequency behavior
+        // Switch to COUNT-ARRAY fingerprint mode (anUseBitArrayStatement=false).
+        // Instead of binary 1.0f/0.0f for presence/absence, this mode stores actual fragment frequencies:
+        // - Recognized fragments: matrix[row][column] = frequency value from the input map
+        // - Unrecognized fragments: ignored (no entry)
+        // - Missing fragments: remain 0.0f (can represent zero occurrences)
         tmpFFp.getFragmentsComponentsFloatMatrix(tmpFragmentsMapsArray, tmpDataMatrix, false);
-        //now instead of true/false represented by either 0.0f/1.0f, fragment frequency will be displayed in fingerprint
+        // Visualize matrix
         System.out.println("Matrix without overhang columns BUT count array behavior:");
         for (float[] tmpFloatArray : tmpDataMatrix) {
             System.out.println(Arrays.toString(tmpFloatArray));
@@ -129,7 +176,7 @@ public class ExampleUsageTest {
         /* Output:
         [10.0, 9.0, 8.0, 7.0, 6.0, 5.0, 4.0, 3.0, 2.0, 1.0]
          */
-        //matrix with overhang works analogous as in example above and will not be shown explicitly
+        // A matrix with overhang works analogous as in the example above and will not be shown explicitly.
     }
     /**
      * The intended use case of the fragment fingerprinter functionality is to encode the presence and absence of
