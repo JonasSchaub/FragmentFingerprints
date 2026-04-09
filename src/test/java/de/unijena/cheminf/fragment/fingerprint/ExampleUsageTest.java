@@ -57,7 +57,7 @@ public class ExampleUsageTest {
      * float matrix with fingerprint values. This is useful for batch processing multiple molecules
      * or generating matrix-based representations suitable for machine learning pipelines.
      *
-     * The fragments used represent the 10 most frequently occurring fragments from a COCONUT
+     * The fragments used represent the 10 most frequently occurring functional group fragments from a COCONUT
      * database analysis of 1000 molecules.
      *
      * @see FragmentFingerprinter#getFragmentsComponentsFloatMatrix(Map[], float[][], boolean)
@@ -98,7 +98,7 @@ public class ExampleUsageTest {
         Map<String, Integer> tmpFragmentsFrequenciesMap = new HashMap<>(16, 0.75f);
         // Populate with example fragment frequencies (sorted descending by abundance).
         // These represent the counts of each fragment found in a sample molecule.
-        // Values will be converted to 1.0f in bit-array mode, or retained in count-array mode.
+        // Values will be converted to floats, 1.0f/0.0f in bit-array mode, or the retained values in count-array mode.
         tmpFragmentsFrequenciesMap.put("C", 10);
         tmpFragmentsFrequenciesMap.put("CC", 9);
         tmpFragmentsFrequenciesMap.put("[H]OC", 8);
@@ -125,7 +125,7 @@ public class ExampleUsageTest {
         float[][] tmpDataMatrix = new float[1][10];
         float[][] tmpDataMatrixWithOverhang = new float[1][15];
         // Initialize array of fragment-frequency maps. In this example, a single-element array
-        // is used (representing one molecule), but the method processes multiple molecules in batch.
+        // is used (representing one molecule), but the method can process multiple molecules in batch.
         Map<String, Integer>[] tmpFragmentsMapsArray = new HashMap[1];
         tmpFragmentsMapsArray[0] = tmpFragmentsFrequenciesMap;
         // Call getFragmentsComponentsFloatMatrix() with anUseBitArrayStatement=true to generate a BIT-ARRAY fingerprint.
