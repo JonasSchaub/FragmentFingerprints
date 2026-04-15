@@ -63,7 +63,7 @@ repositories {
     mavenCentral()
 }
 
-def cdkVersion = '2.11'
+def cdkVersion = '2.12'
 dependencies {
     implementation group: 'org.jetbrains', name : 'annotations', version: '23.0.0'
     implementation group: 'org.openscience.cdk', name: 'cdk-fingerprint', version: cdkVersion

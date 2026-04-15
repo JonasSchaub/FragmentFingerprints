@@ -250,6 +250,8 @@ public class FragmentFingerprinterTest {
         ExhaustiveFragmenter tmpFragmenter = new ExhaustiveFragmenter();
         //Default would be 6 which is too high for the short side chains in the input molecules
         tmpFragmenter.setMinimumFragmentSize(1);
+        //Sets hydrogen saturation for generated fragments
+        tmpFragmenter.setSaturationSetting(ExhaustiveFragmenter.Saturation.HYDROGEN_SATURATED_FRAGMENTS);
         //ExhaustiveFragmenter has a convenience method .getFragments() that returns the generated fragments already as
         // unique SMILES strings, but to be explicit here, the fragments are retrieved as atom containers and unique
         // SMILES strings created in a second step. Also note that any other string-based molecular structure representation
@@ -923,7 +925,7 @@ public class FragmentFingerprinterTest {
      */
     @Test
     public void getNaphthaleneFingerprintSize() {
-        int tmpNaphthaleneFingerprintSizeTest = 7;
+        int tmpNaphthaleneFingerprintSizeTest = 12;
         int tmpNaphthaleneFingerprintSize = FragmentFingerprinterTest.naphthaleneFingerprinter.getSize();
         Assertions.assertEquals(tmpNaphthaleneFingerprintSizeTest, tmpNaphthaleneFingerprintSize);
     }
@@ -943,14 +945,19 @@ public class FragmentFingerprinterTest {
      */
     @Test
     public void getNaphthaleneBitFingerprint() {
-        int[] tmpBitFingerprintTest = new int[7];
+        int[] tmpBitFingerprintTest = new int[12];
         tmpBitFingerprintTest[0] = 0;
-        tmpBitFingerprintTest[1] = 1;
-        tmpBitFingerprintTest[2] = 0;
+        tmpBitFingerprintTest[1] = 0;
+        tmpBitFingerprintTest[2] = 1;
         tmpBitFingerprintTest[3] = 0;
-        tmpBitFingerprintTest[4] = 1;
+        tmpBitFingerprintTest[4] = 0;
         tmpBitFingerprintTest[5] = 0;
-        tmpBitFingerprintTest[6] = 0;
+        tmpBitFingerprintTest[6] = 1;
+        tmpBitFingerprintTest[7] = 0;
+        tmpBitFingerprintTest[8] = 0;
+        tmpBitFingerprintTest[9] = 0;
+        tmpBitFingerprintTest[10] = 0;
+        tmpBitFingerprintTest[11] = 0;
         int[] tmpBitFingerprint = FragmentFingerprinterTest.naphthaleneFingerprinter.getBitArray(FragmentFingerprinterTest.cNP0437667Fragments);
         Assertions.assertArrayEquals(tmpBitFingerprintTest, tmpBitFingerprint);
     }
