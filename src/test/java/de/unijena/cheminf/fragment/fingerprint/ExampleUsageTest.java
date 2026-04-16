@@ -202,6 +202,7 @@ public class ExampleUsageTest {
         ExhaustiveFragmenter tmpFragmenter = new ExhaustiveFragmenter();
         //Default would be 6 which is too high for the short side chains in the input molecules
         tmpFragmenter.setMinimumFragmentSize(1);
+        tmpFragmenter.setSaturationSetting(ExhaustiveFragmenter.Saturation.HYDROGEN_SATURATED_FRAGMENTS);
         //ExhaustiveFragmenter has a convenience method .getFragments() that returns the generated fragments already as
         // unique SMILES strings, but to be explicit here, the fragments are retrieved as atom containers and unique
         // SMILES strings created in a second step. Also note that any other string-based molecular structure representation
@@ -228,38 +229,41 @@ public class ExampleUsageTest {
         }
         /*
          * Output:
-         * 28
-         * BrC1=CC=CC=2C=CC=CC12: 4
-         * BrC=1C=CC2=CC(O)=CC=C2C1: 1
-         * OC1=C[CH](OC)=CC=2C=CC=CC12: 1
-         * BrC1=CC=CC2=[C]C=CC=C12: 1
-         * BrC1=CC=CC=2C=[C]C=CC12: 1
-         * O=CC: 1
-         * O[NH](O)[CH]1=CC=CC=2C=CC=CC21: 1
-         * O=CCl: 1
-         * OC=1C=CC=2C=CC=CC2C1: 6
-         * BrC1=CC=CC=2C=C(C=CC12)C: 1
-         * ON=[CH3]: 2
-         * ONO: 3
-         * OC1=CC=CC=2C=CC=CC12: 4
-         * NC1=CC=CC=2C=CC=CC12: 1
-         * O=C[CH]1=CC=CC=2C=CC=CC21: 2
-         * O=CO: 8
-         * ON=C: 1
-         * O=[S](=O)O: 5
-         * C=1C=CC=2C=CC=CC2C1: 20
-         * C=1C=CC=2C=C(C=CC2C1)C: 2
-         * OC1=CC=CC=2C1=CC=CC2C: 1
-         * O=N[CH]1=CC=C(O)C=2C=CC=CC21: 1
-         * OC=1C=2C=CC=CC2C=CC1C: 1
-         * [CH2][CH]=1C=CC=2C=CC=CC2C1: 1
-         * BrC1=CC=CC=2C1=CC=CC2C: 1
-         * OC1=CC=C(O)C=2C=CC=CC12: 2
-         * C=1C=CC2=C(C1)C=CC=C2C: 1
-         * O=COC: 1
+            31
+            NN: 1
+            O=N: 4
+            BrC1=CC=CC=2C=CC=CC12: 6
+            BrC=1C=CC2=CC(O)=CC=C2C1: 1
+            O=CC1=CC=CC=2C=CC=CC12: 2
+            OC1=CC(OC)=CC=2C=CC=CC12: 1
+            O=CC: 1
+            O=CCl: 1
+            OC=1C=CC=2C=CC=CC2C1: 6
+            N#C: 3
+            ONO: 1
+            OC1=CC=CC=2C=CC=CC12: 4
+            NC1=CC=CC=2C=CC=CC12: 1
+            OC: 7
+            ClC: 1
+            O=CO: 8
+            ON=C: 3
+            C=1C=CC=2C=CC=CC2C1: 20
+            C=1C=CC=2C=C(C=CC2C1)C: 2
+            C=C: 1
+            OC1=CC=CC=2C1=CC=CC2C: 1
+            OC=1C=2C=CC=CC2C=CC1C: 1
+            O=NC1=CC=C(O)C=2C=CC=CC12: 1
+            O=S(=O)O: 5
+            O=C: 7
+            [O-][NH2+]O: 2
+            NC: 3
+            OC1=CC=C(O)C=2C=CC=CC12: 2
+            C=1C=CC2=C(C1)C=CC=C2C: 1
+            O=COC: 1
+            [O-][NH+](O)C1=CC=CC=2C=CC=CC21: 1
          */
         //Collecting fragments that appear at least 2 times
-        List<String> tmpFragmentsList = new ArrayList<>(28);
+        List<String> tmpFragmentsList = new ArrayList<>(12);
         for (String tmpFragment : tmpFrequenciesMap.keySet()) {
             if (tmpFrequenciesMap.get(tmpFragment) > 2) {
                 tmpFragmentsList.add(tmpFragment);
@@ -269,36 +273,41 @@ public class ExampleUsageTest {
         FragmentFingerprinter tmpNaphthaleneFingerprinter = new FragmentFingerprinter(tmpFragmentsList);
         System.out.println(tmpNaphthaleneFingerprinter.getSize());
         /*
-         * Output: 7
+         * Output: 12
          *
-         * Only 7 out of the 28 fragments appear more than 2 times and are included in the fingerprint (see above).
+         * Only 12 out of the 31 fragments appear more than 2 times and are included in the fingerprint (see above).
          */
-        //Parsing 3-hydroxy-2-naphthoic acid, fragmenting it, and creating its fingerprint
-        String tmpCNP0437667SmilesString = "O=C(O)C1=CC=2C=CC=CC2C=C1O"; //3-hydroxy-2-naphthoic acid
+        //Parsing 3,7-dihydroxy-2-naphtoic acid, fragmenting it, and creating its fingerprint
+        String tmpCNP0525434SmilesString = "O=C(O)C1=CC2=CC(O)=CC=C2C=C1O"; //3,7-dihydroxy-2-naphtoic acid
         SmilesParser tmpSmiPar = new SmilesParser(SilentChemObjectBuilder.getInstance());
-        tmpFragmenter.generateFragments(tmpSmiPar.parseSmiles(tmpCNP0437667SmilesString));
+        tmpFragmenter.generateFragments(tmpSmiPar.parseSmiles(tmpCNP0525434SmilesString));
         IAtomContainer[] tmpFragments = tmpFragmenter.getFragmentsAsContainers();
-        List<String> tmpCNP0437667Fragments = new ArrayList(10);
+        List<String> tmpCNP0525434Fragments = new ArrayList(10);
         for (IAtomContainer tmpFragment : tmpFragments) {
-            tmpCNP0437667Fragments.add(tmpSmiGen.create(tmpFragment));
+            tmpCNP0525434Fragments.add(tmpSmiGen.create(tmpFragment));
         }
-        IBitFingerprint tmpCNP0437667BitFP = tmpNaphthaleneFingerprinter.getBitFingerprint(tmpCNP0437667Fragments);
+        IBitFingerprint tmpCNP0525434BitFP = tmpNaphthaleneFingerprinter.getBitFingerprint(tmpCNP0525434Fragments);
         for (int i = 0; i < tmpNaphthaleneFingerprinter.getSize(); i++) {
-            System.out.println(tmpNaphthaleneFingerprinter.getBitDefinition(i) + ": " + tmpCNP0437667BitFP.get(i));
+            System.out.println(tmpNaphthaleneFingerprinter.getBitDefinition(i) + ": " + tmpCNP0525434BitFP.get(i));
         }
         /*
          * Output:
-         * BrC1=CC=CC=2C=CC=CC12: false
-         * OC=1C=CC=2C=CC=CC2C1: true
-         * ONO: false
-         * OC1=CC=CC=2C=CC=CC12: false
-         * O=CO: true
-         * O=[S](=O)O: false
-         * C=1C=CC=2C=CC=CC2C1: false
+            O=N: false
+            BrC1=CC=CC=2C=CC=CC12: false
+            OC=1C=CC=2C=CC=CC2C1: false
+            N#C: false
+            OC1=CC=CC=2C=CC=CC12: false
+            OC: false
+            O=CO: true
+            ON=C: false
+            C=1C=CC=2C=CC=CC2C1: false
+            O=S(=O)O: false
+            O=C: false
+            NC: false
          *
-         * 3-hydroxy-2-naphthoic acid contains the formic acid and the naphthol fragments. It does not produce a
-         * naphthalene fragment because the hydroxy fragment is too small to be considered on its own, according to the CDK
-         * ExhaustiveFragmenter.
+         * 3,7-dihydroxy-2-naphthoic acid contains the formic acid fragment. It does not produce a
+         * naphthalene fragment because the hydroxy groups are not cut off by the CDK ExhaustiveFragmenter, since their
+         * bonds are terminal.
          */
     }
 }
