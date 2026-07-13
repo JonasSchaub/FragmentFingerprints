@@ -55,7 +55,7 @@ import java.util.Map;
  * Class to test the correct working of FragmentFingerprinter
  *
  * @author Betuel Sevindik, Maximilian Rottmann
- * @version 1.1.0.0
+ * @version 1.2.0.0
  */
 public class FragmentFingerprinterTest {
     //<editor-fold desc="private static final class variables" defaultstate="collapsed">
@@ -104,7 +104,7 @@ public class FragmentFingerprinterTest {
      */
     private static IBitFingerprint bitFingerprintTest;
     /**
-     * Bit fingerprint of naphthalene derivate.
+     * Bit fingerprint of naphthalene derivative.
      */
     private static IBitFingerprint cNP0437667BitFP;
     /**
@@ -112,7 +112,7 @@ public class FragmentFingerprinterTest {
      */
     private static CountFingerprint countFingerprintTest;
     /**
-     * Fragments of Naphthalene dervivate.
+     * Fragments of Naphthalene derivative.
      */
     private static List<String> cNP0437667Fragments;
     /**
@@ -123,14 +123,6 @@ public class FragmentFingerprinterTest {
      * List contains molecule fragments with desired fragment duplicates.
      */
    private static ArrayList<String> countListOfUniqueSmiles;
-    //</editor-fold>
-    //
-    //<editor-fold desc="Constructor" defaultstate="collapsed">
-    /**
-     * Empty Constructor
-     */
-    public FragmentFingerprinterTest() {
-    }
     //</editor-fold>
     //
     //<editor-fold desc="BeforeAll method" defaultstate="collapsed">
@@ -247,7 +239,7 @@ public class FragmentFingerprinterTest {
          * In the following, a molecular structure data set is imported that contains 100 natural products with a
          * naphthalene substructure taken from the COCONUT natural products database. These are fragmented using the CDK
          * ExhaustiveFragmenter functionality that breaks single non-ring bonds in input molecules to generate fragments.
-         * The resulting fragments are collected together with their fraquencies as unique SMILES representations.
+         * The resulting fragments are collected together with their frequencies as unique SMILES representations.
          * Fragments that occur more than two times are then used to initialise the fragment fingerprinter. At the end,
          * the "naphthalene-derivatives exhaustive fragmenter fingerprint" is generated for 3-hydroxy-2-naphthoic acid.
          */
@@ -258,6 +250,8 @@ public class FragmentFingerprinterTest {
         ExhaustiveFragmenter tmpFragmenter = new ExhaustiveFragmenter();
         //Default would be 6 which is too high for the short side chains in the input molecules
         tmpFragmenter.setMinimumFragmentSize(1);
+        //Sets hydrogen saturation for generated fragments
+        tmpFragmenter.setSaturationSetting(ExhaustiveFragmenter.Saturation.HYDROGEN_SATURATED_FRAGMENTS);
         //ExhaustiveFragmenter has a convenience method .getFragments() that returns the generated fragments already as
         // unique SMILES strings, but to be explicit here, the fragments are retrieved as atom containers and unique
         // SMILES strings created in a second step. Also note that any other string-based molecular structure representation
@@ -578,61 +572,8 @@ public class FragmentFingerprinterTest {
      * The fragments for the bit fingerprint were generated via fragmentation analysis of 1000 picked molecules from the
      * COCONUT database. The fragments represent the 10 most frequently occurring fragments.
      */
-//    @Test
-//    public void generateFragmentsComponentsFloatMatrixTest() {
-//        List<String> tmpBitSetFragmentsList = new ArrayList<>(10);
-//        tmpBitSetFragmentsList.add("C");
-//        tmpBitSetFragmentsList.add("CC");
-//        tmpBitSetFragmentsList.add("[H]OC");
-//        tmpBitSetFragmentsList.add("*n(*)*");
-//        tmpBitSetFragmentsList.add("*O*");
-//        tmpBitSetFragmentsList.add("CCC");
-//        tmpBitSetFragmentsList.add("C=C");
-//        tmpBitSetFragmentsList.add("c");
-//        tmpBitSetFragmentsList.add("*Cl");
-//        tmpBitSetFragmentsList.add("CCCC");
-//        FragmentFingerprinter tmpFFp = new FragmentFingerprinter(tmpBitSetFragmentsList);
-//        //fragments of structure "2-(6-hydroxy-6,9-dihydro-1H-purin-9-yl)-5-(hydroxymethyl)oxolane-3,4-diol"
-//        List<String> tmpStructureFragmentsList = new ArrayList<>(10);
-//        tmpStructureFragmentsList.add("[H]OC");
-//        tmpStructureFragmentsList.add("[H]OC");
-//        tmpStructureFragmentsList.add("[H]OC");
-//        tmpStructureFragmentsList.add("*O*");
-//        tmpStructureFragmentsList.add("*N=CN(*)CO[H]");
-//        tmpStructureFragmentsList.add("*n(*)*");
-//        tmpStructureFragmentsList.add("*n(*)*");
-//        tmpStructureFragmentsList.add("CCCCC");
-//        tmpStructureFragmentsList.add("c");
-//        tmpStructureFragmentsList.add("cc");
-//        List<List<String>> tmpListsList = new ArrayList<>(2);
-//        tmpListsList.add(tmpStructureFragmentsList);
-//        tmpListsList.add(new ArrayList<>());
-//        //[row count][column count]
-//        float[][] tmpFloatMatrix = new float[2][12];
-//        //visualization that fragment fingerprinter does not change overshoot matrix cells (fingerprint array length < column count)
-//        tmpFloatMatrix[0][10] = 33.0f;
-//        tmpFloatMatrix[0][11] = 33.0f;
-//        tmpFloatMatrix[1][10] = 33.0f;
-//        tmpFloatMatrix[1][11] = 33.0f;
-//        tmpFFp.getFragmentsComponentsFloatMatrix(tmpListsList, tmpFloatMatrix, true);
-//        //manual matrix inspection:
-////        for (int i = 0; i < tmpFloatMatrix.length; i++) {
-////            System.out.println(Arrays.toString(tmpFloatMatrix[i]));
-////        }
-//        //correct fingerprint was generated and put in matrix:
-//        Assertions.assertEquals(1.0f, tmpFloatMatrix[0][2]);
-//        Assertions.assertEquals(1.0f, tmpFloatMatrix[0][3]);
-//        Assertions.assertEquals(1.0f, tmpFloatMatrix[0][4]);
-//        Assertions.assertEquals(1.0f, tmpFloatMatrix[0][7]);
-//        //overshoot matrix cells were not changed by fragment fingerprinter:
-//        Assertions.assertEquals(33.0f, tmpFloatMatrix[0][10]);
-//        Assertions.assertEquals(33.0f, tmpFloatMatrix[0][11]);
-//        //even if no fingerprint was generated and filled into matrix:
-//        Assertions.assertEquals(33.0f, tmpFloatMatrix[1][10]);
-//        Assertions.assertEquals(33.0f, tmpFloatMatrix[1][11]);
-//    }
     @Test
-    public void TestMapVariantFloatMatrixGeneration() {
+    public void testFloatMatrixGeneration() {
         List<String> tmpBitSetFragmentsList = new ArrayList<>(10);
         tmpBitSetFragmentsList.add("C");
         tmpBitSetFragmentsList.add("CC");
@@ -671,14 +612,14 @@ public class FragmentFingerprinterTest {
         tmpFFp.getFragmentsComponentsFloatMatrix(tmpMoleculeFragmentsArray, tmpFloatMatrix, true);
         for (int i = 0; i < tmpFloatMatrix.length; i++) {
             for (int j = 0; j < tmpFloatMatrix[i].length; j++) {
-                if (tmpFloatMatrix[i][j] != 1.0f && tmpFloatMatrix[i][j] != 33.0f) {
-                    if (i != 1) {
+                if (tmpFloatMatrix[i][j] != 1.0f && tmpFloatMatrix[i][j] != 33.0f && i != 1) {
                         Assertions.fail();
                     }
-                }
+
             }
         }
         tmpFFp.getFragmentsComponentsFloatMatrix(tmpMoleculeFragmentsArray, tmpFloatMatrix, false);
+        //check matrix
         Assertions.assertEquals(10.0f, tmpFloatMatrix[0][0]);
         Assertions.assertEquals(9.0f, tmpFloatMatrix[0][1]);
         Assertions.assertEquals(8.0f, tmpFloatMatrix[0][2]);
@@ -692,13 +633,31 @@ public class FragmentFingerprinterTest {
         Assertions.assertEquals(33.0f, tmpFloatMatrix[0][10]);
         Assertions.assertEquals(33.0f, tmpFloatMatrix[0][11]);
     }
+    @Test
+    public void testFragmentFingerprintArrayInput() {
+        String[] tmpSmilesArray = new String[5];
+        tmpSmilesArray[0] = "C";
+        tmpSmilesArray[1] = "CC";
+        tmpSmilesArray[2] = "COH";
+        tmpSmilesArray[3] = "C=C";
+        tmpSmilesArray[4] = "CS";
+        FragmentFingerprinter tmpFFp = new FragmentFingerprinter(tmpSmilesArray);
+        List<String> tmpSmilesList = new ArrayList<>(5);
+        tmpSmilesList.add("C");
+        tmpSmilesList.add("CC");
+        tmpSmilesList.add("COH");
+        tmpSmilesList.add("C=C");
+        tmpSmilesList.add("CS");
+        FragmentFingerprinter tmpListFFp = new FragmentFingerprinter(tmpSmilesList);
+        Assertions.assertEquals(tmpListFFp.getSize(), tmpFFp.getSize());
+    }
     //
     /**
      *  Tests the correct functionality of mergeCountFingerprint() of CountFingerprint class.
      *  Two fingerprints are therefor generated and merged and checked for equal integers with a fixed result.
      */
     @Test
-    public void TestMergeCountFingerprint() {
+    public void testMergeCountFingerprint() {
         List<String> tmpSmilesList = new ArrayList<>(5);
         tmpSmilesList.add("C");
         tmpSmilesList.add("*O");
@@ -749,7 +708,7 @@ public class FragmentFingerprinterTest {
      * BitSet is checked.
      */
     @Test
-    public void TestGetBitSetOfList() {
+    public void testGetBitSetOfList() {
         List<String> tmpSmilesList = new ArrayList<>(5);
         tmpSmilesList.add("C");
         tmpSmilesList.add("*O");
@@ -770,12 +729,13 @@ public class FragmentFingerprinterTest {
         for (int i = 0; i < tmpExpectBitSet.size(); i++) {
             Assertions.assertEquals(tmpExpectBitSet.get(i), tmpTestBitSet.get(i));
         }
-    }/**
+    }
+    /**
      * Test for FragmentFingerprinter getBitSet(SMILES to frequency map) where correct fingerprint generation and
      * conversion to BitSet is checked.
      */
     @Test
-    public void TestGetBitSetOfFrequencyMap() {
+    public void testGetBitSetOfFrequencyMap() {
         List<String> tmpSmilesList = new ArrayList<>(5);
         tmpSmilesList.add("C");
         tmpSmilesList.add("*O");
@@ -965,7 +925,7 @@ public class FragmentFingerprinterTest {
      */
     @Test
     public void getNaphthaleneFingerprintSize() {
-        int tmpNaphthaleneFingerprintSizeTest = 7;
+        int tmpNaphthaleneFingerprintSizeTest = 12;
         int tmpNaphthaleneFingerprintSize = FragmentFingerprinterTest.naphthaleneFingerprinter.getSize();
         Assertions.assertEquals(tmpNaphthaleneFingerprintSizeTest, tmpNaphthaleneFingerprintSize);
     }
@@ -985,14 +945,19 @@ public class FragmentFingerprinterTest {
      */
     @Test
     public void getNaphthaleneBitFingerprint() {
-        int[] tmpBitFingerprintTest = new int[7];
+        int[] tmpBitFingerprintTest = new int[12];
         tmpBitFingerprintTest[0] = 0;
-        tmpBitFingerprintTest[1] = 1;
-        tmpBitFingerprintTest[2] = 0;
+        tmpBitFingerprintTest[1] = 0;
+        tmpBitFingerprintTest[2] = 1;
         tmpBitFingerprintTest[3] = 0;
-        tmpBitFingerprintTest[4] = 1;
+        tmpBitFingerprintTest[4] = 0;
         tmpBitFingerprintTest[5] = 0;
-        tmpBitFingerprintTest[6] = 0;
+        tmpBitFingerprintTest[6] = 1;
+        tmpBitFingerprintTest[7] = 0;
+        tmpBitFingerprintTest[8] = 0;
+        tmpBitFingerprintTest[9] = 0;
+        tmpBitFingerprintTest[10] = 0;
+        tmpBitFingerprintTest[11] = 0;
         int[] tmpBitFingerprint = FragmentFingerprinterTest.naphthaleneFingerprinter.getBitArray(FragmentFingerprinterTest.cNP0437667Fragments);
         Assertions.assertArrayEquals(tmpBitFingerprintTest, tmpBitFingerprint);
     }
