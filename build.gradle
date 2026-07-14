@@ -1,7 +1,8 @@
 /*
  * MIT License
  *
- * Copyright (c) 2023 Betuel Sevindik, Felix Baensch, Jonas Schaub, Christoph Steinbeck, and Achim Zielesny
+ * Copyright (c) 2026 Betuel Sevindik, Maximilian Rottmann, Felix Baensch, Jonas
+ * Schaub, Christoph Steinbeck, and Achim Zielesny
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -46,10 +47,10 @@ version = '1.2.0'
 
 //Creates javadoc and sources jars
 java {
-    toolchain {
-        languageVersion = JavaLanguageVersion.of(17)
-    }
-    //withJavadocJar()
+    //toolchain {
+    //    languageVersion = JavaLanguageVersion.of(17)
+    //}
+    withJavadocJar()
     withSourcesJar()
 }
 
@@ -124,7 +125,7 @@ spotless {
         cleanthat()
         importOrder('de', 'org', 'com', 'java', 'javax')
         removeUnusedImports()
-        indentWithSpaces(4) // doesn't really seem to work...
+        leadingTabsToSpaces(4)
         trimTrailingWhitespace()
         endWithNewline()
         licenseHeaderFile('License-header/License-header.txt')
@@ -202,6 +203,7 @@ mavenPublishing {
                     url = "https://github.com/JonasSchaub"
                 }
                 developer {
+                    id = "steinbeck"
                     name = "Christoph Steinbeck"
                     email = "christoph.steinbeck@uni-jena.de"
                     url = "https://cheminf.uni-jena.de/members/steinbeck/"
