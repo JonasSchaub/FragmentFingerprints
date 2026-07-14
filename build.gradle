@@ -65,11 +65,11 @@ repositories {
 
 def cdkVersion = '2.12'
 dependencies {
-    implementation group: 'org.jetbrains', name : 'annotations', version: '23.0.0'
-    implementation group: 'org.openscience.cdk', name: 'cdk-fingerprint', version: cdkVersion
-    implementation group: 'org.openscience.cdk', name: 'cdk-fragment', version: cdkVersion
-    implementation group: 'org.openscience.cdk', name: 'cdk-silent', version: cdkVersion
-    implementation group: 'org.openscience.cdk', name: 'cdk-atomtype', version: cdkVersion
+    implementation "org.jetbrains:annotations:23.0.0"
+    implementation "org.openscience.cdk:cdk-fingerprint:$cdkVersion"
+    implementation "org.openscience.cdk:cdk-fragment:$cdkVersion"
+    implementation "org.openscience.cdk:cdk-silent:$cdkVersion"
+    implementation "org.openscience.cdk:cdk-atomtype:$cdkVersion"
     testImplementation("org.junit.jupiter:junit-jupiter:6.1.2")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 
