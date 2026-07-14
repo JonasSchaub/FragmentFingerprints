@@ -10,6 +10,7 @@ updates:
     directory: "/"           # Location of build.gradle
     schedule:
       interval: "weekly"
+    target-branch: "production"
     open-pull-requests-limit: 5
     commit-message:
       prefix: "build(deps)"
@@ -19,6 +20,7 @@ updates:
     directory: "/"           # Looks for workflow files under .github/workflows/
     schedule:
       interval: "weekly"
+    target-branch: "production"
     open-pull-requests-limit: 5
     commit-message:
       prefix: "ci(deps)"
