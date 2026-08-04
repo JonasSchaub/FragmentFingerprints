@@ -41,7 +41,7 @@ import java.util.Objects;
  * key-based fingerprints.
  *
  * @author Betuel Sevindik, Maximilian Rottmann
- * @version 1.1.0.0
+ * @version 1.2.0.0
  */
 public class CountFingerprint implements ICountFingerprint {
     //<editor-fold desc="private final class variables" defaultstate="collapsed">
@@ -90,18 +90,18 @@ public class CountFingerprint implements ICountFingerprint {
      * @param aFingerprintSize defines the size of the fingerprint
      * @param aPositionToFrequencyMap This map is a raw map and must map the positions of key fragments in the
      *                                fingerprint to their frequencies in the molecule or any set of fragments.
-     * @param aFingerprintBehaviorStatement defines whether CountFingerprint should behave ass BitFingerprint
+     * @param aBehaveAsBitFingerprintStatement defines whether CountFingerprint should behave as BitFingerprint (
      * @throws NullPointerException is thrown if the arguments are null.
      * @throws IllegalArgumentException is thrown if the given size is smaller than one.
      */
-    public CountFingerprint(int aFingerprintSize, Map<Integer, Integer> aPositionToFrequencyMap, boolean aFingerprintBehaviorStatement) throws NullPointerException, IllegalArgumentException {
+    public CountFingerprint(int aFingerprintSize, Map<Integer, Integer> aPositionToFrequencyMap, boolean aBehaveAsBitFingerprintStatement) throws NullPointerException, IllegalArgumentException {
         Objects.requireNonNull(aPositionToFrequencyMap, "aPositionToFrequencyMap is null.");
         if (aFingerprintSize < 1) {
-            throw new IllegalArgumentException("Fingerprint size cannot be zero or smaller");
+            throw new IllegalArgumentException("Fingerprint size cannot be less than 1.");
         }
         this.definedFingerprintSize = aFingerprintSize;
         this.uniqueSmilesPositionToFrequencyCountRawMap = aPositionToFrequencyMap;
-        this.behaveAsBitFingerprint = aFingerprintBehaviorStatement;
+        this.behaveAsBitFingerprint = aBehaveAsBitFingerprintStatement;
     }
     //</editor-fold>
     //
@@ -150,7 +150,7 @@ public class CountFingerprint implements ICountFingerprint {
     public int getCount(int index) throws IllegalArgumentException {
         if (index >= this.definedFingerprintSize || index < 0) {
             throw new IllegalArgumentException("This position does not exist in the fingerprint (undefined state).");
-        } else if (index >= 0 && this.uniqueSmilesPositionToFrequencyCountRawMap.containsKey(index)) {
+        } else if (this.uniqueSmilesPositionToFrequencyCountRawMap.containsKey(index)) {
             if (this.behaveAsBitFingerprint) {
                 return 1;
             } else {
@@ -173,14 +173,29 @@ public class CountFingerprint implements ICountFingerprint {
     }
     //
     /**
-     * UnsupportedOperationException. This method is not supported.
      * {@inheritDoc}
+     * Important: Modifies the current instance!
      *
      * @throws UnsupportedOperationException method is not supported
      */
     @Override
-    public void merge(ICountFingerprint fp) {
-        throw new UnsupportedOperationException();
+    public void merge(ICountFingerprint aCountFingerprint) {
+        Objects.requireNonNull(aCountFingerprint, "Given fingerprint was null.");
+        if (!(aCountFingerprint instanceof CountFingerprint)) {
+            throw new ClassCastException("Can only merge CountFingerprint instances. Provided class: " + aCountFingerprint.getClass().getName());
+        }
+        int countFingerprintToMergeSize = ((CountFingerprint) aCountFingerprint).getDefinedFingerprintSize();
+        if (this.definedFingerprintSize != countFingerprintToMergeSize) {
+            throw new IllegalArgumentException("Defined fingerprint size does not match. A merge is only possible for fingerprints of the same fragment set.");
+        }
+        //merge frequencies of given fingerprint into this instance
+        for (Map.Entry<Integer, Integer> tmpEntry : ((CountFingerprint) aCountFingerprint).getSmilesPositionToFrequencyMap().entrySet()) {
+            if (this.uniqueSmilesPositionToFrequencyCountRawMap.containsKey(tmpEntry.getKey())) {
+                this.uniqueSmilesPositionToFrequencyCountRawMap.put(tmpEntry.getKey(), this.uniqueSmilesPositionToFrequencyCountRawMap.get(tmpEntry.getKey()) + tmpEntry.getValue());
+            } else {
+                this.uniqueSmilesPositionToFrequencyCountRawMap.put(tmpEntry.getKey(), tmpEntry.getValue());
+            }
+        }
     }
     //
     /**
@@ -240,7 +255,7 @@ public class CountFingerprint implements ICountFingerprint {
         Objects.requireNonNull(aFirstCountFingerprintToMerge, "Given fingerprint was null.");
         Objects.requireNonNull(aSecondCountFingerprintToMerge, "Given fingerprint was null.");
         if (aFirstCountFingerprintToMerge.getDefinedFingerprintSize() != aSecondCountFingerprintToMerge.getDefinedFingerprintSize()) {
-            throw new IllegalArgumentException("Defined fingerprint size does not match. A merge is only possible with" +
+            throw new IllegalArgumentException("Defined fingerprint size does not match. A merge is only possible with " +
                     "fingerprints that come from the same fragment set.");
         }
         int tmpFirstFPMapSize = aFirstCountFingerprintToMerge.getSmilesPositionToFrequencyMap().size();
@@ -263,6 +278,7 @@ public class CountFingerprint implements ICountFingerprint {
     //
     /**
      * Public getter for internal map of smiles fingerprint position to corresponding frequency.
+     * IMPORTANT! The returned map is not to be modified!
      *
      * @return Mapping of smiles fingerprint position to frequency
      */

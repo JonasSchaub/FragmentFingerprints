@@ -45,51 +45,60 @@ import java.util.Map;
 /**
  * Test class with usage examples for the fragment fingerprinter functionality.
  *
- * @version 1.0.0.0
- * @author Jonas Schaub
+ * @version 1.1.0.0
+ * @author Jonas Schaub, Maximilian Rottmann
  */
 public class ExampleUsageTest {
     /**
-     * The fragments for the bit fingerprint were generated via fragmentation analysis of 1000 picked molecules from the
-     * COCONUT database. The structures represent the 10 most frequently occurring fragments.
+     * Demonstrates the getFragmentsComponentsFloatMatrix() method with two fingerprinting modes:
+     * bit array (binary presence/absence) and count array (fragment frequencies).
+     *
+     * The method processes an array of fragment-frequency maps and populates a pre-initialized
+     * float matrix with fingerprint values. This is useful for batch processing multiple molecules
+     * or generating matrix-based representations suitable for machine learning pipelines.
+     *
+     * The fragments used represent the 10 most frequently occurring functional group fragments from a COCONUT
+     * database analysis of 1000 molecules.
+     *
+     * @see FragmentFingerprinter#getFragmentsComponentsFloatMatrix(Map[], float[][], boolean)
+     * @see CountFingerprint for alternative fingerprinting approaches
      */
     @Test
     public void floatMatrixExampleUsageTest() {
         System.out.println("Float matrix example usage test:");
-        //generate list of master vector (pre-defined fingerprint)
-        List<String> tmpFingerprintList = new ArrayList<>(10);
-        //fragment SMILES Strings
-        tmpFingerprintList.add("C");
-        tmpFingerprintList.add("CC");
-        tmpFingerprintList.add("[H]OC");
-        tmpFingerprintList.add("*n(*)*");
-        tmpFingerprintList.add("*O*");
-        tmpFingerprintList.add("CCC");
-        tmpFingerprintList.add("C=C");
-        tmpFingerprintList.add("c");
-        tmpFingerprintList.add("*Cl");
-        tmpFingerprintList.add("CCCC");
-        //instance new FragmentFingerprinter with fingerprint fragments list from above
-        FragmentFingerprinter tmpFFp = new FragmentFingerprinter(tmpFingerprintList);
-
-
-        //list of fragments for which to generate a fingerprint
-        List<String> tmpFragmentsList = new ArrayList<>(12);
-        tmpFragmentsList.add("C");
-        tmpFragmentsList.add("CC");
-        tmpFragmentsList.add("[H]OC");
-        tmpFragmentsList.add("*n(*)*");
-        tmpFragmentsList.add("*O*");
-        tmpFragmentsList.add("CCC");
-        tmpFragmentsList.add("C=C");
-        tmpFragmentsList.add("c");
-        tmpFragmentsList.add("*Cl");
-        tmpFragmentsList.add("CCCC");
-
-
-        //map of fragment-frequency pairs for which to generate a fingerprint
+        //
+        // SETUP:
+        //
+        // Master vector (pre-defined fingerprint) defines the standardized fragment set.
+        // Each index in this list maps to a column position in the resulting fingerprint matrix.
+        // Only fragments present in this master list will be included in the fingerprint.
+        List<String> tmpFingerprintMasterList = new ArrayList<>(10);
+        // SMILES representations of fragments (canonical/unique form required for consistent fingerprinting)
+        // The order here determines the bit/column index mapping in the fingerprinter
+        tmpFingerprintMasterList.add("C");
+        tmpFingerprintMasterList.add("CC");
+        tmpFingerprintMasterList.add("[H]OC");
+        tmpFingerprintMasterList.add("*n(*)*");
+        tmpFingerprintMasterList.add("*O*");
+        tmpFingerprintMasterList.add("CCC");
+        tmpFingerprintMasterList.add("C=C");
+        tmpFingerprintMasterList.add("c");
+        tmpFingerprintMasterList.add("*Cl");
+        tmpFingerprintMasterList.add("CCCC");
+        // Initialize FragmentFingerprinter with the master fragment list. This creates an internal
+        // SMILES-to-position mapping (Map<String, Integer>) that will be used to:
+        // 1) Determine fingerprint size (equal to number of unique fragments)
+        // 2) Map fragment SMILES to their column indices in the output matrix
+        // 3) Filter unrecognized fragments when generating fingerprints
+        FragmentFingerprinter tmpFFp = new FragmentFingerprinter(tmpFingerprintMasterList);
+        // Fragment-frequency map for a single molecule (represents one row in output matrix).
+        // Key: fragment SMILES; Value: occurrence count in the molecule.
+        // The getFragmentsComponentsFloatMatrix() method expects an array of such maps,
+        // where each array element represents one molecule.
         Map<String, Integer> tmpFragmentsFrequenciesMap = new HashMap<>(16, 0.75f);
-        //the same fragments as above are used with example frequencies sorted for abundance
+        // Populate with example fragment frequencies (sorted descending by abundance).
+        // These represent the counts of each fragment found in a sample molecule.
+        // Values will be converted to floats, 1.0f/0.0f in bit-array mode, or the retained values in count-array mode.
         tmpFragmentsFrequenciesMap.put("C", 10);
         tmpFragmentsFrequenciesMap.put("CC", 9);
         tmpFragmentsFrequenciesMap.put("[H]OC", 8);
@@ -100,58 +109,74 @@ public class ExampleUsageTest {
         tmpFragmentsFrequenciesMap.put("c", 3);
         tmpFragmentsFrequenciesMap.put("*Cl", 2);
         tmpFragmentsFrequenciesMap.put("CCCC", 1);
-        //as well, two more halogen groups are added to distinctively showcase the fingerprint functionality
-        //these fragments will be ignored for fingerprint generation as they are not in the pre-defined master vector
+        // Additional fragments (*F, *I) are included to demonstrate the filtering mechanism:
+        // getFragmentsComponentsFloatMatrix() only processes fragments that exist in the master list
+        // (initialized in FragmentFingerprinter constructor). Unknown fragments are silently ignored.
+        // This is why the output only shows values for the 10 master fragments, not these 2 additions.
         tmpFragmentsFrequenciesMap.put("*F", 1);
         tmpFragmentsFrequenciesMap.put("*I", 1);
-        //two matrixes are initialized, one as big as the pre-defined fingerprint, one with additional columns
+        //
+        // USAGE:
+        //
+        // Initialize two float matrices with different column counts:
+        // - tmpDataMatrix: exactly matches fingerprint size (10 columns) - demonstrates standard usage
+        // - tmpDataMatrixWithOverhang: larger than fingerprint size (15 columns) - tests matrix validation
+        // The method validates that matrix columns >= fingerprint size; excess columns remain untouched.
         float[][] tmpDataMatrix = new float[1][10];
         float[][] tmpDataMatrixWithOverhang = new float[1][15];
-
-
-        //list of fragments lists is created
-        List<List<String>> tmpFragmentsListsList = new ArrayList<>(2);
-        tmpFragmentsListsList.add(tmpFragmentsList);
-
-
-        //array for containing fragments-frequencies-maps is initialized
+        // Initialize array of fragment-frequency maps. In this example, a single-element array
+        // is used (representing one molecule), but the method can process multiple molecules in batch.
         Map<String, Integer>[] tmpFragmentsMapsArray = new HashMap[1];
         tmpFragmentsMapsArray[0] = tmpFragmentsFrequenciesMap;
-
-        //fingerprints are generated from maps array and directly filled into the specified matrix
-        // (using bit array behavior)
-
-        //tmpFFp.getFragmentsComponentsFloatMatrix(tmpFragmentsListsList, tmpDataMatrix, true);
-
+        // Call getFragmentsComponentsFloatMatrix() with anUseBitArrayStatement=true to generate a BIT-ARRAY fingerprint.
+        // Internal method flow:
+        // 1) Validates matrix dimensions (rows >= maps array length, columns >= fingerprint size)
+        // 2) Iterates through each map in the array and calls private getFloatFingerprint()
+        // 3) For recognized fragments: sets matrix[row][column] = 1.0f (presence indicator)
+        // 4) For unrecognized fragments: ignores them (no value set)
+        // 5) Uninitialized positions (fragments not in this molecule) remain 0.0f
         tmpFFp.getFragmentsComponentsFloatMatrix(tmpFragmentsMapsArray, tmpDataMatrix, true);
-        //visualizing resulting matrix
+        // Visualize resulting matrix
         System.out.println("Matrix without overhang columns:");
         for (float[] tmpFloatArray : tmpDataMatrix) {
             System.out.println(Arrays.toString(tmpFloatArray));
         }
-        //now the same operation for the matrix with additional column space
+        /* Output:
+        [1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0]
+         */
+        //
+        // Demonstrate matrix overhang handling with the same bit-array mode operation:
+        // This matrix has 15 columns but the fingerprint only uses 10 (based on 10 master fragments).
+        // The getFragmentsComponentsFloatMatrix() method:
+        // 1) Only writes to indices 0-9 (columns within fingerprint size)
+        // 2) Leaves columns 10-14 untouched (preserving any pre-existing values)
+        // This allows reusing matrix memory or combining multiple fingerprints in one matrix.
         tmpFFp.getFragmentsComponentsFloatMatrix(
                 tmpFragmentsMapsArray, tmpDataMatrixWithOverhang, true);
-
-        //tmpFFp.getFragmentsComponentsFloatMatrix(tmpFragmentsListsList, tmpDataMatrixWithOverhang, true);
-
-        //the FragmentFingerprinter will ignore array space AFTER the size of the pre-defined fingerprint
-        // (e. array with length 12 but pre-defined fingerprint of size 10 -> array position 10 and 11 will be untouched)
+        // Visualize matrix
         System.out.println("Matrix WITH overhang columns:");
         for (float[] tmpFloatArray : tmpDataMatrixWithOverhang) {
             System.out.println(Arrays.toString(tmpFloatArray));
         }
-        //change behavior to count/frequency behavior
+        /* Output:
+        [1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+         */
+        //
+        // Switch to COUNT-ARRAY fingerprint mode (anUseBitArrayStatement=false).
+        // Instead of binary 1.0f/0.0f for presence/absence, this mode stores actual fragment frequencies:
+        // - Recognized fragments: matrix[row][column] = frequency value from the input map
+        // - Unrecognized fragments: ignored (no entry)
+        // - Missing fragments: remain 0.0f (can represent zero occurrences)
         tmpFFp.getFragmentsComponentsFloatMatrix(tmpFragmentsMapsArray, tmpDataMatrix, false);
-
-        //tmpFFp.getFragmentsComponentsFloatMatrix(tmpFragmentsListsList, tmpDataMatrix, false);
-
-        //now instead of true/false represented by either 0.0f/1.0f, fragment frequency will be displayed in fingerprint
+        // Visualize matrix
         System.out.println("Matrix without overhang columns BUT count array behavior:");
         for (float[] tmpFloatArray : tmpDataMatrix) {
             System.out.println(Arrays.toString(tmpFloatArray));
         }
-        //matrix with overhang works analogous and will not be shown explicitly
+        /* Output:
+        [10.0, 9.0, 8.0, 7.0, 6.0, 5.0, 4.0, 3.0, 2.0, 1.0]
+         */
+        // A matrix with overhang works analogous as in the example above and will not be shown explicitly.
     }
     /**
      * The intended use case of the fragment fingerprinter functionality is to encode the presence and absence of
@@ -177,6 +202,7 @@ public class ExampleUsageTest {
         ExhaustiveFragmenter tmpFragmenter = new ExhaustiveFragmenter();
         //Default would be 6 which is too high for the short side chains in the input molecules
         tmpFragmenter.setMinimumFragmentSize(1);
+        tmpFragmenter.setSaturationSetting(ExhaustiveFragmenter.Saturation.HYDROGEN_SATURATED_FRAGMENTS);
         //ExhaustiveFragmenter has a convenience method .getFragments() that returns the generated fragments already as
         // unique SMILES strings, but to be explicit here, the fragments are retrieved as atom containers and unique
         // SMILES strings created in a second step. Also note that any other string-based molecular structure representation
@@ -203,38 +229,41 @@ public class ExampleUsageTest {
         }
         /*
          * Output:
-         * 28
-         * BrC1=CC=CC=2C=CC=CC12: 4
-         * BrC=1C=CC2=CC(O)=CC=C2C1: 1
-         * OC1=C[CH](OC)=CC=2C=CC=CC12: 1
-         * BrC1=CC=CC2=[C]C=CC=C12: 1
-         * BrC1=CC=CC=2C=[C]C=CC12: 1
-         * O=CC: 1
-         * O[NH](O)[CH]1=CC=CC=2C=CC=CC21: 1
-         * O=CCl: 1
-         * OC=1C=CC=2C=CC=CC2C1: 6
-         * BrC1=CC=CC=2C=C(C=CC12)C: 1
-         * ON=[CH3]: 2
-         * ONO: 3
-         * OC1=CC=CC=2C=CC=CC12: 4
-         * NC1=CC=CC=2C=CC=CC12: 1
-         * O=C[CH]1=CC=CC=2C=CC=CC21: 2
-         * O=CO: 8
-         * ON=C: 1
-         * O=[S](=O)O: 5
-         * C=1C=CC=2C=CC=CC2C1: 20
-         * C=1C=CC=2C=C(C=CC2C1)C: 2
-         * OC1=CC=CC=2C1=CC=CC2C: 1
-         * O=N[CH]1=CC=C(O)C=2C=CC=CC21: 1
-         * OC=1C=2C=CC=CC2C=CC1C: 1
-         * [CH2][CH]=1C=CC=2C=CC=CC2C1: 1
-         * BrC1=CC=CC=2C1=CC=CC2C: 1
-         * OC1=CC=C(O)C=2C=CC=CC12: 2
-         * C=1C=CC2=C(C1)C=CC=C2C: 1
-         * O=COC: 1
+            31
+            NN: 1
+            O=N: 4
+            BrC1=CC=CC=2C=CC=CC12: 6
+            BrC=1C=CC2=CC(O)=CC=C2C1: 1
+            O=CC1=CC=CC=2C=CC=CC12: 2
+            OC1=CC(OC)=CC=2C=CC=CC12: 1
+            O=CC: 1
+            O=CCl: 1
+            OC=1C=CC=2C=CC=CC2C1: 6
+            N#C: 3
+            ONO: 1
+            OC1=CC=CC=2C=CC=CC12: 4
+            NC1=CC=CC=2C=CC=CC12: 1
+            OC: 7
+            ClC: 1
+            O=CO: 8
+            ON=C: 3
+            C=1C=CC=2C=CC=CC2C1: 20
+            C=1C=CC=2C=C(C=CC2C1)C: 2
+            C=C: 1
+            OC1=CC=CC=2C1=CC=CC2C: 1
+            OC=1C=2C=CC=CC2C=CC1C: 1
+            O=NC1=CC=C(O)C=2C=CC=CC12: 1
+            O=S(=O)O: 5
+            O=C: 7
+            [O-][NH2+]O: 2
+            NC: 3
+            OC1=CC=C(O)C=2C=CC=CC12: 2
+            C=1C=CC2=C(C1)C=CC=C2C: 1
+            O=COC: 1
+            [O-][NH+](O)C1=CC=CC=2C=CC=CC21: 1
          */
         //Collecting fragments that appear at least 2 times
-        List<String> tmpFragmentsList = new ArrayList<>(28);
+        List<String> tmpFragmentsList = new ArrayList<>(12);
         for (String tmpFragment : tmpFrequenciesMap.keySet()) {
             if (tmpFrequenciesMap.get(tmpFragment) > 2) {
                 tmpFragmentsList.add(tmpFragment);
@@ -244,36 +273,41 @@ public class ExampleUsageTest {
         FragmentFingerprinter tmpNaphthaleneFingerprinter = new FragmentFingerprinter(tmpFragmentsList);
         System.out.println(tmpNaphthaleneFingerprinter.getSize());
         /*
-         * Output: 7
+         * Output: 12
          *
-         * Only 7 out of the 28 fragments appear more than 2 times and are included in the fingerprint (see above).
+         * Only 12 out of the 31 fragments appear more than 2 times and are included in the fingerprint (see above).
          */
-        //Parsing 3-hydroxy-2-naphthoic acid, fragmenting it, and creating its fingerprint
-        String tmpCNP0437667SmilesString = "O=C(O)C1=CC=2C=CC=CC2C=C1O"; //3-hydroxy-2-naphthoic acid
+        //Parsing 3,7-dihydroxy-2-naphtoic acid, fragmenting it, and creating its fingerprint
+        String tmpCNP0525434SmilesString = "O=C(O)C1=CC2=CC(O)=CC=C2C=C1O"; //3,7-dihydroxy-2-naphtoic acid
         SmilesParser tmpSmiPar = new SmilesParser(SilentChemObjectBuilder.getInstance());
-        tmpFragmenter.generateFragments(tmpSmiPar.parseSmiles(tmpCNP0437667SmilesString));
+        tmpFragmenter.generateFragments(tmpSmiPar.parseSmiles(tmpCNP0525434SmilesString));
         IAtomContainer[] tmpFragments = tmpFragmenter.getFragmentsAsContainers();
-        List<String> tmpCNP0437667Fragments = new ArrayList(10);
+        List<String> tmpCNP0525434Fragments = new ArrayList(10);
         for (IAtomContainer tmpFragment : tmpFragments) {
-            tmpCNP0437667Fragments.add(tmpSmiGen.create(tmpFragment));
+            tmpCNP0525434Fragments.add(tmpSmiGen.create(tmpFragment));
         }
-        IBitFingerprint tmpCNP0437667BitFP = tmpNaphthaleneFingerprinter.getBitFingerprint(tmpCNP0437667Fragments);
+        IBitFingerprint tmpCNP0525434BitFP = tmpNaphthaleneFingerprinter.getBitFingerprint(tmpCNP0525434Fragments);
         for (int i = 0; i < tmpNaphthaleneFingerprinter.getSize(); i++) {
-            System.out.println(tmpNaphthaleneFingerprinter.getBitDefinition(i) + ": " + tmpCNP0437667BitFP.get(i));
+            System.out.println(tmpNaphthaleneFingerprinter.getBitDefinition(i) + ": " + tmpCNP0525434BitFP.get(i));
         }
         /*
          * Output:
-         * BrC1=CC=CC=2C=CC=CC12: false
-         * OC=1C=CC=2C=CC=CC2C1: true
-         * ONO: false
-         * OC1=CC=CC=2C=CC=CC12: false
-         * O=CO: true
-         * O=[S](=O)O: false
-         * C=1C=CC=2C=CC=CC2C1: false
+            O=N: false
+            BrC1=CC=CC=2C=CC=CC12: false
+            OC=1C=CC=2C=CC=CC2C1: false
+            N#C: false
+            OC1=CC=CC=2C=CC=CC12: false
+            OC: false
+            O=CO: true
+            ON=C: false
+            C=1C=CC=2C=CC=CC2C1: false
+            O=S(=O)O: false
+            O=C: false
+            NC: false
          *
-         * 3-hydroxy-2-naphthoic acid contains the formic acid and the naphthol fragments. It does not produce a
-         * naphthalene fragment because the hydroxy fragment is too small to be considered on its own, according to the CDK
-         * ExhaustiveFragmenter.
+         * 3,7-dihydroxy-2-naphthoic acid contains the formic acid fragment. It does not produce a
+         * naphthalene fragment because the hydroxy groups are not cut off by the CDK ExhaustiveFragmenter, since their
+         * bonds are terminal.
          */
     }
 }

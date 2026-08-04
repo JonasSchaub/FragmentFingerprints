@@ -28,9 +28,9 @@ plugins {
     id 'jacoco'
     id 'java-library'
     id 'java'
-    id "com.diffplug.spotless" version "8.1.0"
-    id "com.vanniktech.maven.publish" version "0.35.0"
-    id "org.sonarqube" version "7.1.0.6387"
+    id "com.diffplug.spotless" version "8.9.0"
+    id "com.vanniktech.maven.publish" version "0.37.0"
+    id "org.sonarqube" version "7.3.1.8318"
 }
 
 application {
@@ -63,14 +63,14 @@ repositories {
     mavenCentral()
 }
 
-def cdkVersion = '2.11'
+def cdkVersion = '2.12'
 dependencies {
     implementation group: 'org.jetbrains', name : 'annotations', version: '23.0.0'
     implementation group: 'org.openscience.cdk', name: 'cdk-fingerprint', version: cdkVersion
     implementation group: 'org.openscience.cdk', name: 'cdk-fragment', version: cdkVersion
     implementation group: 'org.openscience.cdk', name: 'cdk-silent', version: cdkVersion
     implementation group: 'org.openscience.cdk', name: 'cdk-atomtype', version: cdkVersion
-    testImplementation("org.junit.jupiter:junit-jupiter:6.0.1")
+    testImplementation("org.junit.jupiter:junit-jupiter:6.1.2")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 
 }
