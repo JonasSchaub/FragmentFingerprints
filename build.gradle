@@ -28,7 +28,7 @@ plugins {
     id 'jacoco'
     id 'java-library'
     id 'java'
-    id "com.diffplug.spotless" version "8.1.0"
+    id "com.diffplug.spotless" version "8.10.2"
     id "com.vanniktech.maven.publish" version "0.35.0"
     id "org.sonarqube" version "7.1.0.6387"
 }
